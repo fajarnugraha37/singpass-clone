@@ -3,13 +3,12 @@
   "type": "module",
   "private": true,
   "workspaces": [
-    "backend",
-    "frontend",
+    "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "dev:be": "cd backend && bun run dev",
-    "dev:fe": "cd frontend && bun run dev"
+    "dev:be": "cd apps/backend && bun run dev",
+    "dev:fe": "cd apps/frontend && bun run dev"
   },
   "devDependencies": {
     "@types/bun": "latest"
