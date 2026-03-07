@@ -31,7 +31,12 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] **Architecture Check**: Follows Hexagonal Architecture, DRY, KISS. Separates Hono backend from Astro frontend.
+- [ ] **API Stability Check**: Uses Hono RPC for typed contracts. No silent breaking changes.
+- [ ] **Security Check**: Mirrors Singpass flow (2FA, strict sessions). Adheres to OIDC/FAPI 2.0 standards.
+- [ ] **Protocol Check**: Implements proper token exchange and passwordless/fallback flows.
+- [ ] **AI Boundaries Check**: Deterministic execution, testing first.
+- [ ] **Documentation Check**: Spec-driven and documented before implementation.
 
 ## Project Structure
 
