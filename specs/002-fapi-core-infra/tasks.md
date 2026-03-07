@@ -44,11 +44,11 @@ Each user story phase is designed to be independently testable using the `Crypto
 **Goal**: Implement secure storage and retrieval of PAR parameters.
 **Independent Test**: Persist parameters and retrieve them using a sequential `request_uri`.
 
-- [ ] T013 [US2] Define `AuthDataService` interface in `apps/backend/src/core/domain/auth_data_service.ts`
-- [ ] T014 [US2] Implement `createPAR` with sequential URI generation in `apps/backend/src/infra/adapters/drizzle_auth_data.ts`
-- [ ] T015 [US2] Implement `getPAR` with TTL (60s) enforcement in `apps/backend/src/infra/adapters/drizzle_auth_data.ts`
-- [ ] T016 [US2] Create Zod schemas for PAR payload validation in `packages/shared/src/config.ts`
-- [ ] T017 [US2] Create unit tests for PAR lifecycle in `apps/backend/tests/infra/adapters/par.test.ts`
+- [x] T013 [US2] Define `AuthDataService` interface in `apps/backend/src/core/domain/auth_data_service.ts`
+- [x] T014 [US2] Implement `createPAR` with sequential URI generation in `apps/backend/src/infra/adapters/drizzle_auth_data.ts`
+- [x] T015 [US2] Implement `getPAR` with TTL (60s) enforcement in `apps/backend/src/infra/adapters/drizzle_auth_data.ts`
+- [x] T016 [US2] Create Zod schemas for PAR payload validation in `packages/shared/src/config.ts`
+- [x] T017 [US2] Create unit tests for PAR lifecycle in `apps/backend/tests/infra/adapters/par.test.ts`
 
 ## Phase 5: User Story 3 - Session Tracking with 2FA (P2)
 
