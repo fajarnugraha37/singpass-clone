@@ -36,7 +36,7 @@
 - [ ] **Security Check**: SQLite cookie-based sessions, 2FA, OIDC/FAPI 2.0. Secrets NEVER logged (or masked).
 - [ ] **Protocol Check**: Implements proper token exchange and passwordless/fallback flows.
 - [ ] **Testing Check**: Unit tests exist for all logic, coverage >= 80%.
-- [ ] **AI Boundaries Check**: Deterministic execution, strictly follows the plan and tasks.
+- [ ] **AI Boundaries Check**: Deterministic execution, strictly follows the plan and tasks. MUST utilize registered MCP servers to check Singpass compatibility/implementation details from the official website.
 - [ ] **Documentation Check**: Spec-driven and documented before implementation.
 
 ## Project Structure
