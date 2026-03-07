@@ -1,0 +1,13 @@
+{
+  "name": "packages-crawler",
+  "module": "crawl.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/turndown": "^5.0.4"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "turndown": "^7.1.3"
+  }
+}
