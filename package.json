@@ -1,0 +1,20 @@
+{
+  "name": "singpass-clone",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:be": "cd backend && bun run dev",
+    "dev:fe": "cd frontend && bun run dev"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
