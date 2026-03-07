@@ -17,9 +17,9 @@ Each user story phase is designed to be independently testable using the `Crypto
 
 ## Phase 1: Setup
 
-- [ ] T001 Initialize backend directory structure per Hexagonal Architecture in `apps/backend/src/`
-- [ ] T002 Configure Drizzle ORM and SQLite client in `apps/backend/src/infra/database/client.ts`
-- [ ] T003 Implement AES-256-GCM encryption utility for server keys in `apps/backend/src/infra/adapters/encryption.ts`
+- [x] T001 Initialize backend directory structure per Hexagonal Architecture in `apps/backend/src/`
+- [x] T002 Configure Drizzle ORM and SQLite client in `apps/backend/src/infra/database/client.ts`
+- [x] T003 Implement AES-256-GCM encryption utility for server keys in `apps/backend/src/infra/adapters/encryption.ts`
 
 ## Phase 2: Foundational (Database Schema)
 
