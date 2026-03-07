@@ -3,11 +3,14 @@ import type { AuthDataService, Session, AuthCodeSessionData } from '../../core/d
 import { db } from '../database/client';
 import { parRequests, sessions, authCodes } from '../database/schema';
 import { parRequestSchema } from '../../../../../packages/shared/src/config';
+import type { SecurityAuditService } from '../../core/domain/audit_service';
 
 export class DrizzleAuthDataService implements AuthDataService {
   private parTtlSeconds = 60;
   private sessionTtlSeconds = 3600;
   private authCodeTtlSeconds = 60;
+
+  constructor(private auditService?: SecurityAuditService) {}
 
   /**
    * T014: Pushes authorization parameters and returns a unique request_uri.
@@ -34,6 +37,13 @@ export class DrizzleAuthDataService implements AuthDataService {
       .set({ requestUri: request_uri })
       .where(eq(parRequests.id, inserted.id));
 
+    await this.auditService?.logEvent({
+      type: 'PAR_CREATED',
+      severity: 'INFO',
+      clientId: validated.client_id,
+      details: { request_uri },
+    });
+
     return {
       request_uri,
       expires_in: this.parTtlSeconds,
@@ -56,8 +66,16 @@ export class DrizzleAuthDataService implements AuthDataService {
 
     if (!result) return null;
 
-    // Optional: could parse back into JSON if schema isn't doing it automatically
-    return typeof result.payload === 'string' ? JSON.parse(result.payload) : result.payload;
+    const payload = typeof result.payload === 'string' ? JSON.parse(result.payload) : result.payload;
+
+    await this.auditService?.logEvent({
+      type: 'PAR_RETRIEVED',
+      severity: 'INFO',
+      clientId: payload.client_id,
+      details: { request_uri },
+    });
+
+    return payload;
   }
 
   async createSession(userId?: string, dpopJkt?: string): Promise<{ sessionId: string }> {
@@ -115,6 +133,12 @@ export class DrizzleAuthDataService implements AuthDataService {
       expiresAt,
     });
 
+    await this.auditService?.logEvent({
+      type: 'AUTH_CODE_ISSUED',
+      severity: 'INFO',
+      details: { sessionId, parId },
+    });
+
     return { code };
   }
 
@@ -140,6 +164,12 @@ export class DrizzleAuthDataService implements AuthDataService {
 
     // Delete code after use
     await db.delete(authCodes).where(eq(authCodes.code, code));
+
+    await this.auditService?.logEvent({
+      type: 'AUTH_CODE_EXCHANGED',
+      severity: 'INFO',
+      details: { sessionId: result.sessionId, parId: result.parId },
+    });
 
     return result as AuthCodeSessionData;
   }

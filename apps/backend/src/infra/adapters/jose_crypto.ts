@@ -7,8 +7,12 @@ import { serverKeys } from '../database/schema';
 import { encryptKey, decryptKey } from './encryption';
 import { eq, and, sql } from 'drizzle-orm';
 
+import type { SecurityAuditService } from '../../core/domain/audit_service';
+
 export class JoseCryptoService implements CryptoService {
   private algorithm = 'ES256';
+
+  constructor(private auditService?: SecurityAuditService) {}
 
   /**
    * Generates a new ES256 key pair and persists it to the database (encrypted).
@@ -78,15 +82,29 @@ export class JoseCryptoService implements CryptoService {
     assertion: string,
     clientPublicKey: JWK
   ): Promise<boolean> {
+    const payload = jose.decodeJwt(assertion);
+    const clientId = payload.iss || 'unknown';
+
     try {
       const publicKey = await jose.importJWK(clientPublicKey, this.algorithm);
       await jose.jwtVerify(assertion, publicKey, {
         algorithms: [this.algorithm],
       });
+
+      await this.auditService?.logEvent({
+        type: 'CLIENT_AUTH_SUCCESS',
+        severity: 'INFO',
+        clientId,
+      });
+
       return true;
-    } catch (error) {
-      // In a production app, we would log this to a security audit log
-      // For now, we just return false to satisfy the interface
+    } catch (error: any) {
+      await this.auditService?.logEvent({
+        type: 'CLIENT_AUTH_FAIL',
+        severity: 'WARN',
+        clientId,
+        details: { reason: error.message },
+      });
       return false;
     }
   }
@@ -142,10 +160,22 @@ export class JoseCryptoService implements CryptoService {
       .limit(1);
 
     if (existingJti) {
+      await this.auditService?.logEvent({
+        type: 'DPOP_VALIDATION_FAIL',
+        severity: 'ERROR',
+        details: { jti: payload.jti, reason: 'Replay attack detected' },
+      });
       throw new Error('DPoP proof jti already used (replay attack)');
     }
 
     const jkt = await jose.calculateJwkThumbprint(header.jwk as JWK);
+
+    await this.auditService?.logEvent({
+      type: 'DPOP_VALIDATION_SUCCESS',
+      severity: 'INFO',
+      details: { jti: payload.jti, jkt },
+    });
+
     return { jkt };
   }
 

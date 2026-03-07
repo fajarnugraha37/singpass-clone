@@ -71,10 +71,10 @@ Each user story phase is designed to be independently testable using the `Crypto
 
 ## Phase 7: Polish & Audit Logging
 
-- [ ] T025 Define `SecurityAuditService` interface in `apps/backend/src/core/domain/audit_service.ts`
-- [ ] T026 Implement `SecurityAuditService` with dual-logging (DB + JSON console) in `apps/backend/src/infra/adapters/security_logger.ts`
-- [ ] T027 Integrate audit logging into `jose_crypto.ts` and `drizzle_auth_data.ts`
-- [ ] T028 Implement periodic cleanup job for expired PARs and AuthCodes in `apps/backend/src/infra/database/cleanup.ts`
+- [x] T025 Define `SecurityAuditService` interface in `apps/backend/src/core/domain/audit_service.ts`
+- [x] T026 Implement `SecurityAuditService` with dual-logging (DB + JSON console) in `apps/backend/src/infra/adapters/security_logger.ts`
+- [x] T027 Integrate audit logging into `jose_crypto.ts` and `drizzle_auth_data.ts`
+- [x] T028 Implement periodic cleanup job for expired PARs and AuthCodes in `apps/backend/src/infra/database/cleanup.ts`
 
 ## Dependencies
 
