@@ -1,8 +1,8 @@
 <!--
 Sync Impact Report:
-- Version change: 1.1.0 -> 1.2.0
+- Version change: 1.2.0 -> 1.3.0
 - List of modified principles:
-  - Set Principle V: AI Model Usage Boundaries (Added mandate to utilize registered MCP servers for checking Singpass compatibility from the official website)
+  - Set Principle V: AI Model Usage Boundaries (Updated mandate to rely on local docs/singpass-server and docs/singpass-client instead of checking official website)
 - Added sections: N/A
 - Removed sections: N/A
 - Templates requiring updates:
@@ -39,8 +39,8 @@ The system MUST maintain strict protocol invariants mirroring Singpass behavior:
 
 ### V. AI Model Usage Boundaries
 
-AI tasks MUST follow deterministic execution utilizing smaller, focused models for individual sub-tasks. AI implementations MUST NOT proceed without an explicitly validated architecture step. AI MUST ALWAYS utilize registered MCP servers (e.g., singpass, search tools, fetch tools) to check Singpass compatibility, implementation details, and documentation directly from the official website (`singpass.gov.sg`) before assuming system behavior. AI outputs MUST adhere to the testing standards, KISS principle, and code quality limits defined herein.
-*Rationale*: Large-scale generation without architectural guardrails leads to unmaintainable tech debt; deterministic, spec-driven steps maintain quality. Grounding assumptions in the official Singpass website ensures the system behaves as a faithful clone.
+AI tasks MUST follow deterministic execution utilizing smaller, focused models for individual sub-tasks. AI implementations MUST NOT proceed without an explicitly validated architecture step. AI MUST ALWAYS use the local Markdown specifications in `docs/singpass-server` and `docs/singpass-client` as the primary source of truth for Singpass integrations. If something is not covered there, AI may peek into `docs/singpass` as a fallback. Consequently, checking the official Singpass website via MCP is no longer required or allowed for standard implementations. AI outputs MUST adhere to the testing standards, KISS principle, and code quality limits defined herein.
+*Rationale*: Large-scale generation without architectural guardrails leads to unmaintainable tech debt; deterministic, spec-driven steps maintain quality. Grounding assumptions in the local `docs/` repository ensures consistency and speed.
 
 ### VI. Documentation Requirements
 
@@ -80,4 +80,4 @@ All development MUST strictly follow the generated Constitution, the Implementat
 - Amendments require documentation, team approval, and a migration plan if core invariants or stack dependencies change.
 - All Pull Requests MUST be reviewed to verify compliance with Architecture, Security, API Stability principles, and AI usage boundaries.
 
-**Version**: 1.2.0 | **Ratified**: 2026-03-07 | **Last Amended**: 2026-03-07
+**Version**: 1.3.0 | **Ratified**: 2026-03-07 | **Last Amended**: 2026-03-07
