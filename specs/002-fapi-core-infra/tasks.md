@@ -75,6 +75,11 @@ Each user story phase is designed to be independently testable using the `Crypto
 - [x] T026 Implement `SecurityAuditService` with dual-logging (DB + JSON console) in `apps/backend/src/infra/adapters/security_logger.ts`
 - [x] T027 Integrate audit logging into `jose_crypto.ts` and `drizzle_auth_data.ts`
 - [x] T028 Implement periodic cleanup job for expired PARs and AuthCodes in `apps/backend/src/infra/database/cleanup.ts`
+- [x] T029 Create performance benchmark script to verify SC-001 (latency < 50ms) in `apps/backend/tests/performance/latency.bench.ts`
+- [x] T030 Refactor DPoP TTL and security thresholds into environment variables in `packages/shared/src/config.ts` and `jose_crypto.ts`
+- [x] T031 Implement internal interval trigger for periodic cleanup in `apps/backend/src/index.ts`
+- [x] T032 Refactor periodic cleanup to use a scheduler library (croner) in `apps/backend/src/index.ts`
+- [x] T033 Implement graceful shutdown logic to stop the cron job on OS signals in `apps/backend/src/index.ts`
 
 ## Dependencies
 

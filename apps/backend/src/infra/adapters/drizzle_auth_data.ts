@@ -2,13 +2,13 @@ import { eq, and, gt } from 'drizzle-orm';
 import type { AuthDataService, Session, AuthCodeSessionData } from '../../core/domain/auth_data_service';
 import { db } from '../database/client';
 import { parRequests, sessions, authCodes } from '../database/schema';
-import { parRequestSchema } from '../../../../../packages/shared/src/config';
+import { parRequestSchema, sharedConfig } from '../../../../../packages/shared/src/config';
 import type { SecurityAuditService } from '../../core/domain/audit_service';
 
 export class DrizzleAuthDataService implements AuthDataService {
-  private parTtlSeconds = 60;
-  private sessionTtlSeconds = 3600;
-  private authCodeTtlSeconds = 60;
+  private parTtlSeconds = sharedConfig.SECURITY.PAR_TTL_SECONDS;
+  private sessionTtlSeconds = sharedConfig.SECURITY.SESSION_TTL_SECONDS;
+  private authCodeTtlSeconds = sharedConfig.SECURITY.AUTH_CODE_TTL_SECONDS;
 
   constructor(private auditService?: SecurityAuditService) {}
 
@@ -22,7 +22,6 @@ export class DrizzleAuthDataService implements AuthDataService {
     const expiresAt = new Date(Date.now() + this.parTtlSeconds * 1000);
 
     // Initial insert to get the sequential ID
-    // We use a temporary URI and update it after we get the ID from the database
     // SQLite auto-increment ID is returned after insert.
     const [inserted] = await db.insert(parRequests).values({
       requestUri: 'PENDING',

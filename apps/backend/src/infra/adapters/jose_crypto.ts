@@ -6,6 +6,7 @@ import * as schema from '../database/schema';
 import { serverKeys } from '../database/schema';
 import { encryptKey, decryptKey } from './encryption';
 import { eq, and, sql } from 'drizzle-orm';
+import { sharedConfig } from '../../../../../packages/shared/src/config';
 
 import type { SecurityAuditService } from '../../core/domain/audit_service';
 
@@ -135,11 +136,12 @@ export class JoseCryptoService implements CryptoService {
       throw new Error(`DPoP htu mismatch: expected ${expectedUrl}, got ${payload.htu}`);
     }
 
-    // iat check (60s window)
+    // iat check (configurable window)
     const now = Math.floor(Date.now() / 1000);
     const iat = payload.iat || 0;
-    if (Math.abs(now - iat) > 60) {
-      throw new Error('DPoP proof expired (iat > 60s)');
+    const ttl = sharedConfig.SECURITY.DPOP_TTL_SECONDS;
+    if (Math.abs(now - iat) > ttl) {
+      throw new Error(`DPoP proof expired (iat > ${ttl}s)`);
     }
 
     // jti uniqueness check (prevents replay)
