@@ -44,6 +44,12 @@ Client applications need a secure way to pre-register their authorization reques
 - What happens if the generated reference identifier expires before the user acts upon it?
 - How does the system handle malformed or oversized payloads during pre-registration?
 
+## Clarifications
+
+### Session 2026-03-08
+
+- Q: What is the expected volume of concurrent pre-registration requests, and does the 60-second expiry require an active cleanup process, or is it sufficient to rely on row-level TTL/passive expiration given SQLite's capabilities? -> A: Moderate volume; passive cleanup (e.g., TTL-based queries or periodic cron) is sufficient
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
@@ -53,7 +59,7 @@ Client applications need a secure way to pre-register their authorization reques
 - **FR-003**: The system MUST expose a secure endpoint for pre-registering authorization requests.
 - **FR-004**: The system MUST strictly validate the client's identity using secure assertions before accepting a pre-registration request.
 - **FR-005**: The system MUST validate the presence of cryptographic proof-of-possession and interception prevention mechanisms on all authorization requests.
-- **FR-006**: The system MUST temporarily store the pre-registered request details securely.
+- **FR-006**: The system MUST temporarily store the pre-registered request details securely, supporting moderate volume with passive cleanup mechanisms (e.g., TTL-based queries or periodic cron).
 - **FR-007**: The system MUST return a unique, single-use reference identifier that expires quickly (e.g., within 60 seconds).
 - **FR-008**: The system MUST rigorously validate all input parameters against strict format and presence rules.
 
