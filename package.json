@@ -1,5 +1,5 @@
 {
-  "name": "singpass-clone",
+  "name": "vibe-auth",
   "type": "module",
   "private": true,
   "workspaces": [
@@ -7,18 +7,19 @@
     "packages/*"
   ],
   "scripts": {
-    "serena:index": "uvx --from git+https://github.com/oraios/serena serena project index",
+    "dev": "bun run dev:be & bun run dev:fe",
     "dev:be": "cd apps/backend && bun run dev",
     "dev:fe": "cd apps/frontend && bun run dev",
     "test": "bun test",
     "test:coverage": "bun test --coverage",
     "lint": "bun x eslint .",
-    "format": "bun x prettier --write ."
+    "format": "bun x prettier --write .",
+    "install:all": "bun install"
   },
   "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
+    "@types/bun": "latest",
+    "eslint": "latest",
+    "prettier": "latest",
     "typescript": "^5"
   }
 }

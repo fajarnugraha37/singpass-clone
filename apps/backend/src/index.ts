@@ -1,9 +1,9 @@
 import { Hono } from 'hono'
 
-const app = new Hono()
+const app = new Hono().basePath('/api')
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
+const routes = app
+  .get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
 
+export type AppType = typeof routes
 export default app

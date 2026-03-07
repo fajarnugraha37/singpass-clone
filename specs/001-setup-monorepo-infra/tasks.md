@@ -51,10 +51,10 @@
 
 ### Implementation for User Story 1
 
-- [ ] T013 [US1] Finalize workspace dependency linking in root `package.json`
-- [ ] T014 [US1] Implement placeholder health check in `apps/backend/src/index.ts`
-- [ ] T015 [US1] Implement minimal Astro welcome page in `apps/frontend/src/pages/index.astro`
-- [ ] T016 [US1] Verify `bun install` succeeds and populates root `node_modules`
+- [x] T013 [US1] Finalize workspace dependency linking in root `package.json`
+- [x] T014 [US1] Implement placeholder health check in `apps/backend/src/index.ts`
+- [x] T015 [US1] Implement minimal Astro welcome page in `apps/frontend/src/pages/index.astro`
+- [x] T016 [US1] Verify `bun install` succeeds and populates root `node_modules`
 
 **Checkpoint**: User Story 1 is complete - the monorepo is functional and ready for development.
 
