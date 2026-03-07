@@ -17,12 +17,12 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Initialize root `package.json` with workspaces (`apps/*`, `packages/*`) in root
-- [ ] T002 Create directory structure: `apps/frontend`, `apps/backend`, `packages/shared`, `packages/config` in root
-- [ ] T003 Configure root `tsconfig.json` with base settings and workspace aliases in root
-- [ ] T004 [P] Create base ESLint configuration in `packages/config/eslint-preset.js`
-- [ ] T005 [P] Create base Prettier configuration in `packages/config/prettier-preset.js`
-- [ ] T006 [P] Create base TSConfig in `packages/config/tsconfig-base.json`
+- [x] T001 Initialize root `package.json` with workspaces (`apps/*`, `packages/*`) in root
+- [x] T002 Create directory structure: `apps/frontend`, `apps/backend`, `packages/shared`, `packages/config` in root
+- [x] T003 Configure root `tsconfig.json` with base settings and workspace aliases in root
+- [x] T004 [P] Create base ESLint configuration in `packages/config/eslint-preset.js`
+- [x] T005 [P] Create base Prettier configuration in `packages/config/prettier-preset.js`
+- [x] T006 [P] Create base TSConfig in `packages/config/tsconfig-base.json`
 
 ---
 

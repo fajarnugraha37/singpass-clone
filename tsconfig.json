@@ -24,6 +24,13 @@
     // Some stricter flags (disabled by default)
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false
+    "noPropertyAccessFromIndexSignature": false,
+
+    // Workspace aliases
+    "baseUrl": ".",
+    "paths": {
+      "@vibe/shared/*": ["packages/shared/src/*"],
+      "@vibe/config/*": ["packages/config/*"]
+    }
   }
 }
