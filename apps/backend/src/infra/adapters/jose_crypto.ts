@@ -2,9 +2,10 @@ import * as jose from 'jose';
 import type { JWK } from 'jose';
 import type { CryptoService } from '../../core/domain/crypto_service';
 import { db } from '../database/client';
+import * as schema from '../database/schema';
 import { serverKeys } from '../database/schema';
 import { encryptKey, decryptKey } from './encryption';
-import { eq } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 
 export class JoseCryptoService implements CryptoService {
   private algorithm = 'ES256';

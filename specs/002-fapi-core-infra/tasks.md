@@ -64,10 +64,10 @@ Each user story phase is designed to be independently testable using the `Crypto
 **Goal**: Bind public keys to sessions and validate DPoP proofs.
 **Independent Test**: Bind a thumbprint and validate a DPoP proof against it.
 
-- [ ] T021 [US4] Implement `calculateThumbprint` (RFC 7638) in `apps/backend/src/infra/adapters/jose_crypto.ts`
-- [ ] T022 [US4] Implement `validateDPoPProof` (signature, iat, jti, htm, htu) in `apps/backend/src/infra/adapters/jose_crypto.ts`
-- [ ] T023 [US4] Implement `issueAuthCode` and `exchangeAuthCode` with DPoP binding in `apps/backend/src/infra/adapters/drizzle_auth_data.ts`
-- [ ] T024 [US4] Create unit tests for DPoP binding and proof validation in `apps/backend/tests/infra/adapters/dpop.test.ts`
+- [x] T021 [US4] Implement `calculateThumbprint` (RFC 7638) in `apps/backend/src/infra/adapters/jose_crypto.ts`
+- [x] T022 [US4] Implement `validateDPoPProof` (signature, iat, jti, htm, htu) in `apps/backend/src/infra/adapters/jose_crypto.ts`
+- [x] T023 [US4] Implement `issueAuthCode` and `exchangeAuthCode` with DPoP binding in `apps/backend/src/infra/adapters/drizzle_auth_data.ts`
+- [x] T024 [US4] Create unit tests for DPoP binding and proof validation in `apps/backend/tests/infra/adapters/dpop.test.ts`
 
 ## Phase 7: Polish & Audit Logging
 
