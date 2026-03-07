@@ -1,37 +1,33 @@
 <!--
 Sync Impact Report:
-- Version change: Initial Draft -> 1.0.0
+- Version change: 1.0.0 -> 1.1.0
 - List of modified principles:
-  - Set Principle I: Architecture Design
-  - Set Principle II: API Stability
-  - Set Principle III: Security Requirements
-  - Set Principle IV: Protocol Invariants
-  - Set Principle V: AI Model Usage Boundaries
-  - Set Principle VI: Documentation Requirements
-- Added sections: Development Philosophy & Constraints, Project Goals & Criteria
+  - Set Principle I: Architecture Design (Added consistency convention)
+  - Set Principle II: API Stability & Singpass Contracts (Added Singpass strict clone rules & input validation)
+  - Set Principle III: Security Requirements (Added SQLite cookie session storage, secret masking, input validation)
+  - Set Principle VII: Strict Compliance (Added strict compliance to plan and tasks)
+- Added sections: N/A
 - Removed sections: N/A
 - Templates requiring updates:
   - ✅ .specify/templates/plan-template.md (Updated Constitution Checks)
-  - ✅ .specify/templates/spec-template.md (Spec-driven approach naturally complies)
-  - ✅ .specify/templates/tasks-template.md (Test-first task structure matches)
 - Follow-up TODOs:
-  - None (Ratification date set to today, 2026-03-07)
+  - None (Ratification date kept, Last Amended date set to today)
 -->
 # vibe-auth Constitution
 
 ## Core Principles
 
 ### I. Architecture Design
-The system MUST follow Hexagonal Architecture (Ports and Adapters) to cleanly isolate the core domain from external concerns (database, web frameworks). Code MUST adhere strictly to DRY (Don't Repeat Yourself) and KISS (Keep It Simple, Stupid) principles, avoiding deep nesting, utilizing appropriate design patterns, and avoiding complex logic in a single function. The project runs as a Bun monorepo, separating the frontend (Astro + Tailwind + Svelte islands) and backend (Hono).
-*Rationale*: Isolating the domain ensures business logic can be tested independently. Keeping it simple guarantees long-term maintainability.
+The system MUST follow Hexagonal Architecture (Ports and Adapters) to cleanly isolate the core domain from external concerns (database, web frameworks). Code MUST adhere strictly to DRY (Don't Repeat Yourself) and KISS (Keep It Simple, Stupid) principles, avoiding deep nesting, utilizing appropriate design patterns, and avoiding complex logic in a single function. Coding conventions MUST be strictly consistent across the entire monorepo. The project runs as a Bun monorepo, separating the frontend (Astro + Tailwind + Svelte islands) and backend (Hono).
+*Rationale*: Isolating the domain ensures business logic can be tested independently. Keeping it simple and consistent guarantees long-term maintainability.
 
-### II. API Stability
-All API communication MUST rely on Hono RPC to share strict TypeScript contracts between the backend and frontend. The API represents a rigid boundary; silent breaking changes to these contracts are prohibited. API responses MUST be predictable, typed, and well-documented.
-*Rationale*: End-to-end type safety eliminates entire categories of runtime errors and simplifies frontend consumption.
+### II. API Stability & Singpass Contracts
+For internal system communication, rely on Hono RPC to share strict TypeScript contracts between backend and frontend. For all external-facing identity provider endpoints, the HTTP contracts (endpoints, request bodies, responses, headers) MUST perfectly mirror the existing Singpass API endpoints, as this system is a strict clone. Input validation MUST exist on all endpoints. Silent breaking changes to these contracts are prohibited.
+*Rationale*: End-to-end type safety eliminates runtime errors. Perfect contract mirroring ensures zero-friction integration for existing Singpass clients.
 
 ### III. Security Requirements
-Security is the paramount concern, employing a security-first protocol modeling approach to replicate a Singpass-like authentication flow. The system MUST enforce Two-Factor Authentication (2FA) for critical paths, utilize robust session management with strict grace periods, and adhere to OIDC (OpenID Connect) / FAPI 2.0 standards where applicable. Never log or leak sensitive user data or unhashed tokens.
-*Rationale*: Identity providers are high-value targets; robust, standards-compliant security is non-negotiable.
+Security is the paramount concern. The system MUST enforce Two-Factor Authentication (2FA) for critical paths. Sessions MUST be managed using secure cookies and the session state MUST be stored persistently in the SQLite database. Adhere to OIDC / FAPI 2.0 standards where applicable. Input validation MUST be comprehensive on all endpoints to prevent injection. Sensitive secrets are NEVER logged; any potentially sensitive log output MUST be securely masked.
+*Rationale*: Identity providers are high-value targets; robust, standards-compliant security and strictly unlogged secrets are non-negotiable.
 
 ### IV. Protocol Invariants
 The system MUST maintain strict protocol invariants mirroring Singpass behavior:
@@ -47,13 +43,17 @@ AI tasks MUST follow deterministic execution utilizing smaller, focused models f
 Development strictly adheres to "Documentation First" and "Specification Driven" philosophies. No implementation code is written before the specification, architecture, and contracts are documented, reviewed, and validated. The specification is the absolute single source of truth.
 *Rationale*: Documentation is cheaper to change than code and serves as the deterministic blueprint for both AI and human execution.
 
+### VII. Strict Compliance
+All development MUST strictly follow the generated Constitution, the Implementation Plan, and the specified Tasks. Deviation from the agreed-upon plan is prohibited without explicit renegotiation and documentation.
+*Rationale*: Deterministic execution relies on absolute adherence to the documented plan.
+
 ## Development Philosophy & Constraints
 
 - **Stack Constraints**:
   - **Runtime**: Bun, TypeScript
   - **Backend**: Hono (TypeScript), Drizzle ORM, SQLite
   - **Frontend**: Astro SSG, TailwindCSS, Svelte islands (Design System first)
-- **Testing Standards**: Every feature MUST include independent tests per user story before implementation begins. Red-Green-Refactor cycles apply. Code quality and testing standards MUST be rigorously maintained.
+- **Testing Standards**: Every feature MUST include independent tests per user story before implementation begins. Red-Green-Refactor cycles apply. Unit tests MUST exist for all logic and MUST pass with code coverage >= 80%.
 - **UX & Performance**: Maintain a highly consistent user experience mirroring Singpass's simplicity and speed. The system must meet strict performance requirements for fast token exchange, minimal latency on UI interactions, and optimized island hydration via Astro.
 
 ## Project Goals & Criteria
@@ -74,4 +74,4 @@ Development strictly adheres to "Documentation First" and "Specification Driven"
 - Amendments require documentation, team approval, and a migration plan if core invariants or stack dependencies change.
 - All Pull Requests MUST be reviewed to verify compliance with Architecture, Security, API Stability principles, and AI usage boundaries.
 
-**Version**: 1.0.0 | **Ratified**: 2026-03-07 | **Last Amended**: 2026-03-07
+**Version**: 1.1.0 | **Ratified**: 2026-03-07 | **Last Amended**: 2026-03-07
