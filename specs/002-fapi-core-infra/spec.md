@@ -93,7 +93,7 @@ As a Client Application, I want my tokens to be "sender-constrained" using DPoP,
 
 ### Functional Requirements
 
-- **FR-001**: System MUST provide Drizzle ORM schemas for SQLite including tables for: `users`, `sessions`, `auth_codes`, `par_requests`, `server_keys`, and `security_audit_log`.
+- **FR-001**: System MUST provide Drizzle ORM schemas for SQLite including tables for: `users`, `sessions`, `auth_codes`, `par_requests`, `server_keys`, `security_audit_log`, and `used_jtis`.
 - **FR-001.1**: Server keys in the `server_keys` table MUST be encrypted at rest using a master key from environment variables.
 - **FR-002**: System MUST implement a JWKS management utility capable of generating and rotating ES256 key pairs.
 - **FR-002.1**: Server ES256 keys MUST use a minimum of 2048-bit equivalent security (Standard P-256 curve).

@@ -5,7 +5,7 @@ export const sharedConfig = {
   API_PREFIX: '/api',
   SECURITY: {
     DPOP_TTL_SECONDS: 60,
-    PAR_TTL_SECONDS: 60,
+    PAR_TTL_SECONDS: 300,
     SESSION_TTL_SECONDS: 3600,
     AUTH_CODE_TTL_SECONDS: 60,
     SERVER_KEY_MIN_SIZE: 2048,

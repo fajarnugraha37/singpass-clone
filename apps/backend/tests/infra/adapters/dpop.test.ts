@@ -2,7 +2,7 @@ import { expect, test, describe, beforeAll } from "bun:test";
 import { JoseCryptoService } from "../../../src/infra/adapters/jose_crypto";
 import { DrizzleAuthDataService } from "../../../src/infra/adapters/drizzle_auth_data";
 import { db } from "../../../src/infra/database/client";
-import { securityAuditLog, parRequests, sessions, authCodes } from "../../../src/infra/database/schema";
+import { securityAuditLog, parRequests, sessions, authCodes, usedJtis } from "../../../src/infra/database/schema";
 import * as jose from "jose";
 
 describe("DPoP Binding & Validation (US4)", () => {
@@ -17,6 +17,7 @@ describe("DPoP Binding & Validation (US4)", () => {
     await db.delete(authCodes);
     await db.delete(sessions);
     await db.delete(parRequests);
+    await db.delete(usedJtis);
   });
 
   test("should calculate JWK thumbprint", async () => {
@@ -84,10 +85,9 @@ describe("DPoP Binding & Validation (US4)", () => {
       .sign(privateKey);
 
     // 1. First time succeeds (mocking the log entry)
-    await db.insert(securityAuditLog).values({
-      eventType: "DPOP_VALIDATION_SUCCESS",
-      severity: "INFO",
-      details: { jti },
+    await db.insert(usedJtis).values({
+      jti,
+      expiresAt: new Date(Date.now() + 60000),
     });
 
     // 2. Second time should fail

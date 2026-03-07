@@ -30,7 +30,7 @@ describe("DrizzleAuthDataService - PAR Lifecycle", () => {
     const result = await authDataService.createPAR(validPARPayload);
     
     expect(result.request_uri).toMatch(/^urn:ietf:params:oauth:request_uri:\d+$/);
-    expect(result.expires_in).toBe(60);
+    expect(result.expires_in).toBe(300);
 
     const retrieved = await authDataService.getPAR(result.request_uri);
     expect(retrieved).toBeDefined();

@@ -5,8 +5,9 @@ import { db } from '../database/client';
 import * as schema from '../database/schema';
 import { serverKeys } from '../database/schema';
 import { encryptKey, decryptKey } from './encryption';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { sharedConfig } from '../../../../../packages/shared/src/config';
+import { getClientConfig } from './client_registry';
 
 import type { SecurityAuditService } from '../../core/domain/audit_service';
 
@@ -149,16 +150,9 @@ export class JoseCryptoService implements CryptoService {
       throw new Error('DPoP proof missing jti');
     }
 
-    // For simplicity in this clone, we check the audit log for previous usage of this JTI
-    // In a production system, a dedicated TTL-based cache (Redis) would be used.
     const [existingJti] = await db.select()
-      .from(schema.securityAuditLog)
-      .where(
-        and(
-          eq(schema.securityAuditLog.eventType, 'DPOP_VALIDATION_SUCCESS'),
-          sql`${schema.securityAuditLog.details}->>'$.jti' = ${payload.jti}`
-        )
-      )
+      .from(schema.usedJtis)
+      .where(eq(schema.usedJtis.jti, payload.jti))
       .limit(1);
 
     if (existingJti) {
@@ -169,6 +163,12 @@ export class JoseCryptoService implements CryptoService {
       });
       throw new Error('DPoP proof jti already used (replay attack)');
     }
+
+    // Insert JTI to prevent reuse
+    await db.insert(schema.usedJtis).values({
+      jti: payload.jti,
+      expiresAt: new Date(Date.now() + ttl * 1000),
+    });
 
     const jkt = await jose.calculateJwkThumbprint(header.jwk as JWK);
 
@@ -211,5 +211,14 @@ export class JoseCryptoService implements CryptoService {
    */
   async calculateThumbprint(jwk: JWK): Promise<string> {
     return await jose.calculateJwkThumbprint(jwk);
+  }
+
+  /**
+   * Validates exact redirect_uri against client registry.
+   */
+  async validateRedirectUri(clientId: string, redirectUri: string): Promise<boolean> {
+    const client = getClientConfig(clientId);
+    if (!client) return false;
+    return client.redirectUris.includes(redirectUri);
   }
 }

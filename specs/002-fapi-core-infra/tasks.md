@@ -24,7 +24,7 @@ Each user story phase is designed to be independently testable using the `Crypto
 ## Phase 2: Foundational (Database Schema)
 
 - [x] T004 [P] Define Drizzle schema for `users` and `sessions` in `apps/backend/src/infra/database/schema.ts`
-- [x] T005 [P] Define Drizzle schema for `par_requests` and `auth_codes` in `apps/backend/src/infra/database/schema.ts`
+- [x] T005 [P] Define Drizzle schema for `par_requests`, `auth_codes`, and `used_jtis` in `apps/backend/src/infra/database/schema.ts`
 - [x] T006 [P] Define Drizzle schema for `server_keys` and `security_audit_log` in `apps/backend/src/infra/database/schema.ts`
 - [x] T007 Generate and run Drizzle migrations to initialize SQLite database
 
@@ -35,8 +35,9 @@ Each user story phase is designed to be independently testable using the `Crypto
 
 - [x] T008 [US1] Define `CryptoService` interface in `apps/backend/src/core/domain/crypto_service.ts`
 - [x] T009 [US1] Implement mock client registry (static config) in `apps/backend/src/infra/adapters/client_registry.ts`
-- [x] T010 [US1] Implement `generateKeyPair` and `getPublicJWKS` in `apps/backend/src/infra/adapters/jose_crypto.ts`
+- [x] T010 [US1] Implement `generateKeyPair` (with `kid` generation) and multi-key `getPublicJWKS` retrieval from `server_keys` in `apps/backend/src/infra/adapters/jose_crypto.ts`
 - [x] T011 [US1] Implement `validateClientAssertion` (private_key_jwt) in `apps/backend/src/infra/adapters/jose_crypto.ts`
+- [x] T011b [US1] Implement exact `redirect_uri` validation against the mock client registry in `apps/backend/src/infra/adapters/jose_crypto.ts`
 - [x] T012 [US1] Create unit tests for `private_key_jwt` validation in `apps/backend/tests/infra/adapters/crypto_auth.test.ts`
 
 ## Phase 4: User Story 2 - Pushed Authorization Request (PAR) Lifecycle (P1)
@@ -46,7 +47,7 @@ Each user story phase is designed to be independently testable using the `Crypto
 
 - [x] T013 [US2] Define `AuthDataService` interface in `apps/backend/src/core/domain/auth_data_service.ts`
 - [x] T014 [US2] Implement `createPAR` with sequential URI generation in `apps/backend/src/infra/adapters/drizzle_auth_data.ts`
-- [x] T015 [US2] Implement `getPAR` with TTL (60s) enforcement in `apps/backend/src/infra/adapters/drizzle_auth_data.ts`
+- [x] T015 [US2] Implement `getPAR` with TTL (5 minutes) enforcement in `apps/backend/src/infra/adapters/drizzle_auth_data.ts`
 - [x] T016 [US2] Create Zod schemas for PAR payload validation in `packages/shared/src/config.ts`
 - [x] T017 [US2] Create unit tests for PAR lifecycle in `apps/backend/tests/infra/adapters/par.test.ts`
 
@@ -65,20 +66,19 @@ Each user story phase is designed to be independently testable using the `Crypto
 **Independent Test**: Bind a thumbprint and validate a DPoP proof against it.
 
 - [x] T021 [US4] Implement `calculateThumbprint` (RFC 7638) in `apps/backend/src/infra/adapters/jose_crypto.ts`
-- [x] T022 [US4] Implement `validateDPoPProof` (signature, iat, jti, htm, htu) in `apps/backend/src/infra/adapters/jose_crypto.ts`
+- [x] T022 [US4] Implement `validateDPoPProof` (signature, iat, jti uniqueness using `used_jtis` table, htm, htu) in `apps/backend/src/infra/adapters/jose_crypto.ts`
 - [x] T023 [US4] Implement `issueAuthCode` and `exchangeAuthCode` with DPoP binding in `apps/backend/src/infra/adapters/drizzle_auth_data.ts`
 - [x] T024 [US4] Create unit tests for DPoP binding and proof validation in `apps/backend/tests/infra/adapters/dpop.test.ts`
 
 ## Phase 7: Polish & Audit Logging
 
 - [x] T025 Define `SecurityAuditService` interface in `apps/backend/src/core/domain/audit_service.ts`
-- [x] T026 Implement `SecurityAuditService` with dual-logging (DB + JSON console) in `apps/backend/src/infra/adapters/security_logger.ts`
+- [x] T026 Implement `SecurityAuditService` with dual-logging (DB + JSON console) and explicit secret masking in `apps/backend/src/infra/adapters/security_logger.ts`
 - [x] T027 Integrate audit logging into `jose_crypto.ts` and `drizzle_auth_data.ts`
 - [x] T028 Implement periodic cleanup job for expired PARs and AuthCodes in `apps/backend/src/infra/database/cleanup.ts`
 - [x] T029 Create performance benchmark script to verify SC-001 (latency < 50ms) in `apps/backend/tests/performance/latency.bench.ts`
 - [x] T030 Refactor DPoP TTL and security thresholds into environment variables in `packages/shared/src/config.ts` and `jose_crypto.ts`
-- [x] T031 Implement internal interval trigger for periodic cleanup in `apps/backend/src/index.ts`
-- [x] T032 Refactor periodic cleanup to use a scheduler library (croner) in `apps/backend/src/index.ts`
+- [x] T031 Implement periodic cleanup using a scheduler library (croner) in `apps/backend/src/index.ts`
 - [x] T033 Implement graceful shutdown logic to stop the cron job on OS signals in `apps/backend/src/index.ts`
 
 ## Dependencies

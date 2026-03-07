@@ -44,4 +44,9 @@ export interface CryptoService {
    * Calculates the S256 thumbprint (jkt) of a JWK.
    */
   calculateThumbprint(jwk: JWK): Promise<string>;
+
+  /**
+   * Validates exact redirect_uri against client registry.
+   */
+  validateRedirectUri(clientId: string, redirectUri: string): Promise<boolean>;
 }

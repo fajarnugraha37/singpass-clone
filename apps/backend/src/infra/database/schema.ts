@@ -45,6 +45,12 @@ export const serverKeys = sqliteTable('server_keys', {
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 });
 
+export const usedJtis = sqliteTable('used_jtis', {
+  jti: text('jti').primaryKey(),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+});
+
 export const securityAuditLog = sqliteTable('security_audit_log', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   eventType: text('event_type').notNull(),
