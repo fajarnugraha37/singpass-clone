@@ -23,10 +23,10 @@ Each user story phase is designed to be independently testable using the `Crypto
 
 ## Phase 2: Foundational (Database Schema)
 
-- [ ] T004 [P] Define Drizzle schema for `users` and `sessions` in `apps/backend/src/infra/database/schema.ts`
-- [ ] T005 [P] Define Drizzle schema for `par_requests` and `auth_codes` in `apps/backend/src/infra/database/schema.ts`
-- [ ] T006 [P] Define Drizzle schema for `server_keys` and `security_audit_log` in `apps/backend/src/infra/database/schema.ts`
-- [ ] T007 Generate and run Drizzle migrations to initialize SQLite database
+- [x] T004 [P] Define Drizzle schema for `users` and `sessions` in `apps/backend/src/infra/database/schema.ts`
+- [x] T005 [P] Define Drizzle schema for `par_requests` and `auth_codes` in `apps/backend/src/infra/database/schema.ts`
+- [x] T006 [P] Define Drizzle schema for `server_keys` and `security_audit_log` in `apps/backend/src/infra/database/schema.ts`
+- [x] T007 Generate and run Drizzle migrations to initialize SQLite database
 
 ## Phase 3: User Story 1 - Secure Client Authentication (P1)
 
