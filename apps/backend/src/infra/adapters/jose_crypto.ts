@@ -84,7 +84,8 @@ export class JoseCryptoService implements CryptoService {
       });
       return true;
     } catch (error) {
-      console.error('Client assertion validation failed:', error);
+      // In a production app, we would log this to a security audit log
+      // For now, we just return false to satisfy the interface
       return false;
     }
   }
@@ -115,12 +116,32 @@ export class JoseCryptoService implements CryptoService {
       throw new Error(`DPoP htu mismatch: expected ${expectedUrl}, got ${payload.htu}`);
     }
 
-    // iat check (60s window handled by jwtVerify if exp/iat claims are present, 
-    // but we'll add explicit check if needed in application layer or here)
+    // iat check (60s window)
     const now = Math.floor(Date.now() / 1000);
     const iat = payload.iat || 0;
     if (Math.abs(now - iat) > 60) {
       throw new Error('DPoP proof expired (iat > 60s)');
+    }
+
+    // jti uniqueness check (prevents replay)
+    if (!payload.jti) {
+      throw new Error('DPoP proof missing jti');
+    }
+
+    // For simplicity in this clone, we check the audit log for previous usage of this JTI
+    // In a production system, a dedicated TTL-based cache (Redis) would be used.
+    const [existingJti] = await db.select()
+      .from(schema.securityAuditLog)
+      .where(
+        and(
+          eq(schema.securityAuditLog.eventType, 'DPOP_VALIDATION_SUCCESS'),
+          sql`${schema.securityAuditLog.details}->>'$.jti' = ${payload.jti}`
+        )
+      )
+      .limit(1);
+
+    if (existingJti) {
+      throw new Error('DPoP proof jti already used (replay attack)');
     }
 
     const jkt = await jose.calculateJwkThumbprint(header.jwk as JWK);

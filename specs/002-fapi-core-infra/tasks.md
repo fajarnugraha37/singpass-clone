@@ -55,9 +55,9 @@ Each user story phase is designed to be independently testable using the `Crypto
 **Goal**: Track authentication progress and LOA levels.
 **Independent Test**: Update a session's LOA and verify persistence.
 
-- [ ] T018 [US3] Implement `createSession` and `updateSession` in `apps/backend/src/infra/adapters/drizzle_auth_data.ts`
-- [ ] T019 [US3] Implement session retrieval with expiry check in `apps/backend/src/infra/adapters/drizzle_auth_data.ts`
-- [ ] T020 [US3] Create unit tests for session state transitions in `apps/backend/tests/core/application/session.test.ts`
+- [x] T018 [US3] Implement `createSession` and `updateSession` in `apps/backend/src/infra/adapters/drizzle_auth_data.ts`
+- [x] T019 [US3] Implement session retrieval with expiry check in `apps/backend/src/infra/adapters/drizzle_auth_data.ts`
+- [x] T020 [US3] Create unit tests for session state transitions in `apps/backend/tests/core/application/session.test.ts`
 
 ## Phase 6: User Story 4 - DPoP Token Binding (P2)
 
