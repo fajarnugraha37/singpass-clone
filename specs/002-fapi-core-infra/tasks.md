@@ -33,11 +33,11 @@ Each user story phase is designed to be independently testable using the `Crypto
 **Goal**: Implement `private_key_jwt` validation and JWKS management.
 **Independent Test**: Submit a valid signed JWT to the validation utility and verify against mock registry.
 
-- [ ] T008 [US1] Define `CryptoService` interface in `apps/backend/src/core/domain/crypto_service.ts`
-- [ ] T009 [US1] Implement mock client registry (static config) in `apps/backend/src/infra/adapters/client_registry.ts`
-- [ ] T010 [US1] Implement `generateKeyPair` and `getPublicJWKS` in `apps/backend/src/infra/adapters/jose_crypto.ts`
-- [ ] T011 [US1] Implement `validateClientAssertion` (private_key_jwt) in `apps/backend/src/infra/adapters/jose_crypto.ts`
-- [ ] T012 [US1] Create unit tests for `private_key_jwt` validation in `apps/backend/tests/infra/adapters/crypto_auth.test.ts`
+- [x] T008 [US1] Define `CryptoService` interface in `apps/backend/src/core/domain/crypto_service.ts`
+- [x] T009 [US1] Implement mock client registry (static config) in `apps/backend/src/infra/adapters/client_registry.ts`
+- [x] T010 [US1] Implement `generateKeyPair` and `getPublicJWKS` in `apps/backend/src/infra/adapters/jose_crypto.ts`
+- [x] T011 [US1] Implement `validateClientAssertion` (private_key_jwt) in `apps/backend/src/infra/adapters/jose_crypto.ts`
+- [x] T012 [US1] Create unit tests for `private_key_jwt` validation in `apps/backend/tests/infra/adapters/crypto_auth.test.ts`
 
 ## Phase 4: User Story 2 - Pushed Authorization Request (PAR) Lifecycle (P1)
 

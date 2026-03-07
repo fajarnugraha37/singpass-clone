@@ -8,13 +8,15 @@
     "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
-    "hono": "latest",
-    "drizzle-orm": "latest",
+    "@hono/zod-validator": "latest",
     "@libsql/client": "latest",
-    "zod": "latest",
-    "@hono/zod-validator": "latest"
+    "drizzle-orm": "latest",
+    "hono": "latest",
+    "jose": "^6.2.0",
+    "zod": "latest"
   },
   "devDependencies": {
+    "@types/node": "^25.3.5",
     "drizzle-kit": "latest"
   }
 }
