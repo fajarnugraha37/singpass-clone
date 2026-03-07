@@ -1,12 +1,20 @@
 {
   "name": "backend",
+  "type": "module",
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.ts",
+    "test": "bun test",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
-    "hono": "^4.12.5"
+    "hono": "latest",
+    "drizzle-orm": "latest",
+    "@libsql/client": "latest",
+    "zod": "latest",
+    "@hono/zod-validator": "latest"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "drizzle-kit": "latest"
   }
 }

@@ -9,7 +9,11 @@
   "scripts": {
     "serena:index": "uvx --from git+https://github.com/oraios/serena serena project index",
     "dev:be": "cd apps/backend && bun run dev",
-    "dev:fe": "cd apps/frontend && bun run dev"
+    "dev:fe": "cd apps/frontend && bun run dev",
+    "test": "bun test",
+    "test:coverage": "bun test --coverage",
+    "lint": "bun x eslint .",
+    "format": "bun x prettier --write ."
   },
   "devDependencies": {
     "@types/bun": "latest"

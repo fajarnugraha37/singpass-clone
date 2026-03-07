@@ -1,0 +1,11 @@
+{
+  "name": "@vibe/shared",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "test": "bun test"
+  },
+  "dependencies": {
+    "zod": "latest"
+  }
+}

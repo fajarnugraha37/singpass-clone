@@ -32,12 +32,12 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T007 Initialize Hono project in `apps/backend/package.json` with dependencies (hono, drizzle-orm, @libsql/client)
-- [ ] T008 Initialize Astro project in `apps/frontend/package.json` with dependencies (astro, svelte, tailwindcss)
-- [ ] T009 Setup shared workspace in `packages/shared/package.json` for types and constants
-- [ ] T010 [P] Configure Hono Hexagonal structure: `apps/backend/src/core/domain`, `apps/backend/src/core/application`, `apps/backend/src/infra/adapters`
-- [ ] T011 [P] Setup Drizzle configuration and SQLite schema in `apps/backend/src/infra/adapters/db/schema.ts`
-- [ ] T012 Configure Bun test runner and coverage reporting in root `package.json`
+- [x] T007 Initialize Hono project in `apps/backend/package.json` with dependencies (hono, drizzle-orm, @libsql/client)
+- [x] T008 Initialize Astro project in `apps/frontend/package.json` with dependencies (astro, svelte, tailwindcss)
+- [x] T009 Setup shared workspace in `packages/shared/package.json` for types and constants
+- [x] T010 [P] Configure Hono Hexagonal structure: `apps/backend/src/core/domain`, `apps/backend/src/core/application`, `apps/backend/src/infra/adapters`
+- [x] T011 [P] Setup Drizzle configuration and SQLite schema in `apps/backend/src/infra/adapters/db/schema.ts`
+- [x] T012 Configure Bun test runner and coverage reporting in root `package.json`
 
 **Checkpoint**: Foundation ready - workspace members can now be developed and tested.
 

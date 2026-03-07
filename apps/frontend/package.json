@@ -4,11 +4,18 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
+    "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "bun test"
   },
   "dependencies": {
-    "astro": "^5.17.1"
+    "@astrojs/svelte": "latest",
+    "@astrojs/tailwind": "latest",
+    "astro": "latest",
+    "svelte": "latest",
+    "tailwindcss": "latest",
+    "hono": "latest"
   }
 }
