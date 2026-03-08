@@ -1,6 +1,7 @@
 <script lang="ts">
   import { i18n } from '../lib/i18n.svelte';
   import QRPlaceholder from './QRPlaceholder.svelte';
+  import LoginForm from './LoginForm.svelte';
 
   type Tab = 'app' | 'password';
 
@@ -39,17 +40,7 @@
         <QRPlaceholder />
       </div>
     {:else}
-      <div class="space-y-6">
-        <!-- Placeholder for LoginForm component (implemented in Phase 5) -->
-        <div class="animate-pulse space-y-4">
-          <div class="h-10 bg-singpass-gray-100 rounded w-full"></div>
-          <div class="h-10 bg-singpass-gray-100 rounded w-full"></div>
-          <div class="h-12 bg-singpass-red/20 rounded w-full"></div>
-        </div>
-        <p class="text-center text-xs text-singpass-gray-400 italic">
-          Login Form Placeholder - Will be implemented in Phase 5
-        </p>
-      </div>
+      <LoginForm />
     {/if}
   </div>
 

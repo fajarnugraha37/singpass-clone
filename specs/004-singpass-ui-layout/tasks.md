@@ -85,10 +85,10 @@
 
 ### Implementation for User Story 3
 
-- [ ] T017 [US3] Create LoginForm Svelte component in `apps/frontend/src/components/LoginForm.svelte`
-- [ ] T018 [P] [US3] Implement NricInput Svelte component with real-time checksum validation in `apps/frontend/src/components/NricInput.svelte`
-- [ ] T019 [P] [US3] Implement PasswordInput Svelte component with show/hide toggle in `apps/frontend/src/components/PasswordInput.svelte`
-- [ ] T020 [US3] Integrate validation errors and "Demo Mode" alert in `apps/frontend/src/components/LoginForm.svelte`
+- [X] T017 [US3] Create LoginForm Svelte component in `apps/frontend/src/components/LoginForm.svelte`
+- [X] T018 [P] [US3] Implement NricInput Svelte component with real-time checksum validation in `apps/frontend/src/components/NricInput.svelte`
+- [X] T019 [P] [US3] Implement PasswordInput Svelte component with show/hide toggle in `apps/frontend/src/components/PasswordInput.svelte`
+- [X] T020 [US3] Integrate validation errors and "Demo Mode" alert in `apps/frontend/src/components/LoginForm.svelte`
 
 **Checkpoint**: All user stories should now be independently functional.
 
