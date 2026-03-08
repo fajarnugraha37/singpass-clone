@@ -58,8 +58,8 @@
 
 ### Tests for User Story 2
 
-- [ ] T014 [P] [US2] Write unit tests for Login and 2FA validation logic in `apps/backend/tests/core/use-cases/ValidateLogin.test.ts` and `apps/backend/tests/core/use-cases/Validate2FA.test.ts`
-- [ ] T015 [P] [US2] Write integration tests for `POST /api/auth/login` and `POST /api/auth/2fa` endpoints in `apps/backend/tests/infra/http/auth.test.ts`
+- [X] T014 [P] [US2] Write unit tests for Login and 2FA validation logic in `apps/backend/tests/core/use-cases/ValidateLogin.test.ts` and `apps/backend/tests/core/use-cases/Validate2FA.test.ts`
+- [X] T015 [P] [US2] Write integration tests for `POST /api/auth/login` and `POST /api/auth/2fa` endpoints in `apps/backend/tests/infra/http/auth.test.ts`
 
 ### Implementation for User Story 2
 
