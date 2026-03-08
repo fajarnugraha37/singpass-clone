@@ -21,6 +21,7 @@
 
 - [X] T004 Setup Auth Session repository interface and SQLite implementation in `apps/backend/src/infra/adapters/db/drizzle_session_repository.ts`
 - [X] T005 Setup Authorization Code repository interface and SQLite implementation in `apps/backend/src/infra/adapters/db/drizzle_authorization_code_repository.ts`
+- [X] T005b Setup PAR repository interface and SQLite implementation in `apps/backend/src/infra/adapters/db/drizzle_par_repository.ts`
 - [X] T006 [P] Add Hono RPC types for Auth routes in `packages/shared/src/contracts/auth.ts` (mapping to `contracts/hono-rpc.md`)
 - [X] T007 [P] Create base backend router for `/auth` and `/api/auth` in `apps/backend/src/infra/http/authRouter.ts`
 
@@ -42,7 +43,7 @@
 ### Implementation for User Story 1
 
 - [X] T010 [P] [US1] Implement `InitiateAuthSession` use case in `apps/backend/src/core/use-cases/InitiateAuthSession.ts` (validates `client_id`, `request_uri`, creates session)
-- [X] T011 [US1] Implement `GET /auth` endpoint handler in `apps/backend/src/infra/http/authRouter.ts` using the use case and setting secure HTTP-only cookie
+- [X] T011 [US1] Implement `GET /auth` endpoint handler in `apps/backend/src/infra/http/authRouter.ts` using the use case, setting secure HTTP-only cookie, and adding strict Zod input validation
 - [X] T012 [US1] Implement error redirect handling for invalid `request_uri` or `client_id` within `GET /auth` in `apps/backend/src/infra/http/authRouter.ts`
 - [X] T013 [P] [US1] Create basic Astro login page UI component at `apps/frontend/src/pages/login.astro`
 
@@ -63,10 +64,10 @@
 
 ### Implementation for User Story 2
 
-- [X] T016 [P] [US2] Implement `ValidateLogin` use case in `apps/backend/src/core/use-cases/ValidateLogin.ts` (validates credentials, generates 6-digit OTP, updates session state)
-- [X] T017 [P] [US2] Implement `Validate2FA` use case in `apps/backend/src/core/use-cases/Validate2FA.ts` (validates OTP against session state)
-- [X] T018 [US2] Implement `POST /api/auth/login` RPC endpoint in `apps/backend/src/infra/http/authRouter.ts`
-- [X] T019 [US2] Implement `POST /api/auth/2fa` RPC endpoint in `apps/backend/src/infra/http/authRouter.ts`
+- [X] T016 [P] [US2] Implement `ValidateLogin` use case in `apps/backend/src/core/use-cases/ValidateLogin.ts` (validates credentials, checks session expiration against PAR expires_in, generates 6-digit OTP, updates session state)
+- [X] T017 [P] [US2] Implement `Validate2FA` use case in `apps/backend/src/core/use-cases/Validate2FA.ts` (validates OTP against session state and enforces session expiration)
+- [X] T018 [US2] Implement `POST /api/auth/login` RPC endpoint in `apps/backend/src/infra/http/authRouter.ts` with strict Zod input validation schema
+- [X] T019 [US2] Implement `POST /api/auth/2fa` RPC endpoint in `apps/backend/src/infra/http/authRouter.ts` with strict Zod input validation schema
 - [X] T020 [P] [US2] Create Svelte interactive Login form component `apps/frontend/src/components/LoginForm.svelte` linking to Hono RPC
 - [X] T021 [P] [US2] Create Svelte interactive 2FA form component `apps/frontend/src/components/TwoFactorForm.svelte` linking to Hono RPC
 - [X] T022 [US2] Integrate `LoginForm.svelte` and `TwoFactorForm.svelte` into `apps/frontend/src/pages/login.astro` with client-side state transitions
@@ -101,7 +102,7 @@
 **Purpose**: Improvements that affect multiple user stories
 
 - [X] T028 [P] Add generic error page UI at `apps/frontend/src/pages/error.astro` for invalid `request_uri` / `client_id` redirects.
-- [X] T029 Add logging of the simulated 6-digit OTP to the backend console for local development testing.
+- [X] T029 Add logging of the simulated 6-digit OTP to the backend console for local development testing (must be strictly gated by NODE_ENV !== 'production' to prevent logging secrets).
 - [X] T030 Ensure strict OIDC error parameters (`error`, `error_description`, `state`) are correctly appended on session expiry or invalid requests in backend handlers.
 - [X] T031 Run quickstart.md validation to ensure end-to-end flow works locally.
 

@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+export const initiateAuthRequestSchema = z.object({
+  client_id: z.string().min(1, 'client_id is required'),
+  request_uri: z.string().min(1, 'request_uri is required'),
+});
+
 export const loginRequestSchema = z.object({
   username: z.string().min(1, 'Username is required'),
   password: z.string().min(1, 'Password is required'),
@@ -35,3 +40,4 @@ export type LoginRequest = z.infer<typeof loginRequestSchema>;
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
 export type TwoFactorRequest = z.infer<typeof twoFactorRequestSchema>;
 export type TwoFactorResponse = z.infer<typeof twoFactorResponseSchema>;
+export type InitiateAuthRequest = z.infer<typeof initiateAuthRequestSchema>;

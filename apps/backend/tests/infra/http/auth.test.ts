@@ -57,14 +57,16 @@ describe('Auth Endpoints', () => {
       expect(res.headers.get('Set-Cookie')).toContain('HttpOnly');
     });
 
-    test('should return 400 if client_id is missing', async () => {
+    test('should redirect to error page if client_id is missing', async () => {
       const res = await app.request('/auth?request_uri=urn:ietf:params:oauth:request_uri:valid');
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(302);
+      expect(res.headers.get('Location')).toContain('/error?error=invalid_request');
     });
 
-    test('should return 400 if request_uri is missing', async () => {
+    test('should redirect to error page if request_uri is missing', async () => {
       const res = await app.request('/auth?client_id=mock-client');
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(302);
+      expect(res.headers.get('Location')).toContain('/error?error=invalid_request');
     });
 
     test('should return redirect to error page if use case fails (invalid/expired URI)', async () => {

@@ -2,7 +2,8 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { 
   loginRequestSchema, 
-  twoFactorRequestSchema 
+  twoFactorRequestSchema,
+  initiateAuthRequestSchema
 } from '../../../../../packages/shared/src/contracts/auth';
 import { InitiateAuthSessionUseCase } from '../../core/use-cases/InitiateAuthSession';
 import { ValidateLoginUseCase } from '../../core/use-cases/ValidateLogin';
@@ -19,7 +20,19 @@ export const createAuthRouter = (
 ) => {
   const authRouter = new Hono()
     // OIDC Initiation Endpoint (mounted at /auth)
-    .get('/', authController.initiateAuth(initiateAuthUseCase))
+    .get(
+      '/',
+      zValidator('query', initiateAuthRequestSchema, (result, c) => {
+        if (!result.success) {
+          const frontendUrl = process.env.PUBLIC_FRONTEND_URL || 'http://localhost:4321';
+          const errorUrl = new URL(`${frontendUrl}/error`);
+          errorUrl.searchParams.set('error', 'invalid_request');
+          errorUrl.searchParams.set('error_description', 'Missing or invalid client_id or request_uri');
+          return c.redirect(errorUrl.toString());
+        }
+      }),
+      authController.initiateAuth(initiateAuthUseCase)
+    )
 
     // RPC API: Primary Login (mounted at /api/auth/login)
     .post('/login', zValidator('json', loginRequestSchema), authController.login(validateLoginUseCase))

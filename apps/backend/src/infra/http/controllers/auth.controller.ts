@@ -7,12 +7,8 @@ import { Validate2FAUseCase } from '../../../core/use-cases/Validate2FA';
 export const initiateAuth = (useCase: InitiateAuthSessionUseCase) => {
   return async (c: Context) => {
     try {
-      const clientId = c.req.query('client_id');
-      const requestUri = c.req.query('request_uri');
-
-      if (!clientId || !requestUri) {
-        return c.text('Missing client_id or request_uri', 400);
-      }
+      const clientId = c.req.query('client_id') as string;
+      const requestUri = c.req.query('request_uri') as string;
 
       const result = await useCase.execute({ clientId, requestUri });
 

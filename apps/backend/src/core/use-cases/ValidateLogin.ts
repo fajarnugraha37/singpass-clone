@@ -60,7 +60,9 @@ export class ValidateLoginUseCase {
     await this.authSessionRepository.update(session);
 
     // 5. Log for dev purposes (as per research.md)
-    console.info(`[2FA] Generated OTP for ${username}: ${otpCode}`);
+    if (process.env.NODE_ENV !== 'production') {
+      console.info(`[2FA] Generated OTP for ${username}: ${otpCode}`);
+    }
 
     await this.auditService.logEvent({
       type: 'LOGIN_SUCCESS',

@@ -68,6 +68,11 @@ As an authenticated user, I want to be redirected back to the relying party appl
 
 ### Edge Cases
 
+- **Invalid/Unparseable request_uri**: Display a generic error page hosted on the Astro frontend (e.g., "Invalid Request") instead of redirecting back.
+- **Expired session/request_uri**: Redirect to `redirect_uri` with OIDC error parameters (e.g., `error=access_denied&error_description=session_expired`).
+- **Concurrent login attempts**: Terminate the old session and start a new one (Last-writer wins).
+- **Unexpected server errors (RPC)**: Use a standard OIDC error code (e.g. 'server_error' or 'access_denied') in the redirect parameters.
+- **Invalid redirect_uri**: Display a generic "Invalid Request" error page hosted on the Astro frontend.
 
 ## Requirements *(mandatory)*
 
