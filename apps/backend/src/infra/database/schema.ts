@@ -64,3 +64,28 @@ export const securityAuditLog = sqliteTable('security_audit_log', {
   ipAddress: text('ip_address'),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 });
+
+export const authSessions = sqliteTable('auth_sessions', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  parRequestUri: text('par_request_uri').notNull(),
+  clientId: text('client_id').notNull(),
+  userId: text('user_id'),
+  status: text('status').notNull(),
+  otpCode: text('otp_code'),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+});
+
+export const authorizationCodes = sqliteTable('authorization_codes', {
+  code: text('code').primaryKey(),
+  userId: text('user_id').notNull(),
+  clientId: text('client_id').notNull(),
+  codeChallenge: text('code_challenge').notNull(),
+  dpopJkt: text('dpop_jkt').notNull(),
+  nonce: text('nonce'),
+  redirectUri: text('redirect_uri').notNull(),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  used: integer('used', { mode: 'boolean' }).default(false).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+});

@@ -9,9 +9,9 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create `Auth Session` entity and Drizzle migration in `apps/backend/src/core/domain/session.ts` and `apps/backend/drizzle/schema.ts`
-- [ ] T002 Create `Authorization Code` entity and Drizzle migration in `apps/backend/src/core/domain/authorizationCode.ts` and `apps/backend/drizzle/schema.ts`
-- [ ] T003 Generate and run Drizzle migrations for the new entities in `apps/backend`
+- [X] T001 Create `Auth Session` entity and Drizzle migration in `apps/backend/src/core/domain/session.ts` and `apps/backend/src/infra/database/schema.ts`
+- [X] T002 Create `Authorization Code` entity and Drizzle migration in `apps/backend/src/core/domain/authorizationCode.ts` and `apps/backend/src/infra/database/schema.ts`
+- [X] T003 Generate and run Drizzle migrations for the new entities in `apps/backend`
 
 ---
 
