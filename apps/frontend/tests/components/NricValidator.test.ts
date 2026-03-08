@@ -28,7 +28,7 @@ describe("NRIC/FIN Comprehensive Validation", () => {
 
   test("M-series (Foreigners from 2022 onwards)", () => {
     expect(validateNric("M1234567K")).toBe(true);
-    expect(validateNric("M0123456N")).toBe(true);
+    expect(validateNric("M0123456T")).toBe(true);
     expect(validateNric("M1234567A")).toBe(false);
   });
 
