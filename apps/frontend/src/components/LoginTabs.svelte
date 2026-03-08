@@ -46,8 +46,8 @@
 
   <!-- Bottom link -->
   <div class="px-6 py-4 bg-singpass-light/30 border-t border-singpass-gray-100 text-center">
-    <a href="#" class="text-xs text-singpass-red font-medium hover:underline transition-all">
-      Retrieve Singpass ID or Reset Password
+    <a href="javascript:void(0)" class="text-xs text-singpass-red font-medium hover:underline transition-all">
+      {i18n.t('login.form.reset')}
     </a>
   </div>
 </div>

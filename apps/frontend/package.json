@@ -11,6 +11,7 @@
     "test": "bun test"
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.6",
     "@astrojs/svelte": "latest",
     "@astrojs/tailwind": "latest",
     "@tailwindcss/vite": "^4.2.1",
@@ -19,6 +20,7 @@
     "hono": "latest",
     "sass": "^1.97.3",
     "svelte": "latest",
-    "tailwindcss": "^4.2.1"
+    "tailwindcss": "^4.2.1",
+    "typescript": "^5.9.3"
   }
 }

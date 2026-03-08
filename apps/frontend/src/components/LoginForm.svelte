@@ -25,7 +25,7 @@
       return;
     }
 
-    alert('Demo Mode: No backend connected. In a real application, this would authenticate with Singpass.');
+    alert(i18n.t('login.demo.alert'));
   }
 
   function handleNricChange(val: string) {
@@ -63,7 +63,7 @@
       class="h-4 w-4 text-singpass-red border-singpass-gray-300 rounded focus:ring-singpass-red/20 transition-all cursor-pointer"
     />
     <label for="remember-me" class="ml-2 block text-sm text-singpass-gray-500 cursor-pointer select-none">
-      Remember Singpass ID
+      {i18n.t('login.form.remember')}
     </label>
   </div>
 

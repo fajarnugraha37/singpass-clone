@@ -102,9 +102,9 @@
 
 ### Implementation for User Story 4
 
-- [ ] T021 [US4] Create LanguageSwitcher Svelte component in `apps/frontend/src/components/LanguageSwitcher.svelte`
-- [ ] T022 [US4] Map all UI strings in components to i18n store keys in `apps/frontend/src/lib/i18n.svelte.ts`
-- [ ] T023 [US4] Integrate LanguageSwitcher into Header in `apps/frontend/src/components/Header.astro`
+- [X] T021 [US4] Create LanguageSwitcher Svelte component in `apps/frontend/src/components/LanguageSwitcher.svelte`
+- [X] T022 [US4] Map all UI strings in components to i18n store keys in `apps/frontend/src/lib/i18n.svelte.ts`
+- [X] T023 [US4] Integrate LanguageSwitcher into Header in `apps/frontend/src/components/Header.svelte`
 
 **Checkpoint**: Interface fully localized and switchable across all 4 languages.
 
