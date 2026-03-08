@@ -28,7 +28,7 @@ export class ValidateLoginUseCase {
 
     if (!session || session.expiresAt < now) {
       await this.auditService.logEvent({
-        eventType: 'LOGIN_FAILURE',
+        type: 'LOGIN_FAILURE',
         severity: 'WARN',
         details: { reason: 'Session not found or expired', sessionId, username },
       });
@@ -41,7 +41,7 @@ export class ValidateLoginUseCase {
 
     if (!isValid) {
       await this.auditService.logEvent({
-        eventType: 'LOGIN_FAILURE',
+        type: 'LOGIN_FAILURE',
         severity: 'WARN',
         details: { reason: 'Invalid credentials', sessionId, username },
       });
@@ -63,7 +63,7 @@ export class ValidateLoginUseCase {
     console.info(`[2FA] Generated OTP for ${username}: ${otpCode}`);
 
     await this.auditService.logEvent({
-      eventType: 'LOGIN_SUCCESS',
+      type: 'LOGIN_SUCCESS',
       severity: 'INFO',
       details: { sessionId, username, nextStep: '2fa' },
     });

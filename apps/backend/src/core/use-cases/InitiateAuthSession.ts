@@ -26,7 +26,7 @@ export class InitiateAuthSessionUseCase {
     const parRequest = await this.parRepository.getByRequestUri(requestUri);
     if (!parRequest) {
       await this.auditService.logEvent({
-        eventType: 'AUTH_INITIATION_FAILURE',
+        type: 'AUTH_INITIATION_FAILURE',
         severity: 'WARN',
         details: { reason: 'Invalid or expired request_uri', requestUri, clientId },
       });
@@ -36,7 +36,7 @@ export class InitiateAuthSessionUseCase {
     // 2. Validate client_id matches
     if (parRequest.clientId !== clientId) {
       await this.auditService.logEvent({
-        eventType: 'AUTH_INITIATION_FAILURE',
+        type: 'AUTH_INITIATION_FAILURE',
         severity: 'WARN',
         details: { reason: 'client_id mismatch', requestUri, clientId, parClientId: parRequest.clientId },
       });
@@ -60,7 +60,7 @@ export class InitiateAuthSessionUseCase {
     await this.authSessionRepository.save(session);
 
     await this.auditService.logEvent({
-      eventType: 'AUTH_INITIATION_SUCCESS',
+      type: 'AUTH_INITIATION_SUCCESS',
       severity: 'INFO',
       details: { sessionId, clientId, requestUri },
     });

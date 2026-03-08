@@ -100,10 +100,10 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T028 [P] Add generic error page UI at `apps/frontend/src/pages/error.astro` for invalid `request_uri` / `client_id` redirects.
-- [ ] T029 Add logging of the simulated 6-digit OTP to the backend console for local development testing.
-- [ ] T030 Ensure strict OIDC error parameters (`error`, `error_description`, `state`) are correctly appended on session expiry or invalid requests in backend handlers.
-- [ ] T031 Run quickstart.md validation to ensure end-to-end flow works locally.
+- [X] T028 [P] Add generic error page UI at `apps/frontend/src/pages/error.astro` for invalid `request_uri` / `client_id` redirects.
+- [X] T029 Add logging of the simulated 6-digit OTP to the backend console for local development testing.
+- [X] T030 Ensure strict OIDC error parameters (`error`, `error_description`, `state`) are correctly appended on session expiry or invalid requests in backend handlers.
+- [X] T031 Run quickstart.md validation to ensure end-to-end flow works locally.
 
 ---
 

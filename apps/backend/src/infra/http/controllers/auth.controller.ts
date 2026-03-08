@@ -28,7 +28,13 @@ export const initiateAuth = (useCase: InitiateAuthSessionUseCase) => {
       return c.redirect(result.redirectUri);
     } catch (error: any) {
       console.error('[Auth Initiation] Error:', error);
-      return c.text(`Invalid request: ${error.message}`, 400);
+      
+      const frontendUrl = process.env.PUBLIC_FRONTEND_URL || 'http://localhost:4321';
+      const errorUrl = new URL(`${frontendUrl}/error`);
+      errorUrl.searchParams.set('error', 'invalid_request');
+      errorUrl.searchParams.set('error_description', error.message);
+      
+      return c.redirect(errorUrl.toString());
     }
   };
 };

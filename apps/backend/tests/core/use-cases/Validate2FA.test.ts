@@ -2,10 +2,12 @@ import { expect, test, describe, beforeEach } from 'bun:test'
 import { Validate2FAUseCase } from '../../../src/core/use-cases/Validate2FA'
 import type { AuthSessionRepository } from '../../../src/core/domain/session'
 import type { SecurityAuditService } from '../../../src/core/domain/audit_service'
+import type { GenerateAuthCodeUseCase } from '../../../src/core/use-cases/GenerateAuthCode'
 
 describe('Validate2FAUseCase', () => {
   let mockAuthSessionRepository: AuthSessionRepository;
   let mockAuditService: SecurityAuditService;
+  let mockGenerateAuthCodeUseCase: GenerateAuthCodeUseCase;
   let useCase: Validate2FAUseCase;
 
   beforeEach(() => {
@@ -31,9 +33,17 @@ describe('Validate2FAUseCase', () => {
       logEvent: async () => {},
     } as any;
 
+    mockGenerateAuthCodeUseCase = {
+      execute: async () => ({
+        code: 'mock-code',
+        redirectUri: 'https://client.example.com/cb?code=mock-code',
+      }),
+    } as any;
+
     useCase = new Validate2FAUseCase(
       mockAuthSessionRepository,
-      mockAuditService
+      mockAuditService,
+      mockGenerateAuthCodeUseCase
     );
   });
 
@@ -44,6 +54,7 @@ describe('Validate2FAUseCase', () => {
     });
 
     expect(result).toHaveProperty('success', true);
+    expect(result).toHaveProperty('redirect_uri');
   });
 
   test('should fail for invalid OTP', async () => {

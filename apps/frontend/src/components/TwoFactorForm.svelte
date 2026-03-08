@@ -1,9 +1,9 @@
 <script lang="ts">
   import { client } from '../lib/rpc';
 
-  let otp = '';
-  let error = '';
-  let isLoading = false;
+  let otp = $state('');
+  let error = $state('');
+  let isLoading = $state(false);
 
   async function handleSubmit(event: Event) {
     event.preventDefault();
@@ -11,8 +11,8 @@
     isLoading = true;
 
     try {
-      // POST /api/auth/api/2fa
-      const res = await client.api.auth.api['2fa'].$post({
+      // POST /api/auth/2fa
+      const res = await client.api.auth['2fa'].$post({
         json: { otp }
       });
 
@@ -33,7 +33,7 @@
   }
 </script>
 
-<form on:submit={handleSubmit} class="space-y-6">
+<form onsubmit={handleSubmit} class="space-y-6">
   <div class="text-center">
     <p class="text-sm text-gray-600 mb-6">
       Enter the 6-digit OTP sent to your registered mobile number.

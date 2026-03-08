@@ -35,15 +35,18 @@ const authRouter = createAuthRouter(
 const api = new Hono()
   .get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
   .post('/par', registerPar(registerParUseCase))
-  // API: Auth RPC Endpoints
+  // API: Auth RPC Endpoints (mounted at /api/auth)
   .route('/auth', authRouter);
 
 const app = new Hono()
   // Public OIDC Endpoints at Root
   .get('/.well-known/openid-configuration', getDiscoveryDocument)
   .get('/.well-known/keys', getJWKS(cryptoService))
-  // Auth Initiation (Redirects to Login UI)
-  .route('/', authRouter)
+
+  // Auth Initiation (mounted at /auth)
+  .route('/auth', authRouter)
+
+  // API Routes
   .route('/api', api);
 
 // Periodic cleanup of expired FAPI records (every 10 minutes)
@@ -68,5 +71,4 @@ const shutdown = () => {
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
 
-export type AppType = typeof app;
-export default app;
+export default app

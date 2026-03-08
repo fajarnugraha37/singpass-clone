@@ -29,7 +29,7 @@ export class Validate2FAUseCase {
 
     if (!session || session.expiresAt < now) {
       await this.auditService.logEvent({
-        eventType: '2FA_FAILURE',
+        type: '2FA_FAILURE',
         severity: 'WARN',
         details: { reason: 'Session not found or expired', sessionId },
       });
@@ -39,7 +39,7 @@ export class Validate2FAUseCase {
     // 2. Validate session status
     if (session.status !== 'PRIMARY_AUTH_SUCCESS' && session.status !== '2FA_PENDING') {
        await this.auditService.logEvent({
-        eventType: '2FA_FAILURE',
+        type: '2FA_FAILURE',
         severity: 'WARN',
         details: { reason: 'Invalid session state for 2FA', sessionId, status: session.status },
       });
@@ -55,7 +55,7 @@ export class Validate2FAUseCase {
       }
 
       await this.auditService.logEvent({
-        eventType: '2FA_FAILURE',
+        type: '2FA_FAILURE',
         severity: 'WARN',
         details: { reason: 'Invalid OTP', sessionId, userId: session.userId },
       });
@@ -68,7 +68,7 @@ export class Validate2FAUseCase {
     await this.authSessionRepository.update(session);
 
     await this.auditService.logEvent({
-      eventType: '2FA_SUCCESS',
+      type: '2FA_SUCCESS',
       severity: 'INFO',
       details: { sessionId, userId: session.userId },
     });

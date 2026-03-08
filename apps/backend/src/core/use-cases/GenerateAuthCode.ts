@@ -29,7 +29,7 @@ export class GenerateAuthCodeUseCase {
 
     if (!session || session.expiresAt < now) {
        await this.auditService.logEvent({
-        eventType: 'AUTH_CODE_GENERATION_FAILURE',
+        type: 'AUTH_CODE_GENERATION_FAILURE',
         severity: 'WARN',
         details: { reason: 'Session not found or expired', sessionId },
       });
@@ -38,7 +38,7 @@ export class GenerateAuthCodeUseCase {
 
     if (session.status !== 'COMPLETED') {
        await this.auditService.logEvent({
-        eventType: 'AUTH_CODE_GENERATION_FAILURE',
+        type: 'AUTH_CODE_GENERATION_FAILURE',
         severity: 'WARN',
         details: { reason: 'Authentication not completed', sessionId, status: session.status },
       });
@@ -80,7 +80,7 @@ export class GenerateAuthCodeUseCase {
     }
 
     await this.auditService.logEvent({
-      eventType: 'AUTH_CODE_GENERATED',
+      type: 'AUTH_CODE_GENERATED',
       severity: 'INFO',
       details: { sessionId, userId: session.userId, clientId: session.clientId },
     });

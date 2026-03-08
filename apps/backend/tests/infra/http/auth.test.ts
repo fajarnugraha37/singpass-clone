@@ -1,24 +1,53 @@
 import { expect, test, describe, beforeEach, spyOn } from 'bun:test'
 import app from '../../../src/index'
 import { DrizzlePARRepository } from '../../../src/infra/adapters/db/drizzle_par_repository'
+import { DrizzleAuthSessionRepository } from '../../../src/infra/adapters/db/drizzle_session_repository'
+import { DrizzleAuthorizationCodeRepository } from '../../../src/infra/adapters/db/drizzle_authorization_code_repository'
 
 describe('Auth Endpoints', () => {
-  describe('GET /auth', () => {
-    beforeEach(() => {
-      // Mock PAR repository to return a valid request for a specific URI
-      spyOn(DrizzlePARRepository.prototype, 'getByRequestUri').mockImplementation(async (uri: string) => {
-        if (uri === 'urn:ietf:params:oauth:request_uri:valid') {
-          return {
-            clientId: 'mock-client',
-            requestUri: uri,
-            payload: { state: 'test-state' },
-            expiresAt: new Date(Date.now() + 300000),
-          };
-        }
-        return null;
-      });
+  beforeEach(() => {
+    // Mock PAR repository to return a valid request for a specific URI
+    spyOn(DrizzlePARRepository.prototype, 'getByRequestUri').mockImplementation(async (uri: string) => {
+      if (uri === 'urn:ietf:params:oauth:request_uri:valid') {
+        return {
+          clientId: 'mock-client',
+          requestUri: uri,
+          dpopJkt: 'test-jkt',
+          payload: { 
+            state: 'test-state', 
+            code_challenge: 'test-challenge', 
+            redirect_uri: 'https://client.example.com/cb',
+            nonce: 'test-nonce'
+          },
+          expiresAt: new Date(Date.now() + 300000),
+        };
+      }
+      return null;
     });
 
+    // Mock Session repository
+    spyOn(DrizzleAuthSessionRepository.prototype, 'save').mockImplementation(async () => {});
+    spyOn(DrizzleAuthSessionRepository.prototype, 'getById').mockImplementation(async (id: string) => {
+      if (id === 'valid-session-id') {
+        return {
+          id,
+          clientId: 'mock-client',
+          parRequestUri: 'urn:ietf:params:oauth:request_uri:valid',
+          status: 'INITIATED',
+          expiresAt: new Date(Date.now() + 300000),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+      }
+      return null;
+    });
+    spyOn(DrizzleAuthSessionRepository.prototype, 'update').mockImplementation(async () => {});
+
+    // Mock Auth Code repository
+    spyOn(DrizzleAuthorizationCodeRepository.prototype, 'save').mockImplementation(async () => {});
+  });
+
+  describe('GET /auth', () => {
     test('should redirect to /login and set session cookie for valid request', async () => {
       const res = await app.request('/auth?client_id=mock-client&request_uri=urn:ietf:params:oauth:request_uri:valid');
       
@@ -38,17 +67,16 @@ describe('Auth Endpoints', () => {
       expect(res.status).toBe(400);
     });
 
-    test('should return error status if use case fails (invalid/expired URI)', async () => {
+    test('should return redirect to error page if use case fails (invalid/expired URI)', async () => {
       const res = await app.request('/auth?client_id=mock-client&request_uri=urn:ietf:params:oauth:request_uri:invalid');
-      // Status code depends on implementation, but should not be 302/200 success
-      expect(res.status).toBeGreaterThanOrEqual(400);
+      expect(res.status).toBe(302);
+      expect(res.headers.get('Location')).toContain('/error');
+      expect(res.headers.get('Location')).toContain('error=invalid_request');
     });
   });
 
   describe('POST /api/auth/login', () => {
     test('should return 200 and next_step: 2fa for valid credentials', async () => {
-      // Note: We need a valid session cookie for this to work in a real scenario
-      // For now, we are testing the endpoint's existence and basic response
       const res = await app.request('/api/auth/login', {
         method: 'POST',
         headers: {
@@ -61,8 +89,26 @@ describe('Auth Endpoints', () => {
         })
       });
 
-      // The controller currently returns 501 Not Implemented
-      expect(res.status).toBe(501);
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.success).toBe(true);
+      expect(body.next_step).toBe('2fa');
+    });
+
+    test('should return 401 for invalid credentials', async () => {
+      const res = await app.request('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cookie': 'vibe_auth_session=valid-session-id'
+        },
+        body: JSON.stringify({
+          username: 'S1234567A',
+          password: 'wrong-password'
+        })
+      });
+
+      expect(res.status).toBe(401);
     });
 
     test('should return 400 for invalid request body', async () => {
@@ -82,6 +128,31 @@ describe('Auth Endpoints', () => {
 
   describe('POST /api/auth/2fa', () => {
     test('should return 200 and redirect_uri for valid OTP', async () => {
+      let currentStatus = 'PRIMARY_AUTH_SUCCESS';
+      
+      // Mock Session repository with state for this specific test
+      spyOn(DrizzleAuthSessionRepository.prototype, 'getById').mockImplementation(async (id: string) => {
+        if (id === 'valid-session-id') {
+          return {
+            id,
+            clientId: 'mock-client',
+            parRequestUri: 'urn:ietf:params:oauth:request_uri:valid',
+            status: currentStatus as any,
+            otpCode: '123456',
+            expiresAt: new Date(Date.now() + 300000),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
+        }
+        return null;
+      });
+
+      spyOn(DrizzleAuthSessionRepository.prototype, 'update').mockImplementation(async (session: any) => {
+        if (session.id === 'valid-session-id') {
+          currentStatus = session.status;
+        }
+      });
+
       const res = await app.request('/api/auth/2fa', {
         method: 'POST',
         headers: {
@@ -93,31 +164,10 @@ describe('Auth Endpoints', () => {
         })
       });
 
-      // Initially 501 until implemented in US3
-      expect(res.status).toBe(501);
-    });
-
-    test('should return 200 with redirect_uri containing code and state on success', async () => {
-      // Integration test for final OIDC redirect
-      // This will be fully functional once US3 is complete
-      const res = await app.request('/api/auth/2fa', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Cookie': 'vibe_auth_session=valid-session-id'
-        },
-        body: JSON.stringify({
-          otp: '123456'
-        })
-      });
-
-      // Placeholder test until US3 is complete
-      if (res.status === 200) {
-        const body = await res.json();
-        expect(body.success).toBe(true);
-        expect(body.redirect_uri).toContain('code=');
-        expect(body.redirect_uri).toContain('state=');
-      }
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.success).toBe(true);
+      expect(body.redirect_uri).toBeDefined();
     });
 
     test('should return 400 for invalid OTP format', async () => {

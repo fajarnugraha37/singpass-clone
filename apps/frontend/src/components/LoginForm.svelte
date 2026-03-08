@@ -1,22 +1,30 @@
 <script lang="ts">
   import { client } from '../lib/rpc';
+  import NricInput from './NricInput.svelte';
+  import PasswordInput from './PasswordInput.svelte';
 
-  let username = '';
-  let password = '';
-  let error = '';
-  let isLoading = false;
+  let username = $state('');
+  let password = $state('');
+  let error = $state('');
+  let isLoading = $state(false);
+  let isNricValid = $state(false);
 
-  export let onSuccess: () => void;
+  interface Props {
+    onSuccess: () => void;
+  }
+
+  let { onSuccess }: Props = $props();
 
   async function handleSubmit(event: Event) {
     event.preventDefault();
+    if (!isNricValid) return;
+    
     error = '';
     isLoading = true;
 
     try {
-      // POST /api/auth/api/login (using the router structure)
-      // Note: Hono RPC client paths follow the app.route structure
-      const res = await client.api.auth.api.login.$post({
+      // POST /api/auth/login
+      const res = await client.api.auth.login.$post({
         json: { username, password }
       });
 
@@ -36,46 +44,28 @@
   }
 </script>
 
-<form on:submit={handleSubmit} class="space-y-6">
+<form onsubmit={handleSubmit} class="space-y-6">
   {#if error}
     <div class="p-3 bg-red-50 border border-red-200 text-red-600 text-sm">
       {error}
     </div>
   {/if}
 
-  <div>
-    <label for="username" class="block text-sm font-medium text-gray-700">Singpass ID (NRIC)</label>
-    <div class="mt-1">
-      <input
-        id="username"
-        name="username"
-        type="text"
-        required
-        bind:value={username}
-        class="appearance-none block w-full px-3 py-2 border border-gray-300 shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
-        placeholder="e.g. S1234567A"
-      />
-    </div>
-  </div>
+  <NricInput 
+    bind:value={username} 
+    onchange={(val) => username = val}
+    onvaliditychange={(isValid) => isNricValid = isValid}
+  />
 
-  <div>
-    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-    <div class="mt-1">
-      <input
-        id="password"
-        name="password"
-        type="password"
-        required
-        bind:value={password}
-        class="appearance-none block w-full px-3 py-2 border border-gray-300 shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
-      />
-    </div>
-  </div>
+  <PasswordInput 
+    bind:value={password} 
+    onchange={(val) => password = val}
+  />
 
   <div>
     <button
       type="submit"
-      disabled={isLoading}
+      disabled={isLoading || !isNricValid || !password}
       class="w-full flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
     >
       {isLoading ? 'Logging in...' : 'Log in'}

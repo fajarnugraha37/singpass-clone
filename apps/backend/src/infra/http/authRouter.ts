@@ -18,12 +18,14 @@ export const createAuthRouter = (
   validate2FAUseCase: Validate2FAUseCase
 ) => {
   const authRouter = new Hono()
-    // OIDC Initiation Endpoint
+    // OIDC Initiation Endpoint (mounted at /auth)
     .get('/', authController.initiateAuth(initiateAuthUseCase))
-    // RPC API: Primary Login
-    .post('/api/login', zValidator('json', loginRequestSchema), authController.login(validateLoginUseCase))
-    // RPC API: 2FA Verification
-    .post('/api/2fa', zValidator('json', twoFactorRequestSchema), authController.twoFactor(validate2FAUseCase));
+
+    // RPC API: Primary Login (mounted at /api/auth/login)
+    .post('/login', zValidator('json', loginRequestSchema), authController.login(validateLoginUseCase))
+
+    // RPC API: 2FA Verification (mounted at /api/auth/2fa)
+    .post('/2fa', zValidator('json', twoFactorRequestSchema), authController.twoFactor(validate2FAUseCase));
 
   return authRouter;
 };
