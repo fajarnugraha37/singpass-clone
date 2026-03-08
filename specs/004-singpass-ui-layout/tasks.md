@@ -52,10 +52,10 @@
 
 ### Implementation for User Story 1
 
-- [ ] T010 [P] [US1] Create Singpass Logo SVG component in `apps/frontend/src/components/icons/SingpassLogo.svelte`
-- [ ] T011 [US1] Implement responsive Header with Logo and navigation placeholders in `apps/frontend/src/components/Header.astro`
-- [ ] T012 [US1] Implement Footer with official links and copyright in `apps/frontend/src/components/Footer.astro`
-- [ ] T013 [US1] Assemble BaseLayout in `apps/frontend/src/layouts/BaseLayout.astro` and apply to `apps/frontend/src/pages/index.astro`
+- [X] T010 [P] [US1] Create Singpass Logo SVG component in `apps/frontend/src/components/icons/SingpassLogo.svelte`
+- [X] T011 [US1] Implement responsive Header with Logo and navigation placeholders in `apps/frontend/src/components/Header.astro`
+- [X] T012 [US1] Implement Footer with official links and copyright in `apps/frontend/src/components/Footer.astro`
+- [X] T013 [US1] Assemble BaseLayout in `apps/frontend/src/layouts/BaseLayout.astro` and apply to `apps/frontend/src/pages/index.astro`
 
 **Checkpoint**: At this point, User Story 1 should be fully functional, testable independently and the page layout strongly visually resembles Singpass with correct header and footer, though main content is empty.
 
