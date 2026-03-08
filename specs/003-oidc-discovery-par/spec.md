@@ -58,6 +58,7 @@ Client applications need a secure way to pre-register their authorization reques
 - **FR-003**: The system MUST expose a secure endpoint for pre-registering authorization requests.
 - **FR-004**: The system MUST strictly validate the client's identity using secure assertions before accepting a pre-registration request.
 - **FR-010**: The system MUST implement jti (JWT ID) replay protection by storing consumed JWT IDs for 24 hours in SQLite.
+- **FR-012**: The system MUST implement DPoP-Nonce protection, returning a nonce in the PAR response and validating its freshness in subsequent requests.
 - **FR-011**: The system MUST dynamically bind the request_uri to the thumbprint presented in the DPoP header.
 - **FR-005**: The system MUST validate the presence of cryptographic proof-of-possession and interception prevention mechanisms on all authorization requests.
 - **FR-006**: The system MUST temporarily store the pre-registered request details securely, supporting moderate volume with passive cleanup mechanisms (e.g., TTL-based queries or periodic cron).
