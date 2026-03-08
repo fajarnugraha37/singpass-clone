@@ -19,10 +19,10 @@
 
 **Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
-- [ ] T004 Setup Auth Session repository interface and SQLite implementation in `apps/backend/src/infra/db/SessionRepository.ts`
-- [ ] T005 Setup Authorization Code repository interface and SQLite implementation in `apps/backend/src/infra/db/AuthorizationCodeRepository.ts`
-- [ ] T006 [P] Add Hono RPC types for Auth routes in `packages/shared/src/contracts/auth.ts` (mapping to `contracts/hono-rpc.md`)
-- [ ] T007 [P] Create base backend router for `/auth` and `/api/auth` in `apps/backend/src/infra/http/authRouter.ts`
+- [X] T004 Setup Auth Session repository interface and SQLite implementation in `apps/backend/src/infra/adapters/db/drizzle_session_repository.ts`
+- [X] T005 Setup Authorization Code repository interface and SQLite implementation in `apps/backend/src/infra/adapters/db/drizzle_authorization_code_repository.ts`
+- [X] T006 [P] Add Hono RPC types for Auth routes in `packages/shared/src/contracts/auth.ts` (mapping to `contracts/hono-rpc.md`)
+- [X] T007 [P] Create base backend router for `/auth` and `/api/auth` in `apps/backend/src/infra/http/authRouter.ts`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 

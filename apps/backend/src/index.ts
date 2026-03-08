@@ -8,6 +8,7 @@ import { JoseCryptoService } from './infra/adapters/jose_crypto'
 import { DrizzleSecurityAuditService } from './infra/adapters/security_logger'
 import { DrizzlePARRepository } from './infra/adapters/db/drizzle_par_repository'
 import { RegisterParUseCase } from './core/use-cases/register-par'
+import { authRouter } from './infra/http/authRouter'
 
 const auditService = new DrizzleSecurityAuditService();
 const cryptoService = new JoseCryptoService(auditService);
@@ -20,10 +21,16 @@ const app = new Hono()
 app.get('/.well-known/openid-configuration', getDiscoveryDocument)
 app.get('/.well-known/keys', getJWKS(cryptoService))
 
+// Auth Initiation (Redirects to Login UI)
+app.route('/', authRouter)
+
 // API Routes
 const api = new Hono()
 api.get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
 api.post('/par', registerPar(registerParUseCase))
+
+// API: Auth RPC Endpoints
+api.route('/auth', authRouter)
 
 app.route('/api', api)
 
