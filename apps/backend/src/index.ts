@@ -1,14 +1,37 @@
 import { Hono } from 'hono'
 import { cleanupExpiredRecords } from './infra/database/cleanup'
 import { Cron } from 'croner'
+import { getDiscoveryDocument } from './infra/http/controllers/discovery.controller'
+import { getJWKS } from './infra/http/controllers/jwks.controller'
+import { registerPar } from './infra/http/controllers/par.controller'
+import { JoseCryptoService } from './infra/adapters/jose_crypto'
+import { DrizzleSecurityAuditService } from './infra/adapters/security_logger'
+import { DrizzlePARRepository } from './infra/adapters/db/drizzle_par_repository'
+import { RegisterParUseCase } from './core/use-cases/register-par'
 
-const app = new Hono().basePath('/api')
+const auditService = new DrizzleSecurityAuditService();
+const cryptoService = new JoseCryptoService(auditService);
+const parRepository = new DrizzlePARRepository();
+const registerParUseCase = new RegisterParUseCase(cryptoService, parRepository, auditService);
+
+const app = new Hono()
+
+// Public OIDC Endpoints at Root
+app.get('/.well-known/openid-configuration', getDiscoveryDocument)
+app.get('/.well-known/keys', getJWKS(cryptoService))
+
+// API Routes
+const api = new Hono()
+api.get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
+api.post('/par', registerPar(registerParUseCase))
+
+app.route('/api', api)
 
 // Periodic cleanup of expired FAPI records (every 10 minutes)
 const cleanupJob = new Cron('*/10 * * * *', async () => {
   try {
     const stats = await cleanupExpiredRecords();
-    if (stats.parCleaned > 0 || stats.authCodesCleaned > 0 || stats.sessionsCleaned > 0) {
+    if (stats.parCleaned > 0 || stats.authCodesCleaned > 0 || stats.sessionsCleaned > 0 || stats.jtisCleaned > 0) {
       console.info(`[Cleanup] Purged expired records:`, stats);
     }
   } catch (error) {
@@ -26,8 +49,4 @@ const shutdown = () => {
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
 
-const routes = app
-  .get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
-
-export type AppType = typeof routes
 export default app

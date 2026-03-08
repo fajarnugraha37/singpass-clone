@@ -41,6 +41,7 @@ describe("DrizzleAuthDataService - PAR Lifecycle", () => {
     // Manually insert an expired PAR
     const [inserted] = await db.insert(parRequests).values({
       requestUri: 'urn:ietf:params:oauth:request_uri:expired',
+      clientId: validPARPayload.client_id,
       payload: validPARPayload,
       expiresAt: new Date(Date.now() - 1000), // Expired 1s ago
     }).returning();

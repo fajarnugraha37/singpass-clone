@@ -27,13 +27,25 @@ export interface CryptoService {
 
   /**
    * Validates a DPoP proof JWT.
-   * Checks signature, iat, jti, htm, and htu.
+   * Checks signature, iat, jti, htm, htu, and optionally nonce.
    */
   validateDPoPProof(
     proof: string,
     expectedMethod: string,
-    expectedUrl: string
+    expectedUrl: string,
+    clientId: string,
+    expectedNonce?: string
   ): Promise<{ jkt: string }>;
+
+  /**
+   * Generates a new DPoP-Nonce for a client.
+   */
+  generateDPoPNonce(clientId: string): Promise<string>;
+
+  /**
+   * Validates a DPoP-Nonce.
+   */
+  validateDPoPNonce(nonce: string, clientId: string): Promise<boolean>;
 
   /**
    * Generates the public JWKS (JSON Web Key Set) for the server.

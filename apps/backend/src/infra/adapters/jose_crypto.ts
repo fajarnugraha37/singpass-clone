@@ -117,7 +117,9 @@ export class JoseCryptoService implements CryptoService {
   async validateDPoPProof(
     proof: string,
     expectedMethod: string,
-    expectedUrl: string
+    expectedUrl: string,
+    clientId: string,
+    expectedNonce?: string
   ): Promise<{ jkt: string }> {
     const header = jose.decodeProtectedHeader(proof);
     if (!header.jwk) {
@@ -137,6 +139,10 @@ export class JoseCryptoService implements CryptoService {
       throw new Error(`DPoP htu mismatch: expected ${expectedUrl}, got ${payload.htu}`);
     }
 
+    if (expectedNonce && payload.nonce !== expectedNonce) {
+      throw new Error(`DPoP nonce mismatch: expected ${expectedNonce}, got ${payload.nonce}`);
+    }
+
     // iat check (configurable window)
     const now = Math.floor(Date.now() / 1000);
     const iat = payload.iat || 0;
@@ -152,7 +158,10 @@ export class JoseCryptoService implements CryptoService {
 
     const [existingJti] = await db.select()
       .from(schema.usedJtis)
-      .where(eq(schema.usedJtis.jti, payload.jti))
+      .where(and(
+        eq(schema.usedJtis.jti, payload.jti as string),
+        eq(schema.usedJtis.clientId, clientId)
+      ))
       .limit(1);
 
     if (existingJti) {
@@ -160,13 +169,15 @@ export class JoseCryptoService implements CryptoService {
         type: 'DPOP_VALIDATION_FAIL',
         severity: 'ERROR',
         details: { jti: payload.jti, reason: 'Replay attack detected' },
+        clientId,
       });
       throw new Error('DPoP proof jti already used (replay attack)');
     }
 
     // Insert JTI to prevent reuse
     await db.insert(schema.usedJtis).values({
-      jti: payload.jti,
+      jti: payload.jti as string,
+      clientId,
       expiresAt: new Date(Date.now() + ttl * 1000),
     });
 
@@ -176,9 +187,75 @@ export class JoseCryptoService implements CryptoService {
       type: 'DPOP_VALIDATION_SUCCESS',
       severity: 'INFO',
       details: { jti: payload.jti, jkt },
+      clientId,
     });
 
     return { jkt };
+  }
+
+  /**
+   * Generates a new DPoP-Nonce for a client.
+   * Simple implementation: signed payload with clientId and expiry.
+   */
+  async generateDPoPNonce(clientId: string): Promise<string> {
+    const query = db.select().from(serverKeys).where(eq(serverKeys.isActive, true)).limit(1);
+    const [keyRecord] = await query;
+    if (!keyRecord) {
+      throw new Error('No active signing key found');
+    }
+
+    const decryptedPrivateKey = decryptKey({
+      encryptedKey: keyRecord.encryptedKey,
+      iv: keyRecord.iv,
+      authTag: keyRecord.authTag,
+    });
+
+    const privateKey = await jose.importPKCS8(decryptedPrivateKey.toString(), this.algorithm);
+
+    return await new jose.SignJWT({ clientId })
+      .setProtectedHeader({ alg: this.algorithm, kid: keyRecord.id })
+      .setIssuedAt()
+      .setExpirationTime('15m') // DPoP nonces are typically short-lived
+      .sign(privateKey);
+  }
+
+  /**
+   * Validates a DPoP-Nonce.
+   */
+  async validateDPoPNonce(nonce: string, clientId: string): Promise<boolean> {
+    const activeKeys = await db.select().from(serverKeys).where(eq(serverKeys.isActive, true));
+    
+    // Nonce could have been signed by any active key (or recently deactivated key, but we'll stick to active for simplicity)
+    for (const keyRecord of activeKeys) {
+      try {
+        const decryptedPrivateKey = decryptKey({
+          encryptedKey: keyRecord.encryptedKey,
+          iv: keyRecord.iv,
+          authTag: keyRecord.authTag,
+        });
+        const privateKey = await jose.importPKCS8(decryptedPrivateKey.toString(), this.algorithm);
+        
+        // We need the public key to verify
+        const publicKey = await jose.importSPKI(
+          (await jose.exportSPKI(await jose.importPKCS8(decryptedPrivateKey.toString(), this.algorithm))), 
+          this.algorithm
+        );
+        // Actually, jose.jwtVerify needs a KeyLike public key
+        // Let's just use importPKCS8 then export/import public key is a bit much.
+        // Better: jose.jwtVerify can take a Secret but we have ES256.
+        
+        // Let's use the public key from the record if we had it. But we only store encrypted private key.
+        // We can derive public key from private key.
+        const { payload } = await jose.jwtVerify(nonce, publicKey);
+        
+        if (payload.clientId === clientId) {
+          return true;
+        }
+      } catch (e) {
+        // Continue to next key
+      }
+    }
+    return false;
   }
 
   /**

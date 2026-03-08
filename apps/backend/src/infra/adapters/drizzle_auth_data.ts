@@ -25,6 +25,7 @@ export class DrizzleAuthDataService implements AuthDataService {
     // SQLite auto-increment ID is returned after insert.
     const [inserted] = await db.insert(parRequests).values({
       requestUri: 'PENDING',
+      clientId: validated.client_id,
       payload: validated,
       expiresAt,
     }).returning({ id: parRequests.id });

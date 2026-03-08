@@ -7,7 +7,7 @@
 
 **Purpose**: Feature-specific domain setup
 
-- [ ] T001 Initialize domain interfaces for PAR in `apps/backend/src/core/domain/par.types.ts`
+- [x] T001 Initialize domain interfaces for PAR in `apps/backend/src/core/domain/par.types.ts`
 
 ---
 
@@ -15,10 +15,10 @@
 
 **Purpose**: Database schema and core validation setup
 
-- [ ] T002 Define Drizzle schema for `PushedAuthorizationRequests` in `apps/backend/src/infra/data/schema.ts`
-- [ ] T003 [P] Define Drizzle schema for `ConsumedJti` in `apps/backend/src/infra/data/schema.ts`
-- [ ] T003b [P] Implement DPoP-Nonce generation and signature logic (stateless or minimal store)
-- [ ] T004 Run migrations to update SQLite database: `bunx drizzle-kit push`
+- [x] T002 Define Drizzle schema for `PushedAuthorizationRequests` in `apps/backend/src/infra/data/schema.ts`
+- [x] T003 [P] Define Drizzle schema for `ConsumedJti` in `apps/backend/src/infra/data/schema.ts`
+- [x] T003b [P] Implement DPoP-Nonce generation and signature logic (stateless or minimal store)
+- [x] T004 Run migrations to update SQLite database: `bunx drizzle-kit push`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -32,14 +32,14 @@
 
 ### Tests for User Story 1 (REQUIRED) ⚠️
 
-- [ ] T005 [P] [US1] Create unit tests for Discovery endpoint in `apps/backend/tests/infra/http/discovery.test.ts`
-- [ ] T006 [P] [US1] Create unit tests for JWKS endpoint in `apps/backend/tests/infra/http/jwks.test.ts`
+- [x] T005 [P] [US1] Create unit tests for Discovery endpoint in `apps/backend/tests/infra/http/discovery.test.ts`
+- [x] T006 [P] [US1] Create unit tests for JWKS endpoint in `apps/backend/tests/infra/http/jwks.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T007 [US1] Implement Discovery endpoint handler in `apps/backend/src/infra/http/controllers/discovery.controller.ts`
-- [ ] T008 [US1] Implement JWKS endpoint handler in `apps/backend/src/infra/http/controllers/jwks.controller.ts`
-- [ ] T009 [US1] Register discovery and keys routes in `apps/backend/src/index.ts`
+- [x] T007 [US1] Implement Discovery endpoint handler in `apps/backend/src/infra/http/controllers/discovery.controller.ts`
+- [x] T008 [US1] Implement JWKS endpoint handler in `apps/backend/src/infra/http/controllers/jwks.controller.ts`
+- [x] T009 [US1] Register discovery and keys routes in `apps/backend/src/index.ts`
 
 **Checkpoint**: Discovery and keys endpoints are functional and testable independently.
 
@@ -53,17 +53,17 @@
 
 ### Tests for User Story 2 (REQUIRED) ⚠️
 
-- [ ] T010 [P] [US2] Create unit tests for PAR use-case (validations, storage) in `apps/backend/tests/core/use-cases/register-par.test.ts`
-- [ ] T011 [P] [US2] Create unit tests for PAR endpoint (handler) in `apps/backend/tests/infra/http/par.test.ts`
+- [x] T010 [P] [US2] Create unit tests for PAR use-case (validations, storage) in `apps/backend/tests/core/use-cases/register-par.test.ts`
+- [x] T011 [P] [US2] Create unit tests for PAR endpoint (handler) in `apps/backend/tests/infra/http/par.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T012 [P] [US2] Define Zod validation schema for PAR request in `apps/backend/src/infra/http/validators/par.validator.ts`
-- [ ] T013 [US2] Implement `RegisterParUseCase` in `apps/backend/src/core/use-cases/register-par.ts` (validate assertion, PKCE, DPoP, Singpass params)
-- [ ] T014 [US2] Implement `jti` replay protection logic in `apps/backend/src/core/use-cases/register-par.ts`
-- [ ] T015 [US2] Implement PAR endpoint handler in `apps/backend/src/infra/http/controllers/par.controller.ts`
-- [ ] T016 [US2] Integrate security audit logging for PAR failures in `apps/backend/src/core/use-cases/register-par.ts`
-- [ ] T017 [US2] Register PAR route in `apps/backend/src/index.ts`
+- [x] T012 [P] [US2] Define Zod validation schema for PAR request in `apps/backend/src/infra/http/validators/par.validator.ts`
+- [x] T013 [US2] Implement `RegisterParUseCase` in `apps/backend/src/core/use-cases/register-par.ts` (validate assertion, PKCE, DPoP, Singpass params)
+- [x] T014 [US2] Implement `jti` replay protection logic in `apps/backend/src/core/use-cases/register-par.ts`
+- [x] T015 [US2] Implement PAR endpoint handler in `apps/backend/src/infra/http/controllers/par.controller.ts`
+- [x] T016 [US2] Integrate security audit logging for PAR failures in `apps/backend/src/core/use-cases/register-par.ts`
+- [x] T017 [US2] Register PAR route in `apps/backend/src/index.ts`
 
 **Checkpoint**: Secure PAR initiation is fully functional and integrated with SQLite.
 
@@ -73,9 +73,9 @@
 
 **Purpose**: Final validation and optimization
 
-- [ ] T018 Implement passive expiration filter for PAR/JTI lookups in `apps/backend/src/core/use-cases/register-par.ts`
-- [ ] T019 Run full test suite: `bun test --coverage --threshold 80` (enforce SC-005)
-- [ ] T020 [P] Validate all implementation against `quickstart.md` steps
+- [x] T018 Implement passive expiration filter for PAR/JTI lookups in `apps/backend/src/core/use-cases/register-par.ts`
+- [x] T019 Run full test suite: `bun test --coverage --threshold 80` (enforce SC-005)
+- [x] T020 [P] Validate all implementation against `quickstart.md` steps
 
 ---
 

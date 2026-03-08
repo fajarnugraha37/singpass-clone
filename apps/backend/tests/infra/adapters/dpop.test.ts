@@ -42,7 +42,7 @@ describe("DPoP Binding & Validation (US4)", () => {
       .setIssuedAt()
       .sign(privateKey);
 
-    const result = await cryptoService.validateDPoPProof(proof, "POST", "http://localhost:3000/token");
+    const result = await cryptoService.validateDPoPProof(proof, "POST", "http://localhost:3000/token", "mock-client-id");
     expect(result.jkt).toBeDefined();
     
     const expectedJkt = await jose.calculateJwkThumbprint(jwk);
@@ -63,7 +63,7 @@ describe("DPoP Binding & Validation (US4)", () => {
       .sign(privateKey);
 
     try {
-      await cryptoService.validateDPoPProof(proof, "GET", "http://localhost:3000/token");
+      await cryptoService.validateDPoPProof(proof, "GET", "http://localhost:3000/token", "mock-client-id");
       expect(true).toBe(false);
     } catch (e: any) {
       expect(e.message).toContain("htm mismatch");
@@ -87,12 +87,13 @@ describe("DPoP Binding & Validation (US4)", () => {
     // 1. First time succeeds (mocking the log entry)
     await db.insert(usedJtis).values({
       jti,
+      clientId: "mock-client-id",
       expiresAt: new Date(Date.now() + 60000),
     });
 
     // 2. Second time should fail
     try {
-      await cryptoService.validateDPoPProof(proof, "POST", "http://localhost:3000/token");
+      await cryptoService.validateDPoPProof(proof, "POST", "http://localhost:3000/token", "mock-client-id");
       expect(true).toBe(false);
     } catch (e: any) {
       expect(e.message).toContain("jti already used");

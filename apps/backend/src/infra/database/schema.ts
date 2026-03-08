@@ -21,8 +21,11 @@ export const sessions = sqliteTable('sessions', {
 export const parRequests = sqliteTable('par_requests', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   requestUri: text('request_uri').unique().notNull(),
+  clientId: text('client_id').notNull(),
+  dpopJkt: text('dpop_jkt'),
   payload: text('payload', { mode: 'json' }).notNull(),
   expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 });
 
 export const authCodes = sqliteTable('auth_codes', {
@@ -47,6 +50,7 @@ export const serverKeys = sqliteTable('server_keys', {
 
 export const usedJtis = sqliteTable('used_jtis', {
   jti: text('jti').primaryKey(),
+  clientId: text('client_id').notNull(),
   expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 });
