@@ -1,4 +1,4 @@
-# vibe-auth Project Context
+﻿# vibe-auth Project Context
 
 **Current Feature**: 001-setup-monorepo-infra
 **Tech Stack**:
