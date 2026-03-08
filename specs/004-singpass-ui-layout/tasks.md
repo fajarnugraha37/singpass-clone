@@ -33,12 +33,12 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Define Singpass design tokens and global styles in `apps/frontend/src/assets/styles/global.css`
-- [ ] T006 Create BaseLayout Astro component in `apps/frontend/src/layouts/BaseLayout.astro`
-- [ ] T006b Define shared UI TypeScript interfaces (if needed) in `apps/frontend/src/lib/types.ts`
-- [ ] T007 [P] Create Masthead Astro component in `apps/frontend/src/components/Masthead.astro`
-- [ ] T008 [P] Create Header Astro component in `apps/frontend/src/components/Header.astro`
-- [ ] T009 [P] Create Footer Astro component in `apps/frontend/src/components/Footer.astro`
+- [X] T005 Define Singpass design tokens and global styles in `apps/frontend/src/assets/styles/global.css`
+- [X] T006 Create BaseLayout Astro component in `apps/frontend/src/layouts/BaseLayout.astro`
+- [X] T006b Define shared UI TypeScript interfaces (if needed) in `apps/frontend/src/lib/types.ts`
+- [X] T007 [P] Create Masthead Astro component in `apps/frontend/src/components/Masthead.astro`
+- [X] T008 [P] Create Header Astro component in `apps/frontend/src/components/Header.astro`
+- [X] T009 [P] Create Footer Astro component in `apps/frontend/src/components/Footer.astro`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 

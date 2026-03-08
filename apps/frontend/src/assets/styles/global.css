@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --color-singpass-red: #E31C3D;
+  --color-singpass-dark: #212121;
+  --color-singpass-light: #F9F9F9;
+  --color-singpass-gray-100: #F2F2F2;
+  --color-singpass-gray-200: #E6E6E6;
+  --color-singpass-gray-300: #CCCCCC;
+  --color-singpass-gray-400: #999999;
+  --color-singpass-gray-500: #666666;
+
+  --font-sans: "Inter", "SF Pro Display", "SF Pro Text", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif;
+}
+
+@layer base {
+  html, body {
+    @apply font-sans text-singpass-dark bg-white;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* iOS 12+ Smooth Scrolling */
+  body {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@layer components {
+  .container-singpass {
+    @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
