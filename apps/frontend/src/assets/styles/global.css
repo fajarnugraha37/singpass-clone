@@ -18,11 +18,18 @@
     @apply font-sans text-singpass-dark bg-white;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Prevent font size adjustment after orientation change in iOS */
+    -webkit-text-size-adjust: 100%;
   }
 
   /* iOS 12+ Smooth Scrolling */
   body {
     -webkit-overflow-scrolling: touch;
+  }
+
+  /* Focus rings for accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-singpass-red ring-offset-2;
   }
 }
 
@@ -30,4 +37,22 @@
   .container-singpass {
     @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
   }
+
+  /* iOS 12 Flex Gap Fallback Utility */
+  /* If 'gap' is not supported, we can use this class on flex containers */
+  .flex-gap-fallback {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -0.5rem; /* Adjust based on needed gap */
+  }
+  
+  .flex-gap-fallback > * {
+    margin: 0.5rem;
+  }
+}
+
+/* Fix for background-clip: text in older WebKit (iOS 12) */
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
 }

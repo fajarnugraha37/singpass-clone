@@ -114,11 +114,11 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T024 [P] Ensure iOS 12+ compatibility via Tailwind v4 polyfills and CSS fixes in `apps/frontend/src/assets/styles/global.css`
-- [ ] T025 [P] Add ARIA labels and roles to all interactive components for WCAG compliance
-- [ ] T026 Perform responsive audit and fix mobile layout issues in `apps/frontend/src/assets/styles/global.css`
-- [ ] T027 [P] Create smoke tests for layout and basic interactions in `apps/frontend/tests/smoke.test.ts`
-- [ ] T028 [P] Create component tests for NRIC validation in `apps/frontend/tests/components/NricValidator.test.ts`
+- [X] T024 [P] Ensure iOS 12+ compatibility via Tailwind v4 polyfills and CSS fixes in `apps/frontend/src/assets/styles/global.css`
+- [X] T025 [P] Add ARIA labels and roles to all interactive components for WCAG compliance
+- [X] T026 Perform responsive audit and fix mobile layout issues in `apps/frontend/src/assets/styles/global.css`
+- [X] T027 [P] Create smoke tests for layout and basic interactions in `apps/frontend/tests/smoke.test.ts`
+- [X] T028 [P] Create component tests for NRIC validation in `apps/frontend/tests/components/NricValidator.test.ts`
 
 ---
 

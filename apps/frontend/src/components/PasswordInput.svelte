@@ -40,7 +40,7 @@
       type="button"
       onclick={togglePassword}
       class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-singpass-gray-400 hover:text-singpass-red transition-colors focus:outline-none"
-      aria-label={showPassword ? "Hide password" : "Show password"}
+      aria-label={showPassword ? i18n.t('login.form.password.hide') : i18n.t('login.form.password.show')}
     >
       {#if showPassword}
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

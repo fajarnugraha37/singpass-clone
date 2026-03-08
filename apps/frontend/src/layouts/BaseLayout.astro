@@ -3,6 +3,7 @@ import '../assets/styles/global.css';
 import Masthead from '../components/Masthead.svelte';
 import Header from '../components/Header.svelte';
 import Footer from '../components/Footer.svelte';
+import { i18n } from '../lib/i18n.svelte';
 
 interface Props {
 	title: string;
@@ -13,7 +14,7 @@ const { title, description = "Singpass - Trusted Digital Identity" } = Astro.pro
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={i18n.locale}>
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />

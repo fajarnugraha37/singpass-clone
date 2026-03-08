@@ -30,6 +30,7 @@
       id="menu-button"
       aria-expanded={isOpen}
       aria-haspopup="true"
+      aria-label={i18n.t('header.lang.aria')}
       onclick={toggleDropdown}
     >
       {currentLangLabel}
@@ -53,9 +54,10 @@
             class="flex items-center justify-between w-full text-left px-4 py-2.5 text-xs {i18n.locale === lang.code ? 'bg-singpass-light text-singpass-red font-bold' : 'text-singpass-gray-500 hover:bg-singpass-gray-50 hover:text-singpass-dark'} transition-colors"
             role="menuitem"
             tabindex="-1"
+            aria-current={i18n.locale === lang.code ? 'true' : undefined}
             onclick={() => selectLanguage(lang.code)}
           >
-            <span>{lang.native}</span>
+            <span lang={lang.code}>{lang.native}</span>
             {#if i18n.locale === lang.code}
               <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />

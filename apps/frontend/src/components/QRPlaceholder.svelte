@@ -1,11 +1,12 @@
 <script lang="ts">
-  // Pulse animation for the QR placeholder to simulate waiting state
+  import { i18n } from '../lib/i18n.svelte';
 </script>
 
 <div class="flex flex-col items-center justify-center p-8 bg-white rounded-lg shadow-sm border border-singpass-gray-200">
   <div class="relative">
     <!-- QR Code SVG -->
-    <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-48 h-48 md:w-56 md:h-56">
+    <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-48 h-48 md:w-56 md:h-56" role="img" aria-label={i18n.t('login.qr.title')}>
+      <title>{i18n.t('login.qr.title')}</title>
       <rect width="200" height="200" rx="8" fill="#F2F2F2"/>
       <rect x="20" y="20" width="40" height="40" stroke="#212121" stroke-width="4"/>
       <rect x="140" y="20" width="40" height="40" stroke="#212121" stroke-width="4"/>
@@ -31,7 +32,7 @@
   </div>
   
   <p class="mt-6 text-sm text-singpass-gray-500 font-medium text-center">
-    Scan with your Singpass App to log in
+    {i18n.t('login.qr.description')}
   </p>
 </div>
 
