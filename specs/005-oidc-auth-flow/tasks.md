@@ -88,9 +88,9 @@
 
 ### Implementation for User Story 3
 
-- [ ] T025 [P] [US3] Implement `GenerateAuthCode` use case in `apps/backend/src/core/use-cases/GenerateAuthCode.ts` (creates short-lived code tied to PKCE/DPoP)
-- [ ] T026 [US3] Integrate `GenerateAuthCode` into the `Validate2FA` use case or `POST /api/auth/2fa` handler in `apps/backend/src/infra/http/authRouter.ts` to return the redirect URI upon successful 2FA.
-- [ ] T027 [US3] Update frontend `TwoFactorForm.svelte` to execute `window.location.href = redirect_uri` upon receiving a successful response from `POST /api/auth/2fa`.
+- [X] T025 [P] [US3] Implement `GenerateAuthCode` use case in `apps/backend/src/core/use-cases/GenerateAuthCode.ts` (creates short-lived code tied to PKCE/DPoP)
+- [X] T026 [US3] Integrate `GenerateAuthCode` into the `Validate2FA` use case or `POST /api/auth/2fa` handler in `apps/backend/src/infra/http/authRouter.ts` to return the redirect URI upon successful 2FA.
+- [X] T027 [US3] Update frontend `TwoFactorForm.svelte` to execute `window.location.href = redirect_uri` upon receiving a successful response from `POST /api/auth/2fa`.
 
 **Checkpoint**: All user stories should now be independently functional. The full end-to-end OIDC auth flow is complete.
 

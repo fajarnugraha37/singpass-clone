@@ -1,5 +1,6 @@
 import type { AuthSessionRepository } from '../domain/session';
 import type { SecurityAuditService } from '../domain/audit_service';
+import type { GenerateAuthCodeUseCase } from './GenerateAuthCode';
 
 export interface Validate2FAInput {
   sessionId: string;
@@ -15,7 +16,8 @@ export interface Validate2FAOutput {
 export class Validate2FAUseCase {
   constructor(
     private authSessionRepository: AuthSessionRepository,
-    private auditService: SecurityAuditService
+    private auditService: SecurityAuditService,
+    private generateAuthCodeUseCase: GenerateAuthCodeUseCase
   ) {}
 
   async execute(input: Validate2FAInput): Promise<Validate2FAOutput> {
@@ -71,10 +73,16 @@ export class Validate2FAUseCase {
       details: { sessionId, userId: session.userId },
     });
 
-    // TODO: T026 - OIDC Code Generation should be integrated here or return a placeholder
-    return {
-      success: true,
-      redirect_uri: '/placeholder-redirect', // To be updated in T026
-    };
+    // 5. Generate Authorization Code and Final Redirect URI
+    try {
+      const { redirectUri } = await this.generateAuthCodeUseCase.execute({ sessionId });
+      return {
+        success: true,
+        redirect_uri: redirectUri,
+      };
+    } catch (error: any) {
+      console.error('[2FA] Error generating auth code:', error);
+      return { success: false, error: 'Final authorization failed' };
+    }
   }
 }
