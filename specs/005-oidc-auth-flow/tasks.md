@@ -36,8 +36,8 @@
 
 ### Tests for User Story 1
 
-- [ ] T008 [P] [US1] Write unit tests for Session initiation logic in `apps/backend/tests/core/use-cases/InitiateAuthSession.test.ts`
-- [ ] T009 [P] [US1] Write integration tests for `GET /auth` endpoint in `apps/backend/tests/infra/http/auth.test.ts`
+- [X] T008 [P] [US1] Write unit tests for Session initiation logic in `apps/backend/tests/core/use-cases/InitiateAuthSession.test.ts`
+- [X] T009 [P] [US1] Write integration tests for `GET /auth` endpoint in `apps/backend/tests/infra/http/auth.test.ts`
 
 ### Implementation for User Story 1
 
