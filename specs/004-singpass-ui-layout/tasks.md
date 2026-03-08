@@ -1,132 +1,124 @@
----
-description: "Task list for implementing Singpass UI Base Layout and Login Screen"
----
-
 # Tasks: Singpass UI Base Layout and Login Screen
 
 **Input**: Design documents from `/specs/004-singpass-ui-layout/`
-**Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/
+**Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, quickstart.md
+
+**Tests**: Included as per NFRs and User Story acceptance scenarios.
+
+**Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
 - **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3)
-- Include exact file paths in descriptions
+- All paths are relative to the repository root.
+
+---
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Project initialization and design tokens.
+**Purpose**: Project initialization and basic structure
 
-- [ ] T001 Initialize Tailwind CSS design tokens (brand colors, fonts) in `apps/frontend/src/assets/styles/global.css` or Tailwind config
-- [ ] T002 [P] Setup SVG inline icon assets for Singpass logos and placeholders in `apps/frontend/src/assets/icons/`
+- [ ] T001 Create project structure in `apps/frontend/src/` per implementation plan
+- [ ] T002 [P] Initialize Tailwind CSS v4 configuration (design tokens (brand colors, fonts, etc)) in `apps/frontend/tailwind.config.mjs`
+- [ ] T002b [P] Setup SVG inline icon assets for Singpass logos and placeholders in `apps/frontend/src/assets/icons/`
+- [ ] T003 [P] Setup i18n store and translation dictionary in `apps/frontend/src/lib/i18n.svelte.ts`
+- [ ] T004 [P] Implement NRIC/FIN checksum validation logic in `apps/frontend/src/lib/nric-validator.ts`
 
 ---
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: Core UI structure needed before implementing user stories.
+**Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
-- [ ] T003 Create `BaseLayout` Astro component skeleton in `apps/frontend/src/layouts/BaseLayout.astro`
-- [ ] T004 Define shared UI TypeScript interfaces (if needed) in `apps/frontend/src/lib/types.ts`
+**⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-**Checkpoint**: Base layout structure is established and ready for integration.
+- [ ] T005 Define Singpass design tokens and global styles in `apps/frontend/src/assets/styles/global.css`
+- [ ] T006 Create BaseLayout Astro component in `apps/frontend/src/layouts/BaseLayout.astro`
+- [ ] T006b Define shared UI TypeScript interfaces (if needed) in `apps/frontend/src/lib/types.ts`
+- [ ] T007 [P] Create Masthead Astro component in `apps/frontend/src/components/Masthead.astro`
+- [ ] T008 [P] Create Header Astro component in `apps/frontend/src/components/Header.astro`
+- [ ] T009 [P] Create Footer Astro component in `apps/frontend/src/components/Footer.astro`
+
+**Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
 ---
 
 ## Phase 3: User Story 1 - Authentic Singpass Visual Experience (Priority: P1) 🎯 MVP
 
-**Goal**: Deliver a website that looks and feels like the official Singpass portal.
+**Goal**: Display header, footer, masthead, and typography consistent with Singpass branding (looks and feels like the official Singpass portal).
 
-**Independent Test**: Visually compare against official Singpass portal for layout, color, and typography match.
-
-### Tests for User Story 1
-
-- [ ] T005 [P] [US1] Create basic layout and navigation smoke tests in `apps/frontend/tests/smoke.test.ts`
+**Independent Test**: Visually verify layout components (Masthead, Header, Footer) on the index page against official portal design and compare against official Singpass portal for layout, color, and typography match.
 
 ### Implementation for User Story 1
 
-- [ ] T006 [P] [US1] Implement Singpass Header UI with logo and masthead in `apps/frontend/src/layouts/BaseLayout.astro`
-- [ ] T007 [P] [US1] Implement Singpass Footer UI with links in `apps/frontend/src/layouts/BaseLayout.astro`
-- [ ] T008 [US1] Update `apps/frontend/src/pages/index.astro` to use the completed `BaseLayout.astro`
+- [ ] T010 [P] [US1] Create Singpass Logo SVG component in `apps/frontend/src/components/icons/SingpassLogo.svelte`
+- [ ] T011 [US1] Implement responsive Header with Logo and navigation placeholders in `apps/frontend/src/components/Header.astro`
+- [ ] T012 [US1] Implement Footer with official links and copyright in `apps/frontend/src/components/Footer.astro`
+- [ ] T013 [US1] Assemble BaseLayout in `apps/frontend/src/layouts/BaseLayout.astro` and apply to `apps/frontend/src/pages/index.astro`
 
-**Checkpoint**: At this point, the page layout strongly visually resembles Singpass with correct header and footer, though main content is empty.
+**Checkpoint**: At this point, User Story 1 should be fully functional, testable independently and the page layout strongly visually resembles Singpass with correct header and footer, though main content is empty.
 
 ---
 
 ## Phase 4: User Story 2 - Interactive Login Tab Selection (Priority: P1)
 
-**Goal**: Switch between login methods (Singpass App and Password Login) seamlessly.
+**Goal**: Switch between "Singpass App" and "Password Login" tabs.
 
-**Independent Test**: Clicking on tabs switches the displayed content between the QR code view and the password form placeholder.
-
-### Tests for User Story 2
-
-- [ ] T009 [P] [US2] Create component test for tab switching logic in `apps/frontend/tests/components/LoginCard.test.ts`
+**Independent Test**: Click tabs and verify content switching (QR placeholder vs empty form).
 
 ### Implementation for User Story 2
 
-- [ ] T010 [P] [US2] Create `TabSwitcher.svelte` component in `apps/frontend/src/components/TabSwitcher.svelte`
-- [ ] T011 [P] [US2] Create `SingpassAppTab.svelte` with SVG QR placeholder in `apps/frontend/src/components/SingpassAppTab.svelte`
-- [ ] T012 [P] [US2] Create `PasswordLoginTab.svelte` layout skeleton in `apps/frontend/src/components/PasswordLoginTab.svelte`
-- [ ] T013 [US2] Create Svelte island `LoginCard.svelte` integrating the tab switcher and tab contents in `apps/frontend/src/components/LoginCard.svelte`
-- [ ] T014 [US2] Embed `LoginCard` component into `apps/frontend/src/pages/index.astro` main content area
+- [ ] T014 [US2] Create LoginTabs Svelte component in `apps/frontend/src/components/LoginTabs.svelte`
+- [ ] T015 [P] [US2] Create QRPlaceholder Svelte component with pulsing SVG animation in `apps/frontend/src/components/QRPlaceholder.svelte`
+- [ ] T016 [US2] Implement tab switching logic in `apps/frontend/src/components/LoginTabs.svelte` (Default: Password Login)
 
-**Checkpoint**: At this point, User Story 2 is functional. Users can load the page and click between the two login tabs.
+**Checkpoint**: At this point, User Stories 1 AND 2 should both work independently.
 
 ---
 
 ## Phase 5: User Story 3 - Password Login Form Submission (Priority: P2)
 
-**Goal**: Enter credentials in a clear and accessible form with NRIC checksum validation.
+**Goal**: Functional login form with NRIC validation and password toggle.
 
-**Independent Test**: Form fields accept input, validations trigger inline error messages on invalid input, and submit button shows "Demo Mode" alert on valid input.
-
-### Tests for User Story 3
-
-- [ ] T015 [P] [US3] Create unit tests for NRIC validation algorithm in `apps/frontend/tests/nric.test.ts`
-- [ ] T016 [P] [US3] Create component tests for form validation and password toggle in `apps/frontend/tests/components/PasswordLoginTab.test.ts`
+**Independent Test**: Enter invalid NRIC to see error message; toggle password visibility; click Login for "Demo Mode" alert.
 
 ### Implementation for User Story 3
 
-- [ ] T017 [P] [US3] Implement NRIC validator logic in `apps/frontend/src/lib/nric.ts`
-- [ ] T018 [P] [US3] Create `NricInput.svelte` with inline error and checksum validation in `apps/frontend/src/components/NricInput.svelte`
-- [ ] T019 [P] [US3] Create `PasswordInput.svelte` with show/hide toggle in `apps/frontend/src/components/PasswordInput.svelte`
-- [ ] T020 [US3] Integrate `NricInput` and `PasswordInput` into `apps/frontend/src/components/PasswordLoginTab.svelte`
-- [ ] T021 [US3] Implement "Log In" button logic (demo mode alert, valid state tracking) in `apps/frontend/src/components/PasswordLoginTab.svelte`
+- [ ] T017 [US3] Create LoginForm Svelte component in `apps/frontend/src/components/LoginForm.svelte`
+- [ ] T018 [P] [US3] Implement NricInput Svelte component with real-time checksum validation in `apps/frontend/src/components/NricInput.svelte`
+- [ ] T019 [P] [US3] Implement PasswordInput Svelte component with show/hide toggle in `apps/frontend/src/components/PasswordInput.svelte`
+- [ ] T020 [US3] Integrate validation errors and "Demo Mode" alert in `apps/frontend/src/components/LoginForm.svelte`
 
-**Checkpoint**: The Password Login flow is fully interactive, accessible, and correctly validates the Singpass ID formats.
+**Checkpoint**: All user stories should now be independently functional.
 
 ---
 
 ## Phase 6: User Story 4 - Multi-language Content Switching (Priority: P2)
 
-**Goal**: Switch interface language between English, Mandarin, Malay, and Tamil instantly.
+**Goal**: Switch UI language between English, Mandarin, Malay, and Tamil.
 
-**Independent Test**: Select different languages from the LangSwitcher and verify that all UI labels, tabs, and buttons update immediately without reloading.
-
-### Tests for User Story 4
-
-- [ ] T022 [P] [US4] Create component tests for i18n logic and language switching in `apps/frontend/tests/components/LangSwitcher.test.ts`
+**Independent Test**: Change language in switcher and verify all UI text updates instantly (< 0.2s).
 
 ### Implementation for User Story 4
 
-- [ ] T023 [P] [US4] Implement i18n state management using Svelte runes and translation dictionaries in `apps/frontend/src/lib/i18n.svelte.ts`
-- [ ] T024 [P] [US4] Create Svelte island `LangSwitcher.svelte` in `apps/frontend/src/components/LangSwitcher.svelte`
-- [ ] T025 [US4] Integrate `LangSwitcher.svelte` into `BaseLayout.astro` header
-- [ ] T026 [US4] Update `LoginCard`, `TabSwitcher`, `SingpassAppTab`, and `PasswordLoginTab` components to consume dynamic i18n store values
+- [ ] T021 [US4] Create LanguageSwitcher Svelte component in `apps/frontend/src/components/LanguageSwitcher.svelte`
+- [ ] T022 [US4] Map all UI strings in components to i18n store keys in `apps/frontend/src/lib/i18n.svelte.ts`
+- [ ] T023 [US4] Integrate LanguageSwitcher into Header in `apps/frontend/src/components/Header.astro`
 
-**Checkpoint**: The entire page supports localization, and changing languages updates UI text seamlessly.
+**Checkpoint**: Interface fully localized and switchable across all 4 languages.
 
 ---
 
-## Phase 7: Polish & Cross-Cutting Concerns
+## Phase 7: Polish & Cross-cutting Concerns
 
-**Purpose**: Final UI validation, accessibility checks, and mobile responsiveness.
+**Purpose**: Improvements that affect multiple user stories
 
-- [ ] T027 Run accessibility (WCAG) audits for ARIA roles, input labels, and keyboard navigation across all Svelte components
-- [ ] T028 Validate mobile responsiveness across devices using Tailwind UI breakpoints
-- [ ] T029 Test iOS 12+ legacy layout compatibility (e.g., verifying flexbox/grid behaviors)
-- [ ] T030 Execute full smoke test and component test suite (`bun test`)
+- [ ] T024 [P] Ensure iOS 12+ compatibility via Tailwind v4 polyfills and CSS fixes in `apps/frontend/src/assets/styles/global.css`
+- [ ] T025 [P] Add ARIA labels and roles to all interactive components for WCAG compliance
+- [ ] T026 Perform responsive audit and fix mobile layout issues in `apps/frontend/src/assets/styles/global.css`
+- [ ] T027 [P] Create smoke tests for layout and basic interactions in `apps/frontend/tests/smoke.test.ts`
+- [ ] T028 [P] Create component tests for NRIC validation in `apps/frontend/tests/components/NricValidator.test.ts`
 
 ---
 
@@ -134,25 +126,55 @@ description: "Task list for implementing Singpass UI Base Layout and Login Scree
 
 ### Phase Dependencies
 
-- **Setup & Foundational**: No dependencies, must be completed first.
-- **User Stories (Phase 3-6)**:
-  - US1 (Layout) and US2 (Tabs) can be implemented in sequence.
-  - US3 (Form) depends on US2 being completed to have a place for the form.
-  - US4 (Multi-language) depends on US1, US2, and US3 being completed so all text is ready for translation.
-- **Polish**: Depends on all stories being completed.
+- **Setup (Phase 1)**: No dependencies - can start immediately.
+- **Foundational (Phase 2)**: Depends on Setup completion - BLOCKS all user stories.
+- **User Stories (Phase 3+)**: All depend on Foundational phase completion.
+  - User stories can then proceed in parallel (if staffed).
+  - Or sequentially in priority order (P1 → P2 → P3).
+- **Polish (Final Phase)**: Depends on all desired user stories being complete.
+
+### User Story Dependencies
+
+- **User Story 1 (P1)**: Can start after Foundational (Phase 2) - No dependencies on other stories.
+- **User Story 2 (P2)**: Can start after Foundational (Phase 2) - No dependencies on US1.
+- **User Story 3 (P3)**: Depends on US2 (LoginForm is nested within tabs).
+- **User Story 4 (P4)**: Affects all components; best implemented after US1-3 are stable.
 
 ### Parallel Opportunities
 
-- **Phase 1**: Tailwind styling (T001) and asset preparation (T002) can run in parallel.
-- **Phase 3**: Tests (T005), Header (T006), and Footer (T007) can run in parallel.
-- **Phase 4**: Tab components (T010, T011, T012) can be built in parallel.
-- **Phase 5**: NRIC validation logic (T017), NricInput (T018), and PasswordInput (T019) can be developed in parallel.
-- **Phase 6**: i18n core logic (T023) and LangSwitcher UI (T024) can be developed in parallel.
+- T002, T003, T004 can run in parallel.
+- T007, T008, T009 can run in parallel.
+- US1 and US2 can start in parallel after Phase 2.
+- T018 and T019 (Form inputs) can be developed in parallel with T017.
+- Polish phase tasks T024, T025, T027, T028 can run in parallel.
 
-### Implementation Strategy
+---
 
-1. **Setup & Foundation**: Get styling and Astro layout skeleton ready.
-2. **MVP Delivery**: Complete US1 and US2 to provide the visual shell and basic interactivity (switching tabs).
-3. **Core Functionality**: Complete US3 to provide the required NRIC login form and interaction validation.
-4. **Localization**: Complete US4 to make the components translatable.
-5. **Final QA**: Validate NFRs like browser support (iOS 12+) and accessibility.
+## Parallel Example: User Story 3
+
+```bash
+# Implement form inputs together:
+Task: "Implement NricInput Svelte component in apps/frontend/src/components/NricInput.svelte"
+Task: "Implement PasswordInput Svelte component in apps/frontend/src/components/PasswordInput.svelte"
+```
+
+---
+
+## Implementation Strategy
+
+### MVP First (User Story 1 & 2)
+
+1. Complete Phase 1: Setup
+2. Complete Phase 2: Foundational
+3. Complete Phase 3: User Story 1 (Branding)
+4. Complete Phase 4: User Story 2 (Tab Interactions)
+5. **STOP and VALIDATE**: Verify the interactive shell of the portal.
+
+### Incremental Delivery
+
+1. Foundation ready.
+2. Add User Story 1 (Visual Identity).
+3. Add User Story 2 (Navigation Context).
+4. Add User Story 3 (Functional Login Form).
+5. Add User Story 4 (Accessibility & Internationalization).
+6. Each story adds value without breaking previous stories.
