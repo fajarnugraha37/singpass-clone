@@ -69,9 +69,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T014 [US2] Create LoginTabs Svelte component in `apps/frontend/src/components/LoginTabs.svelte`
-- [ ] T015 [P] [US2] Create QRPlaceholder Svelte component with pulsing SVG animation in `apps/frontend/src/components/QRPlaceholder.svelte`
-- [ ] T016 [US2] Implement tab switching logic in `apps/frontend/src/components/LoginTabs.svelte` (Default: Password Login)
+- [X] T014 [US2] Create LoginTabs Svelte component in `apps/frontend/src/components/LoginTabs.svelte`
+- [X] T015 [P] [US2] Create QRPlaceholder Svelte component with pulsing SVG animation in `apps/frontend/src/components/QRPlaceholder.svelte`
+- [X] T016 [US2] Implement tab switching logic in `apps/frontend/src/components/LoginTabs.svelte` (Default: Password Login)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently.
 

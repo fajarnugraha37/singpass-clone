@@ -13,9 +13,12 @@
   "dependencies": {
     "@astrojs/svelte": "latest",
     "@astrojs/tailwind": "latest",
+    "@tailwindcss/vite": "^4.2.1",
     "astro": "latest",
+    "autoprefixer": "^10.4.27",
+    "hono": "latest",
+    "sass": "^1.97.3",
     "svelte": "latest",
-    "tailwindcss": "latest",
-    "hono": "latest"
+    "tailwindcss": "^4.2.1"
   }
 }
