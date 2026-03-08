@@ -14,9 +14,9 @@
 
 <div class="w-full max-w-md mx-auto bg-white rounded-xl shadow-lg border border-singpass-gray-100 overflow-hidden">
   <!-- Tabs Navigation -->
-  <div class="flex border-b border-singpass-gray-200 bg-singpass-light/50">
+  <div role="tablist" aria-label="Login methods" class="flex border-b border-singpass-gray-200 bg-singpass-light/50">
     <button
-      class="flex-1 py-4 text-sm font-semibold transition-all duration-200 border-b-2 {activeTab === 'app' ? 'border-singpass-red text-singpass-red bg-white' : 'border-transparent text-singpass-gray-500 hover:text-singpass-dark'}"
+      class="flex-1 py-4 text-sm font-semibold transition-all duration-200 border-b-2 {activeTab === 'app' ? 'border-singpass-red text-singpass-red bg-white' : 'border-transparent text-singpass-gray-700 hover:text-singpass-dark'}"
       onclick={() => setTab('app')}
       aria-selected={activeTab === 'app'}
       role="tab"
@@ -24,7 +24,7 @@
       {i18n.t('login.tab.app')}
     </button>
     <button
-      class="flex-1 py-4 text-sm font-semibold transition-all duration-200 border-b-2 {activeTab === 'password' ? 'border-singpass-red text-singpass-red bg-white' : 'border-transparent text-singpass-gray-500 hover:text-singpass-dark'}"
+      class="flex-1 py-4 text-sm font-semibold transition-all duration-200 border-b-2 {activeTab === 'password' ? 'border-singpass-red text-singpass-red bg-white' : 'border-transparent text-singpass-gray-700 hover:text-singpass-dark'}"
       onclick={() => setTab('password')}
       aria-selected={activeTab === 'password'}
       role="tab"
@@ -46,7 +46,7 @@
 
   <!-- Bottom link -->
   <div class="px-6 py-4 bg-singpass-light/30 border-t border-singpass-gray-100 text-center">
-    <a href="javascript:void(0)" class="text-xs text-singpass-red font-medium hover:underline transition-all">
+    <a href="#" class="text-xs text-singpass-red font-medium hover:underline transition-all">
       {i18n.t('login.form.reset')}
     </a>
   </div>

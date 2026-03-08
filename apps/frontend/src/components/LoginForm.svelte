@@ -62,7 +62,7 @@
       bind:checked={rememberMe}
       class="h-4 w-4 text-singpass-red border-singpass-gray-300 rounded focus:ring-singpass-red/20 transition-all cursor-pointer"
     />
-    <label for="remember-me" class="ml-2 block text-sm text-singpass-gray-500 cursor-pointer select-none">
+    <label for="remember-me" class="ml-2 block text-sm text-singpass-gray-700 cursor-pointer select-none">
       {i18n.t('login.form.remember')}
     </label>
   </div>

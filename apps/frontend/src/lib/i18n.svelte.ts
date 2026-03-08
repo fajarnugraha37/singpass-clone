@@ -155,20 +155,14 @@ export const translations = {
   },
 };
 
-// Check if $state is available (it's a Svelte compiler-injected global)
-// If not, we provide a simple fallback for tests
-const state = typeof $state !== 'undefined' ? $state : <T>(v: T) => v;
+let currentLocale = $state<Locale>('en');
 
-class I18nStore {
-  locale = state<Locale>('en');
-
+export const i18n = {
+  get locale() { return currentLocale; },
   t(key: keyof typeof translations.en) {
-    return translations[this.locale][key] || key;
-  }
-
+    return translations[currentLocale][key] || key;
+  },
   setLocale(newLocale: Locale) {
-    this.locale = newLocale;
+    currentLocale = newLocale;
   }
-}
-
-export const i18n = new I18nStore();
+};

@@ -52,6 +52,7 @@
 
 ### Implementation for User Story 1
 
+- [X] T010a [P] [US1] Create layout smoke test to verify header, footer, and masthead presence in `apps/frontend/tests/smoke.test.ts`
 - [X] T010 [P] [US1] Create Singpass Logo SVG component in `apps/frontend/src/components/icons/SingpassLogo.svelte`
 - [X] T011 [US1] Implement responsive Header with Logo and navigation placeholders in `apps/frontend/src/components/Header.astro`
 - [X] T012 [US1] Implement Footer with official links and copyright in `apps/frontend/src/components/Footer.astro`
@@ -69,6 +70,7 @@
 
 ### Implementation for User Story 2
 
+- [X] T014a [US2] Create component test for tab switching logic in `apps/frontend/tests/components/LoginTabs.test.ts`
 - [X] T014 [US2] Create LoginTabs Svelte component in `apps/frontend/src/components/LoginTabs.svelte`
 - [X] T015 [P] [US2] Create QRPlaceholder Svelte component with pulsing SVG animation in `apps/frontend/src/components/QRPlaceholder.svelte`
 - [X] T016 [US2] Implement tab switching logic in `apps/frontend/src/components/LoginTabs.svelte` (Default: Password Login)
@@ -85,6 +87,7 @@
 
 ### Implementation for User Story 3
 
+- [X] T017a [P] [US3] Create component tests for NRIC validation logic and form rendering in `apps/frontend/tests/components/NricValidator.test.ts`
 - [X] T017 [US3] Create LoginForm Svelte component in `apps/frontend/src/components/LoginForm.svelte`
 - [X] T018 [P] [US3] Implement NricInput Svelte component with real-time checksum validation in `apps/frontend/src/components/NricInput.svelte`
 - [X] T019 [P] [US3] Implement PasswordInput Svelte component with show/hide toggle in `apps/frontend/src/components/PasswordInput.svelte`
@@ -102,9 +105,10 @@
 
 ### Implementation for User Story 4
 
+- [X] T021a [US4] Create component test for language switching logic in `apps/frontend/tests/components/LanguageSwitcher.test.ts`
 - [X] T021 [US4] Create LanguageSwitcher Svelte component in `apps/frontend/src/components/LanguageSwitcher.svelte`
 - [X] T022 [US4] Map all UI strings in components to i18n store keys in `apps/frontend/src/lib/i18n.svelte.ts`
-- [X] T023 [US4] Integrate LanguageSwitcher into Header in `apps/frontend/src/components/Header.svelte`
+- [X] T023 [US4] Integrate LanguageSwitcher Svelte Island into Header in `apps/frontend/src/components/Header.astro`
 
 **Checkpoint**: Interface fully localized and switchable across all 4 languages.
 
@@ -117,8 +121,8 @@
 - [X] T024 [P] Ensure iOS 12+ compatibility via Tailwind v4 polyfills and CSS fixes in `apps/frontend/src/assets/styles/global.css`
 - [X] T025 [P] Add ARIA labels and roles to all interactive components for WCAG compliance
 - [X] T026 Perform responsive audit and fix mobile layout issues in `apps/frontend/src/assets/styles/global.css`
-- [X] T027 [P] Create smoke tests for layout and basic interactions in `apps/frontend/tests/smoke.test.ts`
-- [X] T028 [P] Create component tests for NRIC validation in `apps/frontend/tests/components/NricValidator.test.ts`
+- [X] T027 Run Lighthouse audit to verify SC-003 (Score >= 95)
+- [X] T028 Run Network throttling test to verify NFR-002 (Load < 1.5s on 3G)
 
 ---
 

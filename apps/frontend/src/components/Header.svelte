@@ -21,9 +21,9 @@
     
     <div class="flex items-center gap-4">
       <nav class="hidden lg:flex items-center gap-6 mr-4" aria-label="Main Navigation">
-        <a href="javascript:void(0)" class="text-xs font-semibold text-singpass-dark hover:text-singpass-red transition-colors">{i18n.t('header.nav.services')}</a>
-        <a href="javascript:void(0)" class="text-xs font-semibold text-singpass-dark hover:text-singpass-red transition-colors">{i18n.t('header.nav.business')}</a>
-        <a href="javascript:void(0)" class="text-xs font-semibold text-singpass-dark hover:text-singpass-red transition-colors">{i18n.t('header.nav.help')}</a>
+        <a href="#" class="text-xs font-semibold text-singpass-dark hover:text-singpass-red transition-colors">{i18n.t('header.nav.services')}</a>
+        <a href="#" class="text-xs font-semibold text-singpass-dark hover:text-singpass-red transition-colors">{i18n.t('header.nav.business')}</a>
+        <a href="#" class="text-xs font-semibold text-singpass-dark hover:text-singpass-red transition-colors">{i18n.t('header.nav.help')}</a>
       </nav>
       <LanguageSwitcher />
     </div>

@@ -30,7 +30,7 @@
       id="menu-button"
       aria-expanded={isOpen}
       aria-haspopup="true"
-      aria-label={i18n.t('header.lang.aria')}
+      aria-label="{currentLangLabel} {i18n.t('header.lang.aria')}"
       onclick={toggleDropdown}
     >
       {currentLangLabel}
@@ -51,7 +51,7 @@
       <div class="py-1" role="none">
         {#each languages as lang}
           <button
-            class="flex items-center justify-between w-full text-left px-4 py-2.5 text-xs {i18n.locale === lang.code ? 'bg-singpass-light text-singpass-red font-bold' : 'text-singpass-gray-500 hover:bg-singpass-gray-50 hover:text-singpass-dark'} transition-colors"
+            class="flex items-center justify-between w-full text-left px-4 py-2.5 text-xs {i18n.locale === lang.code ? 'bg-singpass-light text-singpass-red font-bold' : 'text-singpass-gray-700 hover:bg-singpass-gray-50 hover:text-singpass-dark'} transition-colors"
             role="menuitem"
             tabindex="-1"
             aria-current={i18n.locale === lang.code ? 'true' : undefined}
