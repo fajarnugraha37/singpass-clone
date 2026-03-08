@@ -46,8 +46,7 @@ Client applications need a secure way to pre-register their authorization reques
 
 ## Clarifications
 
-### Session 2026-03-08
-
+- Q: For failed PAR requests (e.g., invalid assertions or signature mismatch), should we log the full request payload (masked) for forensics, or only the error code and client identifier? → A: Minimal logging: Capture only the error type, timestamp, and client_id.
 - Q: What is the expected volume of concurrent pre-registration requests, and does the 60-second expiry require an active cleanup process, or is it sufficient to rely on row-level TTL/passive expiration given SQLite's capabilities? -> A: Moderate volume; passive cleanup (e.g., TTL-based queries or periodic cron) is sufficient
 
 ## Requirements *(mandatory)*
@@ -58,15 +57,19 @@ Client applications need a secure way to pre-register their authorization reques
 - **FR-002**: The system MUST expose a publicly accessible endpoint containing the cryptographic public keys used to sign system tokens.
 - **FR-003**: The system MUST expose a secure endpoint for pre-registering authorization requests.
 - **FR-004**: The system MUST strictly validate the client's identity using secure assertions before accepting a pre-registration request.
+- **FR-010**: The system MUST implement jti (JWT ID) replay protection by storing consumed JWT IDs for 24 hours in SQLite.
+- **FR-011**: The system MUST dynamically bind the request_uri to the thumbprint presented in the DPoP header.
 - **FR-005**: The system MUST validate the presence of cryptographic proof-of-possession and interception prevention mechanisms on all authorization requests.
 - **FR-006**: The system MUST temporarily store the pre-registered request details securely, supporting moderate volume with passive cleanup mechanisms (e.g., TTL-based queries or periodic cron).
 - **FR-007**: The system MUST return a unique, single-use reference identifier that expires quickly (e.g., within 60 seconds).
 - **FR-008**: The system MUST rigorously validate all input parameters against strict format and presence rules.
+- **FR-009**: The system MUST capture minimal audit logs for failed requests (error type, timestamp, and client_id) without storing full request payloads.
 
 ### Key Entities
 
 - **Discovery Configuration**: Metadata detailing supported authentication methods, endpoints, and security profiles.
 - **Authorization Request**: A collection of parameters describing the client's request for user authentication, temporarily persisted until the user logs in.
+- **Consumed JWT ID**: An entry in the jti store to prevent assertion replay, containing the ID, client identifier, and an expiration timestamp.
 
 ## Success Criteria *(mandatory)*
 
