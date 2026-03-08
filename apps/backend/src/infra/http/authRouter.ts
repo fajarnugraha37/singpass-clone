@@ -4,35 +4,23 @@ import {
   loginRequestSchema, 
   twoFactorRequestSchema 
 } from '../../../../packages/shared/src/contracts/auth';
+import { InitiateAuthSessionUseCase } from '../../core/use-cases/InitiateAuthSession';
+import * as authController from './controllers/auth.controller';
 
 /**
  * Auth Router for both OIDC flow initiation and RPC API endpoints.
  */
-const authRouter = new Hono()
+export const createAuthRouter = (initiateAuthUseCase: InitiateAuthSessionUseCase) => {
+  const authRouter = new Hono()
 
-// OIDC Initiation Endpoint
-authRouter.get('/auth', async (c) => {
-  const clientId = c.req.query('client_id');
-  const requestUri = c.req.query('request_uri');
+  // OIDC Initiation Endpoint
+  authRouter.get('/auth', authController.initiateAuth(initiateAuthUseCase));
 
-  if (!clientId || !requestUri) {
-    return c.text('Missing client_id or request_uri', 400);
-  }
+  // RPC API: Primary Login
+  authRouter.post('/api/login', zValidator('json', loginRequestSchema), authController.login());
 
-  // TODO: Implement Session Initiation Use Case (T011)
-  return c.text('Auth session initiation placeholder');
-});
+  // RPC API: 2FA Verification
+  authRouter.post('/api/2fa', zValidator('json', twoFactorRequestSchema), authController.twoFactor());
 
-// RPC API: Primary Login
-authRouter.post('/api/login', zValidator('json', loginRequestSchema), async (c) => {
-  // TODO: Implement Login Use Case (T018)
-  return c.json({ success: false, error: 'Not implemented' }, 501);
-});
-
-// RPC API: 2FA Verification
-authRouter.post('/api/2fa', zValidator('json', twoFactorRequestSchema), async (c) => {
-  // TODO: Implement 2FA Use Case (T019)
-  return c.json({ success: false, error: 'Not implemented' }, 501);
-});
-
-export { authRouter };
+  return authRouter;
+};

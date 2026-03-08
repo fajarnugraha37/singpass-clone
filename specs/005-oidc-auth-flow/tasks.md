@@ -41,10 +41,10 @@
 
 ### Implementation for User Story 1
 
-- [ ] T010 [P] [US1] Implement `InitiateAuthSession` use case in `apps/backend/src/core/use-cases/InitiateAuthSession.ts` (validates `client_id`, `request_uri`, creates session)
-- [ ] T011 [US1] Implement `GET /auth` endpoint handler in `apps/backend/src/infra/http/authRouter.ts` using the use case and setting secure HTTP-only cookie
-- [ ] T012 [US1] Implement error redirect handling for invalid `request_uri` or `client_id` within `GET /auth` in `apps/backend/src/infra/http/authRouter.ts`
-- [ ] T013 [P] [US1] Create basic Astro login page UI component at `apps/frontend/src/pages/login.astro`
+- [X] T010 [P] [US1] Implement `InitiateAuthSession` use case in `apps/backend/src/core/use-cases/InitiateAuthSession.ts` (validates `client_id`, `request_uri`, creates session)
+- [X] T011 [US1] Implement `GET /auth` endpoint handler in `apps/backend/src/infra/http/authRouter.ts` using the use case and setting secure HTTP-only cookie
+- [X] T012 [US1] Implement error redirect handling for invalid `request_uri` or `client_id` within `GET /auth` in `apps/backend/src/infra/http/authRouter.ts`
+- [X] T013 [P] [US1] Create basic Astro login page UI component at `apps/frontend/src/pages/login.astro`
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently (Backend `/auth` redirects to Astro `/login` or throws OIDC errors).
 

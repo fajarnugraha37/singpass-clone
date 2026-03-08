@@ -7,19 +7,26 @@ import { registerPar } from './infra/http/controllers/par.controller'
 import { JoseCryptoService } from './infra/adapters/jose_crypto'
 import { DrizzleSecurityAuditService } from './infra/adapters/security_logger'
 import { DrizzlePARRepository } from './infra/adapters/db/drizzle_par_repository'
+import { DrizzleAuthSessionRepository } from './infra/adapters/db/drizzle_session_repository'
 import { RegisterParUseCase } from './core/use-cases/register-par'
-import { authRouter } from './infra/http/authRouter'
+import { InitiateAuthSessionUseCase } from './core/use-cases/InitiateAuthSession'
+import { createAuthRouter } from './infra/http/authRouter'
 
 const auditService = new DrizzleSecurityAuditService();
 const cryptoService = new JoseCryptoService(auditService);
 const parRepository = new DrizzlePARRepository();
+const authSessionRepository = new DrizzleAuthSessionRepository();
+
 const registerParUseCase = new RegisterParUseCase(cryptoService, parRepository, auditService);
+const initiateAuthSessionUseCase = new InitiateAuthSessionUseCase(authSessionRepository, parRepository, auditService);
 
 const app = new Hono()
 
 // Public OIDC Endpoints at Root
 app.get('/.well-known/openid-configuration', getDiscoveryDocument)
 app.get('/.well-known/keys', getJWKS(cryptoService))
+
+const authRouter = createAuthRouter(initiateAuthSessionUseCase);
 
 // Auth Initiation (Redirects to Login UI)
 app.route('/', authRouter)
