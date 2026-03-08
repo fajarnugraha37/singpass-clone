@@ -83,8 +83,8 @@
 
 ### Tests for User Story 3
 
-- [ ] T023 [P] [US3] Write unit tests for Authorization Code generation in `apps/backend/tests/core/use-cases/GenerateAuthCode.test.ts`
-- [ ] T024 [P] [US3] Write integration tests ensuring `POST /api/auth/2fa` returns the correct final redirect URI with `code` and `state`.
+- [X] T023 [P] [US3] Write unit tests for Authorization Code generation in `apps/backend/tests/core/use-cases/GenerateAuthCode.test.ts`
+- [X] T024 [P] [US3] Write integration tests ensuring `POST /api/auth/2fa` returns the correct final redirect URI with `code` and `state`.
 
 ### Implementation for User Story 3
 

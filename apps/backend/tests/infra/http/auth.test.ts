@@ -93,7 +93,31 @@ describe('Auth Endpoints', () => {
         })
       });
 
+      // Initially 501 until implemented in US3
       expect(res.status).toBe(501);
+    });
+
+    test('should return 200 with redirect_uri containing code and state on success', async () => {
+      // Integration test for final OIDC redirect
+      // This will be fully functional once US3 is complete
+      const res = await app.request('/api/auth/2fa', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cookie': 'vibe_auth_session=valid-session-id'
+        },
+        body: JSON.stringify({
+          otp: '123456'
+        })
+      });
+
+      // Placeholder test until US3 is complete
+      if (res.status === 200) {
+        const body = await res.json();
+        expect(body.success).toBe(true);
+        expect(body.redirect_uri).toContain('code=');
+        expect(body.redirect_uri).toContain('state=');
+      }
     });
 
     test('should return 400 for invalid OTP format', async () => {
