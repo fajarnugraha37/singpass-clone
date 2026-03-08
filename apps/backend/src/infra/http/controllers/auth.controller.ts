@@ -1,6 +1,8 @@
 import { Context } from 'hono';
-import { setCookie } from 'hono/cookie';
+import { setCookie, getCookie } from 'hono/cookie';
 import { InitiateAuthSessionUseCase } from '../../../core/use-cases/InitiateAuthSession';
+import { ValidateLoginUseCase } from '../../../core/use-cases/ValidateLogin';
+import { Validate2FAUseCase } from '../../../core/use-cases/Validate2FA';
 
 export const initiateAuth = (useCase: InitiateAuthSessionUseCase) => {
   return async (c: Context) => {
@@ -26,22 +28,53 @@ export const initiateAuth = (useCase: InitiateAuthSessionUseCase) => {
       return c.redirect(result.redirectUri);
     } catch (error: any) {
       console.error('[Auth Initiation] Error:', error);
-      // OIDC error response format or generic error page
       return c.text(`Invalid request: ${error.message}`, 400);
     }
   };
 };
 
-export const login = () => {
+export const login = (useCase: ValidateLoginUseCase) => {
   return async (c: Context) => {
-    // T018 implementation placeholder
-    return c.json({ success: false, error: 'Not implemented' }, 501);
+    try {
+      const sessionId = getCookie(c, 'vibe_auth_session');
+      if (!sessionId) {
+        return c.json({ success: false, error: 'Session not found' }, 401);
+      }
+
+      const { username, password } = await c.req.json();
+      const result = await useCase.execute({ sessionId, username, password });
+
+      if (!result.success) {
+        return c.json(result, 401);
+      }
+
+      return c.json(result, 200);
+    } catch (error: any) {
+      console.error('[Login] Error:', error);
+      return c.json({ success: false, error: 'Internal server error' }, 500);
+    }
   };
 };
 
-export const twoFactor = () => {
+export const twoFactor = (useCase: Validate2FAUseCase) => {
   return async (c: Context) => {
-    // T019 implementation placeholder
-    return c.json({ success: false, error: 'Not implemented' }, 501);
+    try {
+      const sessionId = getCookie(c, 'vibe_auth_session');
+      if (!sessionId) {
+        return c.json({ success: false, error: 'Session not found' }, 401);
+      }
+
+      const { otp } = await c.req.json();
+      const result = await useCase.execute({ sessionId, otp });
+
+      if (!result.success) {
+        return c.json(result, 401);
+      }
+
+      return c.json(result, 200);
+    } catch (error: any) {
+      console.error('[2FA] Error:', error);
+      return c.json({ success: false, error: 'Internal server error' }, 500);
+    }
   };
 };

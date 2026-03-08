@@ -63,13 +63,13 @@
 
 ### Implementation for User Story 2
 
-- [ ] T016 [P] [US2] Implement `ValidateLogin` use case in `apps/backend/src/core/use-cases/ValidateLogin.ts` (validates credentials, generates 6-digit OTP, updates session state)
-- [ ] T017 [P] [US2] Implement `Validate2FA` use case in `apps/backend/src/core/use-cases/Validate2FA.ts` (validates OTP against session state)
-- [ ] T018 [US2] Implement `POST /api/auth/login` RPC endpoint in `apps/backend/src/infra/http/authRouter.ts`
-- [ ] T019 [US2] Implement `POST /api/auth/2fa` RPC endpoint in `apps/backend/src/infra/http/authRouter.ts`
-- [ ] T020 [P] [US2] Create Svelte interactive Login form component `apps/frontend/src/components/LoginForm.svelte` linking to Hono RPC
-- [ ] T021 [P] [US2] Create Svelte interactive 2FA form component `apps/frontend/src/components/TwoFactorForm.svelte` linking to Hono RPC
-- [ ] T022 [US2] Integrate `LoginForm.svelte` and `TwoFactorForm.svelte` into `apps/frontend/src/pages/login.astro` with client-side state transitions
+- [X] T016 [P] [US2] Implement `ValidateLogin` use case in `apps/backend/src/core/use-cases/ValidateLogin.ts` (validates credentials, generates 6-digit OTP, updates session state)
+- [X] T017 [P] [US2] Implement `Validate2FA` use case in `apps/backend/src/core/use-cases/Validate2FA.ts` (validates OTP against session state)
+- [X] T018 [US2] Implement `POST /api/auth/login` RPC endpoint in `apps/backend/src/infra/http/authRouter.ts`
+- [X] T019 [US2] Implement `POST /api/auth/2fa` RPC endpoint in `apps/backend/src/infra/http/authRouter.ts`
+- [X] T020 [P] [US2] Create Svelte interactive Login form component `apps/frontend/src/components/LoginForm.svelte` linking to Hono RPC
+- [X] T021 [P] [US2] Create Svelte interactive 2FA form component `apps/frontend/src/components/TwoFactorForm.svelte` linking to Hono RPC
+- [X] T022 [US2] Integrate `LoginForm.svelte` and `TwoFactorForm.svelte` into `apps/frontend/src/pages/login.astro` with client-side state transitions
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently. The user can submit primary credentials and simulated 2FA OTPs from the Astro frontend to the Hono backend.
 

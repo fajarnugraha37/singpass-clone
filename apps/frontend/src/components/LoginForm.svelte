@@ -1,84 +1,84 @@
 <script lang="ts">
-  import { i18n } from '../lib/i18n.svelte';
-  import NricInput from './NricInput.svelte';
-  import PasswordInput from './PasswordInput.svelte';
-  import { validateNric } from '../lib/nric-validator';
+  import { client } from '../lib/rpc';
 
-  let nric = $state('');
-  let password = $state('');
-  let rememberMe = $state(false);
-  let isNricValid = $state(false);
+  let username = '';
+  let password = '';
+  let error = '';
+  let isLoading = false;
 
-  let isFormValid = $derived(isNricValid && password.length > 0);
+  export let onSuccess: () => void;
 
-  function handleSubmit(e: Event) {
-    e.preventDefault();
-    
-    if (!validateNric(nric)) {
-      // Re-trigger validation UI by making sure NricInput knows it's touched
-      // In this case, we just check and let NricInput handle its own state if possible
-      // but here we can just show an alert for the demo
-      return;
+  async function handleSubmit(event: Event) {
+    event.preventDefault();
+    error = '';
+    isLoading = true;
+
+    try {
+      // POST /api/auth/api/login (using the router structure)
+      // Note: Hono RPC client paths follow the app.route structure
+      const res = await client.api.auth.api.login.$post({
+        json: { username, password }
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        onSuccess();
+      } else {
+        error = data.error || 'Login failed';
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      error = 'An unexpected error occurred';
+    } finally {
+      isLoading = false;
     }
-
-    if (password.length === 0) {
-      return;
-    }
-
-    alert(i18n.t('login.demo.alert'));
-  }
-
-  function handleNricChange(val: string) {
-    nric = val;
-  }
-
-  function handlePasswordChange(val: string) {
-    password = val;
-  }
-
-  function handleNricValidityChange(valid: boolean) {
-    isNricValid = valid;
   }
 </script>
 
-<form onsubmit={handleSubmit} class="space-y-6">
-  <div class="space-y-5">
-    <NricInput 
-      bind:value={nric} 
-      onchange={handleNricChange} 
-      onvaliditychange={handleNricValidityChange}
-    />
-    
-    <PasswordInput 
-      bind:value={password} 
-      onchange={handlePasswordChange}
-    />
+<form on:submit={handleSubmit} class="space-y-6">
+  {#if error}
+    <div class="p-3 bg-red-50 border border-red-200 text-red-600 text-sm">
+      {error}
+    </div>
+  {/if}
+
+  <div>
+    <label for="username" class="block text-sm font-medium text-gray-700">Singpass ID (NRIC)</label>
+    <div class="mt-1">
+      <input
+        id="username"
+        name="username"
+        type="text"
+        required
+        bind:value={username}
+        class="appearance-none block w-full px-3 py-2 border border-gray-300 shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+        placeholder="e.g. S1234567A"
+      />
+    </div>
   </div>
 
-  <div class="flex items-center">
-    <input
-      id="remember-me"
-      type="checkbox"
-      bind:checked={rememberMe}
-      class="h-4 w-4 text-singpass-red border-singpass-gray-300 rounded focus:ring-singpass-red/20 transition-all cursor-pointer"
-    />
-    <label for="remember-me" class="ml-2 block text-sm text-singpass-gray-700 cursor-pointer select-none">
-      {i18n.t('login.form.remember')}
-    </label>
+  <div>
+    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+    <div class="mt-1">
+      <input
+        id="password"
+        name="password"
+        type="password"
+        required
+        bind:value={password}
+        class="appearance-none block w-full px-3 py-2 border border-gray-300 shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+      />
+    </div>
   </div>
 
-  <button
-    type="submit"
-    class="w-full py-3.5 px-4 bg-singpass-red hover:bg-[#C11732] active:bg-[#A0132A] text-white font-bold rounded-md shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-[0.98]"
-    disabled={!isFormValid}
-  >
-    {i18n.t('login.form.submit')}
-  </button>
+  <div>
+    <button
+      type="submit"
+      disabled={isLoading}
+      class="w-full flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+    >
+      {isLoading ? 'Logging in...' : 'Log in'}
+    </button>
+  </div>
 </form>
-
-<style>
-  /* Custom checkbox styling if needed */
-  input[type="checkbox"] {
-    accent-color: #E31C3D;
-  }
-</style>

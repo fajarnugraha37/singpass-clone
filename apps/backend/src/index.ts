@@ -10,6 +10,8 @@ import { DrizzlePARRepository } from './infra/adapters/db/drizzle_par_repository
 import { DrizzleAuthSessionRepository } from './infra/adapters/db/drizzle_session_repository'
 import { RegisterParUseCase } from './core/use-cases/register-par'
 import { InitiateAuthSessionUseCase } from './core/use-cases/InitiateAuthSession'
+import { ValidateLoginUseCase } from './core/use-cases/ValidateLogin'
+import { Validate2FAUseCase } from './core/use-cases/Validate2FA'
 import { createAuthRouter } from './infra/http/authRouter'
 
 const auditService = new DrizzleSecurityAuditService();
@@ -19,27 +21,28 @@ const authSessionRepository = new DrizzleAuthSessionRepository();
 
 const registerParUseCase = new RegisterParUseCase(cryptoService, parRepository, auditService);
 const initiateAuthSessionUseCase = new InitiateAuthSessionUseCase(authSessionRepository, parRepository, auditService);
+const validateLoginUseCase = new ValidateLoginUseCase(authSessionRepository, auditService);
+const validate2FAUseCase = new Validate2FAUseCase(authSessionRepository, auditService);
+const authRouter = createAuthRouter(
+  initiateAuthSessionUseCase,
+  validateLoginUseCase,
+  validate2FAUseCase
+);
+const apiRouter = new Hono()
+  .get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
+  .post('/par', registerPar(registerParUseCase));
 
 const app = new Hono()
 
-// Public OIDC Endpoints at Root
-app.get('/.well-known/openid-configuration', getDiscoveryDocument)
-app.get('/.well-known/keys', getJWKS(cryptoService))
+  // Public OIDC Endpoints at Root
+  .get('/.well-known/openid-configuration', getDiscoveryDocument)
+  .get('/.well-known/keys', getJWKS(cryptoService))
 
-const authRouter = createAuthRouter(initiateAuthSessionUseCase);
-
-// Auth Initiation (Redirects to Login UI)
-app.route('/', authRouter)
-
-// API Routes
-const api = new Hono()
-api.get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
-api.post('/par', registerPar(registerParUseCase))
-
-// API: Auth RPC Endpoints
-api.route('/auth', authRouter)
-
-app.route('/api', api)
+  // Auth Initiation (Redirects to Login UI)
+  .route('/', authRouter)
+  // API: Auth RPC Endpoints
+  .route('/auth', authRouter)
+  .route('/api', apiRouter);
 
 // Periodic cleanup of expired FAPI records (every 10 minutes)
 const cleanupJob = new Cron('*/10 * * * *', async () => {
@@ -63,4 +66,5 @@ const shutdown = () => {
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
 
+export type AppType = typeof app;
 export default app
