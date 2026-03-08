@@ -7,7 +7,8 @@
 
 **Purpose**: Feature-specific domain setup
 
-- [x] T001 Initialize domain interfaces for PAR in `apps/backend/src/core/domain/par.types.ts`
+- [X] T001 Initialize domain interfaces for PAR and JTI in `apps/backend/src/core/domain/par.types.ts`
+- [X] T002 Initialize `par_requests` and `used_jtis` schema in `apps/backend/src/infra/database/schema.ts`
 
 ---
 
@@ -15,10 +16,8 @@
 
 **Purpose**: Database schema and core validation setup
 
-- [x] T002 Define Drizzle schema for `PushedAuthorizationRequests` in `apps/backend/src/infra/data/schema.ts`
-- [x] T003 [P] Define Drizzle schema for `ConsumedJti` in `apps/backend/src/infra/data/schema.ts`
-- [x] T003b [P] Implement DPoP-Nonce generation and signature logic (stateless or minimal store)
-- [x] T004 Run migrations to update SQLite database: `bunx drizzle-kit push`
+- [X] T003 Run migrations to update SQLite database: `bunx drizzle-kit push`
+- [X] T004 Implement DPoP key thumbprint (`jkt`) extraction logic in `apps/backend/src/core/domain/crypto_service.ts`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -30,16 +29,16 @@
 
 **Independent Test**: Verify `GET /.well-known/openid-configuration` and `GET /.well-known/keys` return expected JSON structures.
 
-### Tests for User Story 1 (REQUIRED) ⚠️
+### Tests for User Story 1 (REQUIRED)
 
-- [x] T005 [P] [US1] Create unit tests for Discovery endpoint in `apps/backend/tests/infra/http/discovery.test.ts`
-- [x] T006 [P] [US1] Create unit tests for JWKS endpoint in `apps/backend/tests/infra/http/jwks.test.ts`
+- [X] T005 [P] [US1] Create unit tests for Discovery endpoint in `apps/backend/tests/infra/http/discovery.test.ts`
+- [X] T006 [P] [US1] Create unit tests for JWKS endpoint in `apps/backend/tests/infra/http/jwks.test.ts`
 
 ### Implementation for User Story 1
 
-- [x] T007 [US1] Implement Discovery endpoint handler in `apps/backend/src/infra/http/controllers/discovery.controller.ts`
-- [x] T008 [US1] Implement JWKS endpoint handler in `apps/backend/src/infra/http/controllers/jwks.controller.ts`
-- [x] T009 [US1] Register discovery and keys routes in `apps/backend/src/index.ts`
+- [X] T007 [US1] Implement Discovery endpoint handler in `apps/backend/src/infra/http/controllers/discovery.controller.ts`
+- [X] T008 [US1] Implement JWKS endpoint handler in `apps/backend/src/infra/http/controllers/jwks.controller.ts`
+- [X] T009 [US1] Register discovery and keys routes in `apps/backend/src/index.ts`
 
 **Checkpoint**: Discovery and keys endpoints are functional and testable independently.
 
@@ -51,19 +50,22 @@
 
 **Independent Test**: Successfully execute a PAR request with a valid signed assertion and receive a `request_uri`.
 
-### Tests for User Story 2 (REQUIRED) ⚠️
+### Tests for User Story 2 (REQUIRED)
 
-- [x] T010 [P] [US2] Create unit tests for PAR use-case (validations, storage) in `apps/backend/tests/core/use-cases/register-par.test.ts`
-- [x] T011 [P] [US2] Create unit tests for PAR endpoint (handler) in `apps/backend/tests/infra/http/par.test.ts`
+- [X] T010 [P] [US2] Create unit tests for PAR use-case in `apps/backend/tests/core/use-cases/register-par.test.ts`
+- [X] T011 [P] [US2] Create unit tests for PAR endpoint handler in `apps/backend/tests/infra/http/par.test.ts`
+- [X] T011b [P] [US2] Create security validation suite for PAR (PKCE, DPoP, Assertions) in `apps/backend/tests/infra/http/par.security.test.ts`
 
 ### Implementation for User Story 2
 
-- [x] T012 [P] [US2] Define Zod validation schema for PAR request in `apps/backend/src/infra/http/validators/par.validator.ts`
-- [x] T013 [US2] Implement `RegisterParUseCase` in `apps/backend/src/core/use-cases/register-par.ts` (validate assertion, PKCE, DPoP, Singpass params)
-- [x] T014 [US2] Implement `jti` replay protection logic in `apps/backend/src/core/use-cases/register-par.ts`
-- [x] T015 [US2] Implement PAR endpoint handler in `apps/backend/src/infra/http/controllers/par.controller.ts`
-- [x] T016 [US2] Integrate security audit logging for PAR failures in `apps/backend/src/core/use-cases/register-par.ts`
-- [x] T017 [US2] Register PAR route in `apps/backend/src/index.ts`
+- [X] T012 [P] [US2] Define Zod validation schema for PAR request in `apps/backend/src/infra/http/validators/par.validator.ts`
+- [X] T013 [US2] Implement `RegisterParUseCase` with FAPI 2.0 validation (PKCE, DPoP, Binding) in `apps/backend/src/core/use-cases/register-par.ts`
+- [X] T014 [US2] Implement `jti` replay protection logic using `used_jtis` table in `apps/backend/src/core/use-cases/register-par.ts`
+- [X] T015 [US2] Implement PAR endpoint handler in `apps/backend/src/infra/http/controllers/par.controller.ts`
+- [X] T016 [US2] Integrate security audit logging for PAR failures in `apps/backend/src/core/use-cases/register-par.ts`
+- [X] T017 [US2] Register PAR route in `apps/backend/src/index.ts`
+- [X] T018 [US2] Implement passive expiration filter for PAR/JTI lookups in `apps/backend/src/core/use-cases/register-par.ts`
+- [X] T018b [US2] Implement DPoP-Nonce support and validation (FR-012) in `apps/backend/src/core/use-cases/register-par.ts`
 
 **Checkpoint**: Secure PAR initiation is fully functional and integrated with SQLite.
 
@@ -73,9 +75,9 @@
 
 **Purpose**: Final validation and optimization
 
-- [x] T018 Implement passive expiration filter for PAR/JTI lookups in `apps/backend/src/core/use-cases/register-par.ts`
-- [x] T019 Run full test suite: `bun test --coverage --threshold 80` (enforce SC-005)
-- [x] T020 [P] Validate all implementation against `quickstart.md` steps
+- [X] T019 Run full test suite: `bun test --coverage --threshold 80`
+- [X] T020 Validate implementation against `specs/003-oidc-discovery-par/quickstart.md`
+- [X] T021 [P] Ensure all secrets are masked in audit logs (Constitution Principle III)
 
 ---
 
@@ -84,42 +86,15 @@
 ### Phase Dependencies
 
 - **Setup (Phase 1)**: No dependencies.
-- **Foundational (Phase 2)**: Depends on Phase 1 completion. BLOCKS US1/US2.
+- **Foundational (Phase 2)**: Depends on Phase 1 completion.
 - **User Stories (Phase 3 & 4)**: Depend on Foundational completion.
-  - US1 (Discovery) is simpler and can be completed first.
-  - US2 (PAR) is the core security component.
 - **Polish (Phase 5)**: Depends on all user stories completion.
-
-### User Story Dependencies
-
-- **US1**: Independent after Phase 2.
-- **US2**: Independent after Phase 2.
-
-### Within Each User Story
-
-- Tests written first, then models, then services, then controllers.
-- Commit after each task.
 
 ### Parallel Opportunities
 
-- T003 (JTI schema) can run with T002 (PAR schema).
-- T005 & T006 (US1 Tests) can run in parallel.
-- T010 & T011 (US2 Tests) can run in parallel.
-- T012 (Validator) can run with T013 (Use-case logic).
-
----
-
-## Parallel Example: User Story 2
-
-```bash
-# Launch PAR tests together:
-Task: "Create unit tests for PAR use-case in apps/backend/tests/core/use-cases/register-par.test.ts"
-Task: "Create unit tests for PAR endpoint in apps/backend/tests/infra/http/par.test.ts"
-
-# Launch implementation components together:
-Task: "Define Zod validation schema for PAR request in apps/backend/src/infra/http/validators/par.validator.ts"
-Task: "Implement RegisterParUseCase in apps/backend/src/core/use-cases/register-par.ts"
-```
+- T005 & T006 (US1 Tests)
+- T010, T011, & T011b (US2 Tests)
+- T012 (Validator) can be developed in parallel with T013 (Use-case logic)
 
 ---
 
@@ -134,15 +109,6 @@ Task: "Implement RegisterParUseCase in apps/backend/src/core/use-cases/register-
 ### Incremental Delivery
 
 1. Foundation ready.
-2. Add Discovery (US1) -> Client-ready configuration.
-3. Add PAR (US2) -> Secure session initiation.
+2. Add Discovery (US1).
+3. Add PAR (US2) with full FAPI 2.0 security.
 4. Total FAPI 2.0 initiation layer complete.
-
----
-
-## Notes
-
-- All tasks follow `[ID] [P?] [Story] Description` format.
-- `[P]` indicates files are distinct and have no implementation blockers.
-- Coverage goal: SC-005 (>80%).
-- All implementation logic follows Hexagonal Architecture in `apps/backend`.

@@ -53,18 +53,17 @@ Client applications need a secure way to pre-register their authorization reques
 
 ### Functional Requirements
 
-- **FR-001**: The system MUST expose a publicly accessible discovery endpoint that provides the standard authentication configuration metadata.
-- **FR-002**: The system MUST expose a publicly accessible endpoint containing the cryptographic public keys used to sign system tokens.
-- **FR-003**: The system MUST expose a secure endpoint for pre-registering authorization requests.
-- **FR-004**: The system MUST strictly validate the client's identity using secure assertions before accepting a pre-registration request.
-- **FR-010**: The system MUST implement jti (JWT ID) replay protection by storing consumed JWT IDs for 24 hours in SQLite.
-- **FR-012**: The system MUST implement DPoP-Nonce protection, returning a nonce in the PAR response and validating its freshness in subsequent requests.
-- **FR-011**: The system MUST dynamically bind the request_uri to the thumbprint presented in the DPoP header.
-- **FR-005**: The system MUST validate the presence of cryptographic proof-of-possession and interception prevention mechanisms on all authorization requests.
-- **FR-006**: The system MUST temporarily store the pre-registered request details securely, supporting moderate volume with passive cleanup mechanisms (e.g., TTL-based queries or periodic cron).
-- **FR-007**: The system MUST return a unique, single-use reference identifier that expires quickly (e.g., within 60 seconds).
-- **FR-008**: The system MUST rigorously validate all input parameters against strict format and presence rules.
+- **FR-001**: The system MUST expose a publicly accessible discovery endpoint that provides standard configuration metadata (mirroring Singpass FAPI 2.0).
+- **FR-002**: The system MUST expose a publicly accessible endpoint containing cryptographic public keys (JWKS).
+- **FR-003**: The system MUST expose a secure endpoint for pre-registering authorization requests (PAR).
+- **FR-004**: The system MUST validate the client's identity using `private_key_jwt` assertions (client_assertion) before accepting a PAR registration.
+- **FR-005**: The system MUST enforce proof-of-possession and interception prevention by validating PKCE (`code_challenge` with S256) and DPoP headers on all PAR requests.
+- **FR-006**: The system MUST securely store the pre-registered request and return a unique, single-use `request_uri` that expires within 60 seconds (enforced via passive TTL cleanup).
+- **FR-008**: The system MUST perform strict Zod-based validation of all input parameters (e.g., `client_id` format, `redirect_uri` presence, `authentication_context_type` values).
 - **FR-009**: The system MUST capture minimal audit logs for failed requests (error type, timestamp, and client_id) without storing full request payloads.
+- **FR-010**: The system MUST implement `jti` replay protection for assertions by storing consumed IDs for 24 hours.
+- **FR-011**: The system MUST bind the `request_uri` to the DPoP key thumbprint (`dpop_jkt`) provided in the header or body.
+- **FR-012**: The system MUST implement DPoP-Nonce protection, returning a nonce in the PAR response and validating its freshness in subsequent requests.
 
 ### Key Entities
 

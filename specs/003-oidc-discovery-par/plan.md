@@ -23,13 +23,13 @@ Implement the public OIDC configuration (`/.well-known/openid-configuration`), J
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- [x] **Architecture Check**: Follows Hexagonal Architecture, DRY, KISS. Consistent coding conventions. Separates Hono backend from Astro frontend.
-- [x] **API Stability Check**: External HTTP contracts EXACTLY mirror Singpass. Internal API uses Hono RPC. Input validation on all endpoints.
-- [x] **Security Check**: SQLite cookie-based sessions, 2FA, OIDC/FAPI 2.0. Secrets NEVER logged (or masked).
-- [x] **Protocol Check**: Implements proper token exchange and passwordless/fallback flows.
-- [x] **Testing Check**: Unit tests exist for all logic, coverage >= 80%.
-- [x] **AI Boundaries Check**: Deterministic execution, strictly follows the plan and tasks. MUST utilize local `docs/singpass-server` and `docs/singpass-client` as the primary source of truth.
-- [x] **Documentation Check**: Spec-driven and documented before implementation.
+- [ ] **Architecture Check**: Follows Hexagonal Architecture, DRY, KISS. Consistent coding conventions. Separates Hono backend from Astro frontend.
+- [ ] **API Stability Check**: External HTTP contracts EXACTLY mirror Singpass. Internal API uses Hono RPC. Input validation on all endpoints.
+- [ ] **Security Check**: SQLite cookie-based sessions, 2FA, OIDC/FAPI 2.0. Secrets NEVER logged (or masked).
+- [ ] **Protocol Check**: Implements proper token exchange and passwordless/fallback flows.
+- [ ] **Testing Check**: Unit tests exist for all logic, coverage >= 80%.
+- [ ] **AI Boundaries Check**: Deterministic execution, strictly follows the plan and tasks. MUST utilize local `docs/singpass-server` and `docs/singpass-client` as the primary source of truth.
+- [ ] **Documentation Check**: Spec-driven and documented before implementation.
 
 ## Project Structure
 

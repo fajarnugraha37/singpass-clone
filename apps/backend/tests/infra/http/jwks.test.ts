@@ -1,21 +1,34 @@
-import { expect, test, describe } from 'bun:test'
-import app from '../../../src/index'
+import { describe, expect, it, mock } from 'bun:test';
+import { Hono } from 'hono';
+import { getJWKS } from '../../../src/infra/http/controllers/jwks.controller';
+import type { CryptoService } from '../../../src/core/domain/crypto_service';
 
-describe('JWKS Endpoint', () => {
-  test('GET /.well-known/keys should return 200 OK and valid JWKS', async () => {
-    const res = await app.request('/.well-known/keys')
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    
-    expect(body).toHaveProperty('keys')
-    expect(Array.isArray(body.keys)).toBe(true)
-    if (body.keys.length > 0) {
-      const key = body.keys[0]
-      expect(key).toHaveProperty('kid')
-      expect(key).toHaveProperty('kty', 'EC')
-      expect(key).toHaveProperty('crv', 'P-256')
-      expect(key).toHaveProperty('x')
-      expect(key).toHaveProperty('y')
-    }
-  })
-})
+describe('JWKS Controller', () => {
+  it('should return 200 and public keys', async () => {
+    const mockCryptoService = {
+      getPublicJWKS: mock(async () => ({
+        keys: [
+          {
+            kty: 'EC',
+            crv: 'P-256',
+            x: '...',
+            y: '...',
+            kid: 'test-kid',
+            use: 'sig',
+            alg: 'ES256',
+          },
+        ],
+      })),
+    } as unknown as CryptoService;
+
+    const app = new Hono();
+    app.get('/.well-known/keys', getJWKS(mockCryptoService));
+
+    const res = await app.request('/.well-known/keys');
+    expect(res.status).toBe(200);
+
+    const data = await res.json();
+    expect(data.keys).toHaveLength(1);
+    expect(data.keys[0].kid).toBe('test-kid');
+  });
+});
