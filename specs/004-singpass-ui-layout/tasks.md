@@ -19,11 +19,11 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create project structure in `apps/frontend/src/` per implementation plan
-- [ ] T002 [P] Initialize Tailwind CSS v4 configuration (design tokens (brand colors, fonts, etc)) in `apps/frontend/tailwind.config.mjs`
-- [ ] T002b [P] Setup SVG inline icon assets for Singpass logos and placeholders in `apps/frontend/src/assets/icons/`
-- [ ] T003 [P] Setup i18n store and translation dictionary in `apps/frontend/src/lib/i18n.svelte.ts`
-- [ ] T004 [P] Implement NRIC/FIN checksum validation logic in `apps/frontend/src/lib/nric-validator.ts`
+- [X] T001 Create project structure in `apps/frontend/src/` per implementation plan
+- [X] T002 [P] Initialize Tailwind CSS v4 configuration (design tokens (brand colors, fonts, etc)) in `apps/frontend/tailwind.config.mjs`
+- [X] T002b [P] Setup SVG inline icon assets for Singpass logos and placeholders in `apps/frontend/src/assets/icons/`
+- [X] T003 [P] Setup i18n store and translation dictionary in `apps/frontend/src/lib/i18n.svelte.ts`
+- [X] T004 [P] Implement NRIC/FIN checksum validation logic in `apps/frontend/src/lib/nric-validator.ts`
 
 ---
 
