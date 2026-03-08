@@ -17,6 +17,7 @@
 
 - [ ] T002 Define Drizzle schema for `PushedAuthorizationRequests` in `apps/backend/src/infra/data/schema.ts`
 - [ ] T003 [P] Define Drizzle schema for `ConsumedJti` in `apps/backend/src/infra/data/schema.ts`
+- [ ] T003b [P] Implement DPoP-Nonce generation and signature logic (stateless or minimal store)
 - [ ] T004 Run migrations to update SQLite database: `bunx drizzle-kit push`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
@@ -73,7 +74,7 @@
 **Purpose**: Final validation and optimization
 
 - [ ] T018 Implement passive expiration filter for PAR/JTI lookups in `apps/backend/src/core/use-cases/register-par.ts`
-- [ ] T019 Run full test suite: `bun test` (ensure >80% coverage)
+- [ ] T019 Run full test suite: `bun test --coverage --threshold 80` (enforce SC-005)
 - [ ] T020 [P] Validate all implementation against `quickstart.md` steps
 
 ---

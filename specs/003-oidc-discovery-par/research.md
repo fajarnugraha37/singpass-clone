@@ -1,5 +1,11 @@
 # Phase 0: Research & Decisions
 
+## Source of Truth (Principle V)
+- **Primary Source**: docs/singpass-server/01-openid-discovery.md (for Discovery/JWKS structure)
+- **Primary Source**: docs/singpass-server/02-pushed-authorization-request.md (for PAR validation/storage)
+- **Validation**: All decisions below are derived strictly from the technical requirements defined in these local specifications.
+
+
 ## Decision 1: Target Framework and Language
 - **Decision**: TypeScript on Bun using Hono framework.
 - **Rationale**: Strictly aligned with the Constitution (I. Architecture Design, Development Philosophy) that specifies Hono and Bun for backend services.
