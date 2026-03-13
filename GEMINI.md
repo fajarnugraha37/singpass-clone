@@ -1,9 +1,9 @@
-﻿# vibe-auth Project Context
+# vibe-auth Project Context
 
-**Current Feature**: 001-setup-monorepo-infra
+**Current Feature**: 008-token-exchange
 **Tech Stack**:
 - **Language/Version**: TypeScript 5.x / Bun 1.1+
-- **Primary Dependencies**: Astro, Hono, Drizzle ORM, Svelte, TailwindCSS
+- **Primary Dependencies**: Astro, Hono, Drizzle ORM, Svelte, TailwindCSS, `jose`, `@vibe-auth/shared`
 - **Storage**: SQLite (via Drizzle)
 - **Testing**: Bun test
 - **Project Type**: Monorepo (Web Application + API)
