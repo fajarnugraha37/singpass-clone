@@ -55,6 +55,30 @@ export const usedJtis = sqliteTable('used_jtis', {
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 });
 
+export const accessTokens = sqliteTable('access_tokens', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  token: text('token').unique().notNull(),
+  userId: text('user_id').notNull(),
+  clientId: text('client_id').notNull(),
+  dpopJkt: text('dpop_jkt').notNull(),
+  scope: text('scope').notNull(),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  revoked: integer('revoked', { mode: 'boolean' }).default(false).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+});
+
+export const refreshTokens = sqliteTable('refresh_tokens', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  token: text('token').unique().notNull(),
+  userId: text('user_id').notNull(),
+  clientId: text('client_id').notNull(),
+  dpopJkt: text('dpop_jkt').notNull(),
+  scope: text('scope').notNull(),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  revoked: integer('revoked', { mode: 'boolean' }).default(false).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+});
+
 export const securityAuditLog = sqliteTable('security_audit_log', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   eventType: text('event_type').notNull(),

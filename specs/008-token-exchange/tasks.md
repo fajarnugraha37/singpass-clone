@@ -34,11 +34,11 @@ description: "Task list for FAPI 2.0 Token Exchange Endpoint implementation"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Update database schema for `AccessToken`, `RefreshToken`, and `UsedJti` in `apps/backend/src/infra/db/schema.ts`
-- [ ] T005 [P] Implement DPoP validation utility using `jose` in `apps/backend/src/core/utils/dpop.ts`
-- [ ] T006 [P] Implement PKCE (S256) validation utility in `apps/backend/src/core/utils/pkce.ts`
-- [ ] T007 [P] Implement JWS/JWE utility for ID Token generation in `apps/backend/src/core/utils/crypto.ts`
-- [ ] T008 Configure FAPI 2.0 compliant error mapping and logging in `apps/backend/src/infra/middleware/fapi-error.ts`
+- [x] T004 Update database schema for `AccessToken`, `RefreshToken`, and `UsedJti` in `apps/backend/src/infra/db/schema.ts`
+- [x] T005 [P] Implement DPoP validation utility using `jose` in `apps/backend/src/core/utils/dpop.ts`
+- [x] T006 [P] Implement PKCE (S256) validation utility in `apps/backend/src/core/utils/pkce.ts`
+- [x] T007 [P] Implement JWS/JWE utility for ID Token generation in `apps/backend/src/core/utils/crypto.ts`
+- [x] T008 Configure FAPI 2.0 compliant error mapping and logging in `apps/backend/src/infra/middleware/fapi-error.ts`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
