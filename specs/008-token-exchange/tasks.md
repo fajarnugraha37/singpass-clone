@@ -74,10 +74,10 @@ description: "Task list for FAPI 2.0 Token Exchange Endpoint implementation"
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T017 [P] Update Singpass server documentation in `docs/singpass-server/04-token-endpoint.md`
-- [ ] T018 Code cleanup and secret masking audit in `apps/backend/src/`
-- [ ] T019 Performance check: Ensure token exchange is < 300ms (SC-002)
-- [ ] T020 Run final validation using `specs/008-token-exchange/quickstart.md`
+- [x] T017 [P] Update Singpass server documentation in `docs/singpass-server/04-token-endpoint.md`
+- [x] T018 Code cleanup and secret masking audit in `apps/backend/src/`
+- [x] T019 Performance check: Ensure token exchange is < 300ms (SC-002)
+- [x] T020 Run final validation using `specs/008-token-exchange/quickstart.md`
 
 ---
 

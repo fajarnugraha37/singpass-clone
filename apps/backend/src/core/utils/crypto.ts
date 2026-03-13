@@ -40,8 +40,9 @@ export async function encryptIDToken(
   alg: string = 'ECDH-ES+A256KW',
   enc: string = 'A256GCM'
 ): Promise<string> {
-  const publicKey = jose.isJWK(clientPublicKey) 
-    ? await jose.importJWK(clientPublicKey, alg) 
+  const isJWK = typeof clientPublicKey === 'object' && 'kty' in clientPublicKey;
+  const publicKey = isJWK
+    ? await jose.importJWK(clientPublicKey as jose.JWK, alg)
     : clientPublicKey;
 
   return await new jose.CompactEncrypt(new TextEncoder().encode(jws))

@@ -29,17 +29,19 @@ Upon successful validation:
 1. **Access Token**: Generate a secure `access_token` bound to the client's DPoP key. (Set lifetime, e.g., 30 minutes).
 2. **ID Token (JWE/JWS)**: Generate an `id_token`.
    - **Claims**: Include `sub`, `aud` (client_id), `iss`, `iat`, `exp`, `nonce` (from PAR), `acr` (e.g., `urn:singpass:authentication:loa:2`), `amr` (e.g., `["pwd", "otp-sms"]`), and conditionally `sub_attributes` (if specific scopes like `name` or `user.identity` were requested).
-   - **Signing (JWS)**: Sign the ID token payload using the server's ES256 private key.
-   - **Encryption (JWE)**: Optionally/mandatorily (as per Singpass specs), encrypt the signed JWS using the Client's public encryption key.
+   - **Signing (JWS)**: Sign the ID token payload using the server's `ES256` private key using the `jose` library.
+   - **Encryption (JWE)**: Mandatorily encrypt the signed JWS using the Client's public encryption key.
+   - **Algorithms**: `ECDH-ES+A256KW` for key wrap and `A256GCM` for content encryption.
 
 ### Response
-Return a `200 OK` JSON response:
+Return a `200 OK` JSON response with `application/json` content type:
 ```json
 {
-  "access_token": "eyJ0eXAi...",
-  "id_token": "eyJhbGci...",
+  "access_token": "string (opaque)",
+  "id_token": "string (JWE Compact)",
   "token_type": "DPoP",
-  "expires_in": 1800
+  "expires_in": 1800,
+  "refresh_token": "string (optional)"
 }
 ```
 
