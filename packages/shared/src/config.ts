@@ -9,6 +9,9 @@ export const sharedConfig = {
     SESSION_TTL_SECONDS: 3600,
     AUTH_CODE_TTL_SECONDS: 60,
     SERVER_KEY_MIN_SIZE: 2048,
+  },
+  OIDC: {
+    ISSUER: 'https://vibe-auth.example.com',
   }
 };
 

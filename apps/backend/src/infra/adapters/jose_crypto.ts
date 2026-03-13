@@ -298,4 +298,35 @@ export class JoseCryptoService implements CryptoService {
     if (!client) return false;
     return client.redirectUris.includes(redirectUri);
   }
+
+  /**
+   * Returns an active server key for signing or encryption.
+   */
+  async getActiveKey(): Promise<{ id: string; privateKey: jose.KeyLike; publicKey: JWK }> {
+    const query = db.select().from(serverKeys).where(eq(serverKeys.isActive, true)).limit(1);
+    const [keyRecord] = await query;
+    if (!keyRecord) {
+      throw new Error('No active signing key found');
+    }
+
+    const decryptedPrivateKey = decryptKey({
+      encryptedKey: keyRecord.encryptedKey,
+      iv: keyRecord.iv,
+      authTag: keyRecord.authTag,
+    });
+
+    const privateKey = await jose.importPKCS8(decryptedPrivateKey.toString(), this.algorithm);
+    const publicKey = await jose.exportJWK(privateKey);
+    
+    return {
+      id: keyRecord.id,
+      privateKey,
+      publicKey: {
+        ...publicKey,
+        kid: keyRecord.id,
+        use: 'sig',
+        alg: this.algorithm,
+      } as JWK,
+    };
+  }
 }

@@ -61,4 +61,9 @@ export interface CryptoService {
    * Validates exact redirect_uri against client registry.
    */
   validateRedirectUri(clientId: string, redirectUri: string): Promise<boolean>;
+
+  /**
+   * Returns an active server key for signing or encryption.
+   */
+  getActiveKey(): Promise<{ id: string; privateKey: jose.KeyLike; publicKey: JWK }>;
 }

@@ -29,6 +29,33 @@ export const MOCK_CLIENT_REGISTRY: Record<string, ClientConfig> = {
       ],
     },
   },
+  'test-client': {
+    clientId: 'test-client',
+    clientName: 'Test Client',
+    redirectUris: ['http://localhost:3000/cb'],
+    jwks: {
+      keys: [
+        {
+          kty: 'EC',
+          crv: 'P-256',
+          x: 'f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU',
+          y: 'x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0',
+          kid: 'test-client-key',
+          use: 'sig',
+          alg: 'ES256',
+        },
+        {
+          kty: 'EC',
+          crv: 'P-256',
+          x: 'f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU',
+          y: 'x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0',
+          kid: 'test-client-enc-key',
+          use: 'enc',
+          alg: 'ECDH-ES+A256KW',
+        },
+      ],
+    },
+  },
 };
 
 export function getClientConfig(clientId: string): ClientConfig | null {

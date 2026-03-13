@@ -59,12 +59,12 @@ description: "Task list for FAPI 2.0 Token Exchange Endpoint implementation"
 
 ### Implementation for User Story 1
 
-- [ ] T011 [P] [US1] Implement `ClientAuthenticationService` for `private_key_jwt` validation in `apps/backend/src/core/services/client-auth.service.ts`
-- [ ] T012 [P] [US1] Implement `TokenService` for generating DPoP-bound Access/Refresh tokens and JWE ID tokens in `apps/backend/src/core/services/token.service.ts`
-- [ ] T013 [US1] Implement `TokenRepository` for database persistence and code invalidation in `apps/backend/src/infra/db/token.repository.ts`
-- [ ] T014 [US1] Implement `TokenExchangeUseCase` coordinating validation and generation in `apps/backend/src/core/use-cases/token-exchange.use-case.ts`
-- [ ] T015 [US1] Define Hono route and controller for `POST /token` in `apps/backend/src/index.ts`
-- [ ] T016 [US1] Apply FAPI 2.0 error handling and input validation (Zod) to the token endpoint
+- [x] T011 [P] [US1] Implement `ClientAuthenticationService` for `private_key_jwt` validation in `apps/backend/src/core/application/services/client-auth.service.ts`
+- [x] T012 [P] [US1] Implement `TokenService` for generating DPoP-bound Access/Refresh tokens and JWE ID tokens in `apps/backend/src/core/application/services/token.service.ts`
+- [x] T013 [US1] Implement `TokenRepository` for database persistence and code invalidation in `apps/backend/src/infra/adapters/db/drizzle_token_repository.ts`
+- [x] T014 [US1] Implement `TokenExchangeUseCase` coordinating validation and generation in `apps/backend/src/core/use-cases/token-exchange.ts`
+- [x] T015 [US1] Define Hono route and controller for `POST /token` in `apps/backend/src/index.ts`
+- [x] T016 [US1] Apply FAPI 2.0 error handling and input validation (Zod) to the token endpoint
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 

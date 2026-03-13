@@ -1,5 +1,5 @@
 import { Context, Next } from 'hono';
-import { TokenErrorResponse } from '../../../../../packages/shared/src/tokens';
+import { TokenErrorResponse } from '../../../../packages/shared/src/tokens';
 
 export class FapiError extends Error {
   constructor(
@@ -19,7 +19,7 @@ export async function fapiErrorHandler(c: Context, next: Next) {
   try {
     await next();
   } catch (err: any) {
-    if (err instanceof FapiError) {
+    if (err.name === 'FapiError' || err instanceof FapiError) {
       console.warn(`[FAPI Error] ${err.error}: ${err.description || 'No description'}`);
       
       const response: TokenErrorResponse = {
