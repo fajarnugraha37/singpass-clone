@@ -13,7 +13,7 @@ export async function validatePKCE(verifier: string, challenge: string, method: 
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     
     // Convert to base64url format
-    const challengeFromVerifier = Buffer.from(hashBuffer)
+    const challengeFromVerifier = Buffer.from(new Uint8Array(hashBuffer))
       .toString('base64')
       .replace(/\+/g, '-')
       .replace(/\//g, '_')

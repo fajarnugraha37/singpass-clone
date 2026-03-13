@@ -54,8 +54,8 @@ description: "Task list for FAPI 2.0 Token Exchange Endpoint implementation"
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T009 [P] [US1] Create unit tests for DPoP and PKCE validation in `apps/backend/tests/core/utils.test.ts`
-- [ ] T010 [P] [US1] Create integration test for `/token` endpoint in `apps/backend/tests/integration/token-exchange.test.ts`
+- [x] T009 [P] [US1] Create unit tests for DPoP and PKCE validation in `apps/backend/tests/core/utils.test.ts`
+- [x] T010 [P] [US1] Create integration test for `/token` endpoint in `apps/backend/tests/integration/token-exchange.test.ts`
 
 ### Implementation for User Story 1
 
