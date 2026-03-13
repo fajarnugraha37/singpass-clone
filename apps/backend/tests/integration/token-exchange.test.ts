@@ -1,6 +1,9 @@
-import { expect, test, describe, beforeAll } from 'bun:test';
+import { expect, test, describe, beforeAll, spyOn, afterEach, mock } from 'bun:test';
 import app from '../../src/index';
 import * as jose from 'jose';
+import { DrizzleAuthorizationCodeRepository } from '../../src/infra/adapters/db/drizzle_authorization_code_repository';
+import { DrizzleTokenRepository } from '../../src/infra/adapters/db/drizzle_token_repository';
+import { JoseCryptoService } from '../../src/infra/adapters/jose_crypto';
 
 describe('Token Exchange Integration', () => {
   let clientKeyPair: jose.GenerateKeyPairResult;
@@ -11,7 +14,42 @@ describe('Token Exchange Integration', () => {
     serverKeyPair = await jose.generateKeyPair('ES256');
   });
 
+  afterEach(() => {
+    mock.restore();
+  });
+
   test('POST /token should exchange auth code for tokens', async () => {
+    const jwk = await jose.exportJWK(clientKeyPair.publicKey);
+    const jkt = await jose.calculateJwkThumbprint(jwk);
+
+    // 0. Mocks
+    spyOn(JoseCryptoService.prototype, 'validateClientAssertion').mockImplementation(async () => true);
+    spyOn(JoseCryptoService.prototype, 'getActiveKey').mockImplementation(async () => ({
+      id: 'server-kid',
+      privateKey: serverKeyPair.privateKey,
+      publicKey: await jose.exportJWK(serverKeyPair.publicKey)
+    }));
+
+    spyOn(DrizzleAuthorizationCodeRepository.prototype, 'getByCode').mockImplementation(async (code: string) => {
+      if (code === 'valid-code-123') {
+        return {
+          code: 'valid-code-123',
+          userId: 'user-123',
+          clientId: 'test-client',
+          codeChallenge: 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM', // matches dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
+          dpopJkt: jkt,
+          redirectUri: 'http://localhost:3000/cb',
+          expiresAt: new Date(Date.now() + 300000),
+          used: false,
+          createdAt: new Date()
+        };
+      }
+      return null;
+    });
+    spyOn(DrizzleAuthorizationCodeRepository.prototype, 'markAsUsed').mockImplementation(async () => {});
+    spyOn(DrizzleTokenRepository.prototype, 'saveAccessToken').mockImplementation(async () => {});
+    spyOn(DrizzleTokenRepository.prototype, 'saveRefreshToken').mockImplementation(async () => {});
+
     // 1. Generate DPoP proof
     const dpopProof = await new jose.SignJWT({
       htm: 'POST',
@@ -21,7 +59,7 @@ describe('Token Exchange Integration', () => {
       .setProtectedHeader({ 
         alg: 'ES256', 
         typ: 'dpop+jwt', 
-        jwk: await jose.exportJWK(clientKeyPair.publicKey) 
+        jwk 
       })
       .setIssuedAt()
       .sign(clientKeyPair.privateKey);
@@ -43,7 +81,7 @@ describe('Token Exchange Integration', () => {
       grant_type: 'authorization_code',
       code: 'valid-code-123',
       redirect_uri: 'http://localhost:3000/cb',
-      code_verifier: 'test-verifier-abc',
+      code_verifier: 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk',
       client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
       client_assertion: clientAssertion,
     });
@@ -58,8 +96,6 @@ describe('Token Exchange Integration', () => {
       body: body.toString(),
     });
 
-    // EXPECTATION: This will FAIL (404) until the endpoint is implemented.
-    // For TDD, we want to see it fail.
     expect(res.status).toBe(200);
     
     const data = await res.json();

@@ -1,4 +1,4 @@
-import { expect, test, describe, beforeEach, spyOn } from 'bun:test'
+import { expect, test, describe, beforeEach, spyOn, afterEach, mock } from 'bun:test'
 import app from '../../../src/index'
 import { JoseCryptoService } from '../../../src/infra/adapters/jose_crypto'
 import * as jose from 'jose'
@@ -15,6 +15,10 @@ describe('PAR Endpoint', () => {
     // Bypass real crypto validation for integration test
     spyOn(JoseCryptoService.prototype, 'validateClientAssertion').mockImplementation(async () => true);
     spyOn(JoseCryptoService.prototype, 'validateDPoPProof').mockImplementation(async () => ({ jkt: 'test-jkt' }));
+  });
+
+  afterEach(() => {
+    mock.restore();
   });
 
   test('POST /api/par should return 201 Created for valid request', async () => {

@@ -89,8 +89,10 @@ export class JoseCryptoService implements CryptoService {
 
     try {
       const publicKey = await jose.importJWK(clientPublicKey, this.algorithm);
+      // FAPI 2.0 / private_key_jwt validation
       await jose.jwtVerify(assertion, publicKey, {
         algorithms: [this.algorithm],
+        clockTolerance: 60, // 1 minute skew tolerance
       });
 
       await this.auditService?.logEvent({
