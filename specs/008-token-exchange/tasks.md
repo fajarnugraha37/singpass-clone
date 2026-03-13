@@ -22,9 +22,9 @@ description: "Task list for FAPI 2.0 Token Exchange Endpoint implementation"
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Verify `apps/backend` and `packages/shared` structure per plan.md
-- [ ] T002 Verify `jose` and `drizzle-orm` dependencies in `apps/backend/package.json`
-- [ ] T003 [P] Create shared types for token responses in `packages/shared/src/tokens.ts`
+- [x] T001 Verify `apps/backend` and `packages/shared` structure per plan.md
+- [x] T002 Verify `jose` and `drizzle-orm` dependencies in `apps/backend/package.json`
+- [x] T003 [P] Create shared types for token responses in `packages/shared/src/tokens.ts`
 
 ---
 
