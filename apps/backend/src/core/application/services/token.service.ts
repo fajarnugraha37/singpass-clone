@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 import type { CryptoService } from '../../domain/crypto_service';
 import { generateEncryptedIDToken, IDTokenClaims } from '../../utils/crypto';
-import { getClientConfig } from '../../../infra/adapters/client_registry';
+import type { ClientRegistry } from '../../domain/client_registry';
 import { FapiErrors } from '../../../infra/middleware/fapi-error';
 import type { TokenResponse } from '../../../../packages/shared/src/tokens';
 import { buildSubAttributes, mapLoaToAcr, UserAttributes } from '../../domain/claims';
@@ -20,7 +20,10 @@ export interface TokenGenerationParams {
 }
 
 export class TokenService {
-  constructor(private cryptoService: CryptoService) {}
+  constructor(
+    private cryptoService: CryptoService,
+    private clientRegistry: ClientRegistry,
+  ) {}
 
   /**
    * Generates a complete set of tokens (Access, ID, Refresh) for a user/client session.
@@ -72,7 +75,7 @@ export class TokenService {
     const { userId, clientId, nonce, issuer, expiresIn, loa, amr, scope, user } = params;
 
     // 1. Resolve Client Config and Public Encryption Key
-    const clientConfig = getClientConfig(clientId);
+    const clientConfig = await this.clientRegistry.getClientConfig(clientId);
     if (!clientConfig) {
       throw FapiErrors.invalidClient('Client not found');
     }

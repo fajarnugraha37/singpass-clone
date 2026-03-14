@@ -44,8 +44,35 @@ describe('Token Exchange Performance', () => {
   let clientAssertion: string;
 
   beforeAll(async () => {
-    const clientAuthService = new ClientAuthenticationService(mockCryptoService);
-    const tokenService = new TokenService(mockCryptoService);
+    const mockClientRegistry: any = {
+      getClientConfig: async (clientId: string) => ({
+        clientId: 'test-client',
+        clientName: 'Test Client',
+        redirectUris: ['http://localhost/cb'],
+        jwks: { keys: [
+          {
+            kty: 'EC',
+            crv: 'P-256',
+            x: 'f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU',
+            y: 'x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0',
+            kid: 'mock-client-key-1',
+            use: 'sig',
+            alg: 'ES256',
+          },
+          {
+            kty: 'EC',
+            crv: 'P-256',
+            x: '1HrSJLEHsUI8f3TCMdiFVtDyXOtmJeu0x2b0MT-a1vI',
+            y: 'cRC2KiCF4oQxfiZ39vVBMp5ng2rPEpYSSmNI7brbTiQ',
+            kid: 'mock-client-enc-key',
+            use: 'enc',
+            alg: 'ECDH-ES+A256KW',
+          }
+        ] }
+      })
+    };
+    const clientAuthService = new ClientAuthenticationService(mockCryptoService, mockClientRegistry);
+    const tokenService = new TokenService(mockCryptoService, mockClientRegistry);
     const dpopValidator = new DPoPValidator(mockJtiStore);
     const mockUserInfoRepo: any = {
       getUserById: async () => ({ id: 'user-123', nric: 'S1234567A', name: 'Test User' }),

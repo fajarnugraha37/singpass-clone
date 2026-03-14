@@ -11,15 +11,24 @@ describe('Coverage Booster', () => {
   describe('JoseCryptoService', () => {
     let cryptoService: JoseCryptoService;
     let mockKeyManager: any;
+    let mockClientRegistry: any;
 
     beforeEach(async () => {
       const { publicKey, privateKey } = await jose.generateKeyPair('ES256', { extractable: true });
+      mockClientRegistry = {
+        getClientConfig: async (clientId: string) => ({
+          clientId: 'test-client',
+          clientName: 'Test Client',
+          redirectUris: ['http://localhost:3000/cb'],
+          jwks: { keys: [] }
+        })
+      };
       mockKeyManager = {
         generateKeyPair: mock(async () => ({ id: 'test-id', publicKey: await jose.exportJWK(publicKey) })),
         getActiveKey: mock(async () => ({ id: 'test-id', privateKey, publicKey: await jose.exportJWK(publicKey) })),
         getPublicJWKS: mock(async () => ({ keys: [await jose.exportJWK(publicKey)] })),
       };
-      cryptoService = new JoseCryptoService(mockKeyManager);
+      cryptoService = new JoseCryptoService(mockKeyManager, mockClientRegistry);
     });
 
     it('should generate key pair', async () => {

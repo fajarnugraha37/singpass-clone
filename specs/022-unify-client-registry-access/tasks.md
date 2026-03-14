@@ -24,11 +24,11 @@
 
 ### Implementation for User Story 1
 
-- [ ] T001 [P] [US1] Refactor `JoseCryptoService` to accept `ClientRegistry` via its constructor and use it in the `validateRedirectUri` method. Update file `apps/backend/src/infra/adapters/jose_crypto.ts`.
-- [ ] T002 [P] [US1] Refactor `TokenService` to accept `ClientRegistry` via its constructor and use it to fetch client configuration. Update file `apps/backend/src/core/application/services/token.service.ts`.
-- [ ] T003 [P] [US1] Refactor `ClientAuthService` to accept `ClientRegistry` via its constructor and use it to fetch client configuration. Update file `apps/backend/src/core/application/services/client-auth.service.ts`.
-- [ ] T004 [P] [US1] Refactor `userinfo.controller.ts` to remove the direct call to `getClientConfig`. The required client information should be provided by the corresponding use case. Update file `apps/backend/src/infra/http/controllers/userinfo.controller.ts`.
-- [ ] T005 [US1] Update the dependency injection wiring to pass the `clientRegistry` instance to the constructors of the refactored services (`JoseCryptoService`, `TokenService`, `ClientAuthService`). Update file `apps/backend/src/index.ts`.
+- [X] T001 [P] [US1] Refactor `JoseCryptoService` to accept `ClientRegistry` via its constructor and use it in the `validateRedirectUri` method. Update file `apps/backend/src/infra/adapters/jose_crypto.ts`.
+- [X] T002 [P] [US1] Refactor `TokenService` to accept `ClientRegistry` via its constructor and use it to fetch client configuration. Update file `apps/backend/src/core/application/services/token.service.ts`.
+- [X] T003 [P] [US1] Refactor `ClientAuthService` to accept `ClientRegistry` via its constructor and use it to fetch client configuration. Update file `apps/backend/src/core/application/services/client-auth.service.ts`.
+- [X] T004 [P] [US1] Refactor `userinfo.controller.ts` to remove the direct call to `getClientConfig`. The required client information should be provided by the corresponding use case. Update file `apps/backend/src/infra/http/controllers/userinfo.controller.ts`.
+- [X] T005 [US1] Update the dependency injection wiring to pass the `clientRegistry` instance to the constructors of the refactored services (`JoseCryptoService`, `TokenService`, `ClientAuthService`). Update file `apps/backend/src/index.ts`.
 
 **Checkpoint**: All application code now uses the `ClientRegistry` port. The old `getClientConfig` function is no longer called by the application.
 
@@ -38,7 +38,7 @@
 
 **Goal**: Ensure all tests pass after the refactoring and are updated to reflect the new dependency injection pattern.
 
-- [ ] T006 [US1] Update all affected unit and integration tests across the `apps/backend/tests/` directory. Mocks for the standalone `getClientConfig` function must be replaced with mocks for the `ClientRegistry` port interface.
+- [X] T006 [US1] Update all affected unit and integration tests across the `apps/backend/tests/` directory. Mocks for the standalone `getClientConfig` function must be replaced with mocks for the `ClientRegistry` port interface.
 
 **Checkpoint**: All tests are updated and passing. The codebase is functionally correct after the refactoring.
 
@@ -48,9 +48,9 @@
 
 **Goal**: Remove the legacy code and perform final validation.
 
-- [ ] T007 [US1] Delete the deprecated `getClientConfig` function from the file `apps/backend/src/infra/adapters/client_registry.ts`.
-- [ ] T008 [US1] Run the entire test suite (`bun test`) to confirm that all tests pass after the function deletion.
-- [ ] T009 [US1] Perform a final, global search for the string `getClientConfig` to ensure no references remain anywhere in the codebase.
+- [X] T007 [US1] Delete the deprecated `getClientConfig` function from the file `apps/backend/src/infra/adapters/client_registry.ts`.
+- [X] T008 [US1] Run the entire test suite (`bun test`) to confirm that all tests pass after the function deletion.
+- [X] T009 [US1] Perform a final, global search for the string `getClientConfig` to ensure no references remain anywhere in the codebase.
 
 **Checkpoint**: The refactoring is complete and validated. The legacy code is removed.
 
@@ -60,7 +60,7 @@
 
 **Purpose**: Final documentation validation.
 
-- [ ] T010 [US1] Validate the instructions in `specs/022-unify-client-registry-access/quickstart.md` by manually checking them against the refactored codebase.
+- [X] T010 [US1] Validate the instructions in `specs/022-unify-client-registry-access/quickstart.md` by manually checking them against the refactored codebase.
 
 ---
 

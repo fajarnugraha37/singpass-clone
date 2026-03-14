@@ -1,6 +1,6 @@
 import * as jose from 'jose';
 import type { CryptoService } from '../../domain/crypto_service';
-import { getClientConfig } from '../../../infra/adapters/client_registry';
+import type { ClientRegistry } from '../../domain/client_registry';
 import { FapiErrors } from '../../../infra/middleware/fapi-error';
 
 export interface ClientAuthenticationResult {
@@ -8,7 +8,10 @@ export interface ClientAuthenticationResult {
 }
 
 export class ClientAuthenticationService {
-  constructor(private cryptoService: CryptoService) {}
+  constructor(
+    private cryptoService: CryptoService,
+    private clientRegistry: ClientRegistry,
+  ) {}
 
   /**
    * Validates a client_assertion using private_key_jwt as per FAPI 2.0.
@@ -33,7 +36,7 @@ export class ClientAuthenticationService {
       }
 
       // 2. Resolve client config and public key
-      const clientConfig = getClientConfig(clientId);
+      const clientConfig = await this.clientRegistry.getClientConfig(clientId);
       if (!clientConfig) {
         throw FapiErrors.invalidClient('Client not found');
       }

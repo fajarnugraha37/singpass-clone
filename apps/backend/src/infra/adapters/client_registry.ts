@@ -67,6 +67,3 @@ export class DrizzleClientRegistry implements ClientRegistry {
   }
 }
 
-export function getClientConfig(clientId: string): ClientConfig | null {
-  return MOCK_CLIENT_REGISTRY[clientId] || null;
-}

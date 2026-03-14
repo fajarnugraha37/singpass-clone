@@ -36,7 +36,8 @@ import { openapiSpec } from './infra/http/openapi-spec';
 
 const auditService = new DrizzleSecurityAuditService();
 const keyManager = new DrizzleServerKeyManager(auditService);
-const cryptoService = new JoseCryptoService(keyManager, auditService);
+const clientRegistry = new DrizzleClientRegistry();
+const cryptoService = new JoseCryptoService(keyManager, clientRegistry, auditService);
 
 // Ensure active keys exist on startup and handle rotation if needed
 await Promise.all([
@@ -48,12 +49,11 @@ const authSessionRepository = new DrizzleAuthSessionRepository();
 const authCodeRepository = new DrizzleAuthorizationCodeRepository();
 const tokenRepository = new DrizzleTokenRepository();
 const userInfoRepository = new DrizzleUserInfoRepository();
-const clientRegistry = new DrizzleClientRegistry();
 const jtiStore = new DrizzleJtiStore();
 const dpopValidator = new DPoPValidator(jtiStore);
 
-const clientAuthService = new ClientAuthenticationService(cryptoService);
-const tokenService = new TokenService(cryptoService);
+const clientAuthService = new ClientAuthenticationService(cryptoService, clientRegistry);
+const tokenService = new TokenService(cryptoService, clientRegistry);
 
 const registerParUseCase = new RegisterParUseCase(cryptoService, parRepository, clientRegistry, dpopValidator, auditService);
 const tokenExchangeUseCase = new TokenExchangeUseCase(

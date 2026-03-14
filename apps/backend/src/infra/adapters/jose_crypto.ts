@@ -4,7 +4,7 @@ import type { CryptoService } from '../../core/domain/crypto_service';
 import { db } from '../database/client';
 import * as schema from '../database/schema';
 import { sharedConfig } from '../../../../../packages/shared/src/config';
-import { getClientConfig } from './client_registry';
+import type { ClientRegistry } from '../../core/domain/client_registry';
 import type { SecurityAuditService } from '../../core/domain/audit_service';
 import type { ServerKeyManager } from '../../core/domain/key_manager';
 import { and, eq } from 'drizzle-orm';
@@ -17,6 +17,7 @@ export class JoseCryptoService implements CryptoService {
 
   constructor(
     private keyManager: ServerKeyManager,
+    private clientRegistry: ClientRegistry,
     private auditService?: SecurityAuditService
   ) {}
 
@@ -133,7 +134,7 @@ export class JoseCryptoService implements CryptoService {
   }
 
   async validateRedirectUri(clientId: string, redirectUri: string): Promise<boolean> {
-    const client = getClientConfig(clientId);
+    const client = await this.clientRegistry.getClientConfig(clientId);
     return client?.redirectUris.includes(redirectUri) ?? false;
   }
 }

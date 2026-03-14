@@ -1,6 +1,5 @@
 import { Context } from 'hono';
 import { GetUserInfoUseCase } from '../../../core/use-cases/get-userinfo';
-import { getClientConfig } from '../../adapters/client_registry';
 
 export const getUserInfo = (useCase: GetUserInfoUseCase, issuer: string) => async (c: Context) => {
   const authHeader = c.req.header('Authorization');
