@@ -360,13 +360,306 @@
 
 ---
 
+### 15. Scope Handling & UserInfo Scope-to-Claims Matrix
+
+**Doc References**:
+- `docs/singpass/technical-specifications/integration-guide/1.-authorization-request.md` (Scope parameter definition)
+- `docs/singpass/technical-specifications/integration-guide/4.-parsing-the-id-token.md` (ID Token claims & `sub_attributes`)
+- `docs/singpass/technical-specifications/integration-guide/5.-requesting-for-userinfo.md` (UserInfo `person_info`)
+- `docs/singpass-server/05-userinfo-endpoint.md` (Server-side `person_info` structure)
+
+**Implementation Files**:
+- `packages/shared/src/config.ts` → `parRequestSchema` (scope validation at PAR entry)
+- `apps/backend/src/core/domain/par.types.ts` → `PushedAuthorizationRequest` (PAR storage)
+- `apps/backend/src/core/use-cases/GenerateAuthCode.ts` → Auth code generation
+- `apps/backend/src/core/domain/authorizationCode.ts` → `AuthorizationCode` type
+- `apps/backend/src/core/use-cases/token-exchange.ts` → Token exchange
+- `apps/backend/src/core/application/services/token.service.ts` → ID Token generation
+- `apps/backend/src/core/domain/userinfo_claims.ts` → `mapUserInfoClaims()` + `PersonInfo`
+- `apps/backend/src/core/use-cases/get-userinfo.ts` → UserInfo use case
+- `apps/backend/src/infra/database/schema.ts` → DB schema
+
+#### 15a. Singpass Scope Definitions (from docs)
+
+Per the Singpass spec, the following scopes are supported:
+
+| Scope | Type | Description | Where Data is Returned |
+|-------|------|-------------|----------------------|
+| `openid` | **Mandatory** | Required by OIDC spec. Must always be present. | Enables the OIDC flow itself |
+| `user.identity` | Login | Returns `identity_number`, `identity_coi`, `account_type` | ID Token → `sub_attributes` |
+| `name` | Login | Returns user's principal name | ID Token → `sub_attributes.name` |
+| `email` | Login | Returns user's email address | ID Token → `sub_attributes.email` |
+| `mobileno` | Login | Returns user's Singapore mobile number | ID Token → `sub_attributes.mobileno` |
+| `sub_account` | Login | Returns sub-account information | ID Token → `sub_account` |
+| `uinfin` | Myinfo | Returns NRIC/FIN identifier | UserInfo → `person_info.uinfin` |
+| _(Myinfo data catalog scopes)_ | Myinfo | Various personal data (employment, income, etc.) | UserInfo → `person_info.*` |
+
+#### 15b. Scope → Claims Matrix
+
+This matrix defines which claims should be returned for each scope, and where (ID Token vs UserInfo `person_info`):
+
+##### ID Token Claims (based on scopes)
+
+| Scope Requested | ID Token Claim | Value Format | Doc Reference |
+|----------------|----------------|--------------|---------------|
+| _(always)_ | `sub` | UUID string | Always returned |
+| _(always)_ | `aud` | client_id string | Always returned |
+| _(always)_ | `iss` | Issuer URL | Always returned |
+| _(always)_ | `iat` | Unix timestamp (seconds) | Always returned |
+| _(always)_ | `exp` | Unix timestamp (seconds) | Always returned |
+| _(always)_ | `nonce` | String from PAR request | Always returned |
+| _(always)_ | `acr` | `urn:singpass:authentication:loa:{1,2,3}` | Always returned |
+| _(always)_ | `amr` | `["pwd"]`, `["pwd", "otp-sms"]`, etc. | Always returned |
+| _(always)_ | `sub_type` | `"user"` | Always returned |
+| `user.identity` | `sub_attributes.identity_number` | NRIC/FIN/Foreign ID string | Conditional |
+| `user.identity` | `sub_attributes.identity_coi` | 2-letter country code (e.g. `"SG"`) | Conditional |
+| `user.identity` | `sub_attributes.account_type` | `"standard"` or `"foreign"` | Conditional |
+| `name` | `sub_attributes.name` | User's full name string | Conditional |
+| `email` | `sub_attributes.email` | Email string | Conditional |
+| `mobileno` | `sub_attributes.mobileno` | SG mobile number string | Conditional |
+
+##### UserInfo `person_info` Claims (based on scopes — Myinfo apps)
+
+| Scope Requested | `person_info` Field | Value Format | Doc Reference |
+|----------------|---------------------|--------------|---------------|
+| `uinfin` | `person_info.uinfin` | `{ "value": "S1234567A" }` | `docs/singpass-server/05-userinfo-endpoint.md` |
+| `name` | `person_info.name` | `{ "value": "JOHN DOE" }` | `docs/singpass-server/05-userinfo-endpoint.md` |
+| `email` | `person_info.email` | `{ "value": "john@example.com" }` | `docs/singpass-server/05-userinfo-endpoint.md` |
+| _(Myinfo catalog)_ | `person_info.*` | `{ "value": "..." }` per field | Follows Myinfo Get Person API |
+
+> Standard claims always returned in UserInfo: `sub`, `iss`, `aud`, `iat`
+
+#### 15c. Code Implementation Gap Analysis
+
+##### Current `PersonInfo` Interface (`userinfo_claims.ts`)
+
+```typescript
+// CURRENT CODE
+export interface PersonInfo {
+  uinfin?: PersonInfoField;   // ✅ Exists
+  name?: PersonInfoField;     // ✅ Exists
+  email?: PersonInfoField;    // ✅ Exists
+  // ❌ MISSING: mobileno, dob, sex, race, nationality, birthcountry,
+  //            residentialstatus, passtype, employment, etc. (Myinfo fields)
+}
+```
+
+**Gap**: `PersonInfo` only has 3 fields. Real Singpass/Myinfo can have 100+ fields. For MVP this is acceptable, but additional Myinfo catalog fields are missing.
+
+##### Current `mapUserInfoClaims()` (`userinfo_claims.ts`)
+
+```typescript
+// CURRENT CODE
+export function mapUserInfoClaims(user, clientId, issuer, scopes) {
+  const person_info = {};
+  const scopeSet = new Set(scopes);
+
+  if (scopeSet.has('uinfin'))  person_info.uinfin = { value: user.nric };
+  if (scopeSet.has('name'))    person_info.name   = { value: user.name };
+  if (scopeSet.has('email'))   person_info.email  = { value: user.email };
+
+  return { sub: user.id, iss: issuer, aud: clientId, iat: ..., person_info };
+}
+```
+
+**Issue**: The scope filtering logic ITSELF is correct. The problem is the `scopes` parameter always receives `['openid']` due to the broken propagation chain (Finding #14).
+
+##### Current `UserData` Interface (`userinfo_claims.ts`)
+
+```typescript
+// CURRENT CODE
+export interface UserData {
+  id: string;
+  nric: string;
+  name: string;
+  email: string;
+  // ❌ MISSING: mobileno (needed for 'mobileno' scope)
+}
+```
+
+##### Current DB User Schema (`infra/database/schema.ts`)
+
+```typescript
+// CURRENT CODE
+export const users = sqliteTable('users', {
+  id: text('id').primaryKey(),
+  nric: text('nric').unique(),
+  name: text('name').notNull(),
+  email: text('email').unique(),
+  createdAt: integer('created_at', ...),
+  // ❌ MISSING: mobileno column
+});
+```
+
+#### 15d. Scope Propagation Chain — Full Code Trace
+
+Below is the complete trace of how scopes flow (or fail to flow) through the system:
+
+```
+Step 1: PAR Request
+  ┌─────────────────────────────────────────────────────────┐
+  │ Client sends: scope="openid uinfin name email"          │
+  │ File: packages/shared/src/config.ts (parRequestSchema)  │
+  │ Zod validates: scope must include 'openid'       ✅     │
+  │ Stored in: parRequests.payload.scope             ✅     │
+  └─────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+Step 2: Auth Session Initiation
+  ┌─────────────────────────────────────────────────────────┐
+  │ File: core/use-cases/InitiateAuthSession.ts             │
+  │ PAR data is referenced via session.parRequestUri  ✅    │
+  │ Scopes NOT explicitly copied to session           ⚠️   │
+  │ (they're still accessible via parRequest.payload)       │
+  └─────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+Step 3: Login & 2FA (scopes not relevant here)
+                           │
+                           ▼
+Step 4: Auth Code Generation  ← 🔴 FIRST BREAK POINT
+  ┌─────────────────────────────────────────────────────────┐
+  │ File: core/use-cases/GenerateAuthCode.ts                │
+  │ Reads: parRequest.payload (which HAS scope)       ✅   │
+  │ Creates AuthorizationCode with:                         │
+  │   - code, userId, clientId, codeChallenge         ✅   │
+  │   - dpopJkt, nonce, redirectUri                   ✅   │
+  │   - scope                                         ❌   │
+  │                                                         │
+  │ AuthorizationCode interface (authorizationCode.ts):      │
+  │   → DOES NOT have a 'scope' field                 ❌   │
+  │                                                         │
+  │ DB schema (authorization_codes table):                   │
+  │   → DOES NOT have a 'scope' column                ❌   │
+  └─────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+Step 5: Token Exchange  ← 🔴 SECOND BREAK POINT
+  ┌─────────────────────────────────────────────────────────┐
+  │ File: core/use-cases/token-exchange.ts                  │
+  │ Retrieves authCode — no scope field available     ❌   │
+  │ Line 97: scope: 'openid' ← HARDCODED             ❌   │
+  │   // Comment says: "This should come from the           │
+  │   //   original request or auth code"                   │
+  │ Passes hardcoded scope to:                              │
+  │   - tokenService.generateTokens() (for ID Token)       │
+  │   - tokenRepository.saveAccessToken()                   │
+  └─────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+Step 6: Access Token Storage  ← 🔴 THIRD BREAK POINT
+  ┌─────────────────────────────────────────────────────────┐
+  │ File: core/use-cases/token-exchange.ts (line 108)       │
+  │ Saved to DB with: scope: 'openid'                 ❌   │
+  │ DB column (access_tokens.scope): stores 'openid'  ❌   │
+  └─────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+Step 7: UserInfo Request  ← 🔴 CONSEQUENCE
+  ┌─────────────────────────────────────────────────────────┐
+  │ File: core/use-cases/get-userinfo.ts                    │
+  │ Reads tokenData.scope = 'openid'                  ❌   │
+  │ Passes scopes=['openid'] to mapUserInfoClaims()         │
+  │                                                         │
+  │ File: core/domain/userinfo_claims.ts                    │
+  │ scopeSet = Set(['openid'])                              │
+  │ Has 'uinfin'? NO → skip                            ❌  │
+  │ Has 'name'?   NO → skip                            ❌  │
+  │ Has 'email'?  NO → skip                            ❌  │
+  │                                                         │
+  │ RESULT: person_info = {} (EMPTY OBJECT)             ❌  │
+  └─────────────────────────────────────────────────────────┘
+```
+
+#### 15e. What Needs to Change (Fix Matrix)
+
+| # | File | Change Required | Priority |
+|---|------|----------------|----------|
+| 1 | `core/domain/authorizationCode.ts` | Add `scope: string` field to `AuthorizationCode` interface | 🔴 Critical |
+| 2 | `infra/database/schema.ts` | Add `scope` column to `authorization_codes` table | 🔴 Critical |
+| 3 | `core/use-cases/GenerateAuthCode.ts` | Read `parRequest.payload.scope` and store it in the auth code | 🔴 Critical |
+| 4 | `infra/adapters/db/drizzle_authorization_code_repository.ts` | Read/write the new `scope` column | 🔴 Critical |
+| 5 | `core/use-cases/token-exchange.ts` | Replace hardcoded `'openid'` with `authCode.scope` on line 97 and line 108 | 🔴 Critical |
+| 6 | `core/domain/userinfo_claims.ts` | Add `mobileno` to `PersonInfo` interface; add `mobileno` to `UserData` | 🟡 Medium |
+| 7 | `infra/database/schema.ts` | Add `mobileno` column to `users` table | 🟡 Medium |
+| 8 | `core/domain/userinfo_claims.ts` | Add `mobileno` scope handling in `mapUserInfoClaims()` | 🟡 Medium |
+| 9 | `core/application/services/token.service.ts` | Pass scopes to ID token generator; add `sub_attributes` and `sub_type` based on scopes | 🟠 High |
+| 10 | `core/utils/crypto.ts` | Extend `IDTokenClaims` interface with `sub_type`, `sub_attributes` | 🟠 High |
+
+#### 15f. Expected Behavior After Fix
+
+Given a PAR request with `scope="openid uinfin name email"`:
+
+**ID Token should contain:**
+```json
+{
+  "sub": "7c9c72ec-5be2-495a-a78e-61e809a2a236",
+  "aud": "test-client",
+  "iss": "https://vibe-auth.example.com",
+  "iat": 1710400000,
+  "exp": 1710403600,
+  "nonce": "abc123",
+  "acr": "urn:singpass:authentication:loa:2",
+  "amr": ["pwd", "otp-sms"],
+  "sub_type": "user",
+  "sub_attributes": {
+    "name": "JOHN DOE"
+  }
+}
+```
+
+**UserInfo response (after JWE decryption + JWS verification) should contain:**
+```json
+{
+  "sub": "7c9c72ec-5be2-495a-a78e-61e809a2a236",
+  "iss": "https://vibe-auth.example.com",
+  "aud": "test-client",
+  "iat": 1710400000,
+  "person_info": {
+    "uinfin": { "value": "S1234567A" },
+    "name": { "value": "JOHN DOE" },
+    "email": { "value": "john@example.com" }
+  }
+}
+```
+
+**Currently returns (broken):**
+```json
+{
+  "sub": "7c9c72ec-...",
+  "iss": "https://vibe-auth.example.com",
+  "aud": "test-client",
+  "iat": 1710400000,
+  "person_info": {}
+}
+```
+
+#### 15g. Scope Handling in ID Token vs UserInfo — Decision Matrix
+
+This matrix helps AI agents determine WHERE each scope's data should be returned:
+
+| Scope | Returned in ID Token `sub_attributes`? | Returned in UserInfo `person_info`? | Notes |
+|-------|---------------------------------------|-------------------------------------|-------|
+| `openid` | N/A (enables the flow) | N/A (enables the flow) | Must always be present |
+| `user.identity` | ✅ Yes → `identity_number`, `identity_coi`, `account_type` | ❌ No | Login apps only |
+| `name` | ✅ Yes → `sub_attributes.name` | ✅ Yes → `person_info.name` | Both for Login, `person_info` for Myinfo |
+| `email` | ✅ Yes → `sub_attributes.email` | ✅ Yes → `person_info.email` | Both for Login, `person_info` for Myinfo |
+| `mobileno` | ✅ Yes → `sub_attributes.mobileno` | ✅ Yes → `person_info.mobileno` | Both for Login, `person_info` for Myinfo |
+| `uinfin` | ❌ No | ✅ Yes → `person_info.uinfin` | Myinfo apps only |
+| _(Myinfo catalog scopes)_ | ❌ No | ✅ Yes → `person_info.*` | Myinfo apps only |
+
+> **Key Rule**: Login apps get user identity data primarily from the **ID Token** (`sub_attributes`). Myinfo apps get detailed personal data from the **UserInfo endpoint** (`person_info`). Some scopes like `name`, `email`, `mobileno` appear in BOTH.
+
+---
+
 ## Priority Summary
 
 | Priority | Finding | Description |
 |----------|---------|-------------|
 | 🔴 Critical | #14 | Scope propagation broken — UserInfo always returns empty `person_info` |
+| 🔴 Critical | #15 | Scope handling is non-functional end-to-end (detailed trace above) |
 | 🔴 Critical | #1 | JWKS may expose private key component `d` |
-| 🟠 High | #5 | ID Token missing `acr`, `amr`, `sub_attributes` claims |
+| 🟠 High | #5 | ID Token missing `acr`, `amr`, `sub_type`, `sub_attributes` claims |
 | 🟠 High | #9 | Three inconsistent DPoP validators; `dpop.ts` has relaxed `htu` and no JTI replay check |
 | 🟠 High | #3 | PAR doesn't validate `redirect_uri` against registered URIs |
 | 🟡 Medium | #2 | `authentication_context_type` not validated |
@@ -383,11 +676,11 @@
 
 ## Recommendations
 
-1. **Fix scope propagation** (#14): Add `scope` field to `AuthorizationCode` domain type. Propagate PAR's `payload.scope` through auth code → token exchange → access token storage.
+1. **Fix scope propagation** (#14, #15): Add `scope` field to `AuthorizationCode` domain type and DB schema. Propagate PAR's `payload.scope` through auth code → token exchange → access token storage. See the 10-step fix matrix in Finding #15e.
 
 2. **Audit JWKS export** (#1): Verify that `jose.exportJWK(privateKey)` strips the `d` parameter. If not, extract only public key components before returning.
 
-3. **Add `acr`/`amr` to ID Token** (#5): Track authentication factors during the login flow. After 2FA completion, set `acr: 'urn:singpass:authentication:loa:2'` and `amr: ['pwd', 'otp-sms']`.
+3. **Add `acr`/`amr`/`sub_type`/`sub_attributes` to ID Token** (#5): Track authentication factors during the login flow. After 2FA completion, set `acr: 'urn:singpass:authentication:loa:2'`, `amr: ['pwd', 'otp-sms']`, `sub_type: 'user'`. Populate `sub_attributes` based on scopes per the matrix in Finding #15g.
 
 4. **Consolidate DPoP validation** (#9): Merge the three DPoP validators into one canonical implementation in `core/utils/dpop_validator.ts` and remove the other two.
 
@@ -398,3 +691,5 @@
 7. **Fix `expires_in`** (#6): Align access token lifetime with Singpass documentation (30 minutes / 1800 seconds).
 
 8. **Add `WWW-Authenticate` headers** (#8): Ensure all 401 responses from UserInfo include the `WWW-Authenticate: DPoP error="..."` header.
+
+9. **Extend `UserData` and DB schema** (#15): Add `mobileno` to `UserData` interface and `users` DB table. Add `mobileno` to `PersonInfo` interface and `mapUserInfoClaims()` scope handling.
