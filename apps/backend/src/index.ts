@@ -30,13 +30,15 @@ import { createAuthRouter } from './infra/http/authRouter';
 import { getUserInfo } from './infra/http/controllers/userinfo.controller';
 import { fapiErrorHandler } from './infra/middleware/fapi-error';
 import { sharedConfig } from '../../../packages/shared/src/config';
+import { DrizzleServerKeyManager } from './infra/adapters/db/drizzle_key_manager';
 
 const auditService = new DrizzleSecurityAuditService();
-const cryptoService = new JoseCryptoService(auditService);
+const keyManager = new DrizzleServerKeyManager(auditService);
+const cryptoService = new JoseCryptoService(keyManager, auditService);
 
 // Ensure active keys exist on startup and handle rotation if needed
-await cryptoService.ensureActiveKey();
-await cryptoService.rotateKeys();
+await keyManager.ensureActiveKey();
+await keyManager.rotateKeys();
 const parRepository = new DrizzlePARRepository();
 const authSessionRepository = new DrizzleAuthSessionRepository();
 const authCodeRepository = new DrizzleAuthorizationCodeRepository();
@@ -134,7 +136,7 @@ const cleanupJob = new Cron('*/10 * * * *', async () => {
 // Daily Key Rotation Job (every day at midnight)
 const rotationJob = new Cron('0 0 * * *', async () => {
   try {
-    await cryptoService.rotateKeys();
+    await keyManager.rotateKeys();
   } catch (error) {
     console.error(`[Rotation] Error during periodic key rotation:`, error);
   }

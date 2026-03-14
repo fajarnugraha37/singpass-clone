@@ -1,5 +1,6 @@
 import { expect, test, describe, beforeAll } from "bun:test";
 import { JoseCryptoService } from "../../../src/infra/adapters/jose_crypto";
+import { DrizzleServerKeyManager } from "../../../src/infra/adapters/db/drizzle_key_manager";
 import { DrizzleAuthDataService } from "../../../src/infra/adapters/drizzle_auth_data";
 import { db } from "../../../src/infra/database/client";
 import { securityAuditLog, parRequests, sessions, authCodes, usedJtis } from "../../../src/infra/database/schema";
@@ -10,7 +11,9 @@ describe("DPoP Binding & Validation (US4)", () => {
   let authDataService: DrizzleAuthDataService;
 
   beforeAll(async () => {
-    cryptoService = new JoseCryptoService();
+    process.env.SERVER_KEY_ENCRYPTION_SECRET = "00".repeat(32);
+    const keyManager = new DrizzleServerKeyManager();
+    cryptoService = new JoseCryptoService(keyManager);
     authDataService = new DrizzleAuthDataService();
     // Clean up
     await db.delete(securityAuditLog);
@@ -96,7 +99,7 @@ describe("DPoP Binding & Validation (US4)", () => {
       await cryptoService.validateDPoPProof(proof, "POST", "http://localhost:3000/token", "mock-client-id");
       expect(true).toBe(false);
     } catch (e: any) {
-      expect(e.message).toContain("jti already used");
+      expect(e.message).toContain("DPoP jti replay");
     }
   });
 

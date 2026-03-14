@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeAll } from 'bun:test';
 import * as jose from 'jose';
 import { JoseCryptoService } from '../../src/infra/adapters/jose_crypto';
-import { db } from '../../src/infra/database/client';
-import { serverKeys } from '../../src/infra/database/schema';
+import { DrizzleServerKeyManager } from '../../src/infra/adapters/db/drizzle_key_manager';
 
 describe('JoseCryptoService: signAndEncrypt', () => {
   let cryptoService: JoseCryptoService;
@@ -13,7 +12,8 @@ describe('JoseCryptoService: signAndEncrypt', () => {
 
   beforeAll(async () => {
     process.env.SERVER_KEY_ENCRYPTION_SECRET = '00'.repeat(32);
-    cryptoService = new JoseCryptoService();
+    const keyManager = new DrizzleServerKeyManager();
+    cryptoService = new JoseCryptoService(keyManager);
     
     // 1. Setup Server Key
     const serverKey = await cryptoService.generateKeyPair();

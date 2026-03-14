@@ -4,13 +4,16 @@ import { db } from '../../../src/infra/database/client';
 import { serverKeys } from '../../../src/infra/database/schema';
 import { eq, and } from 'drizzle-orm';
 import { sharedConfig } from '../../../../../packages/shared/src/config';
+import { DrizzleServerKeyManager } from '../../../src/infra/adapters/db/drizzle_key_manager';
 
 describe('JoseCryptoService: Key Rotation', () => {
   let cryptoService: JoseCryptoService;
+  let keyManager: DrizzleServerKeyManager;
 
   beforeAll(async () => {
     process.env.SERVER_KEY_ENCRYPTION_SECRET = '00'.repeat(32);
-    cryptoService = new JoseCryptoService();
+    keyManager = new DrizzleServerKeyManager();
+    cryptoService = new JoseCryptoService(keyManager);
   });
 
   it('should automatically rotate keys and deactivate old ones', async () => {

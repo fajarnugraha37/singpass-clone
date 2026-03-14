@@ -11,15 +11,26 @@ export interface EncryptedData {
 }
 
 /**
- * Encrypts a private key using AES-256-GCM.
- * Requires SERVER_KEY_ENCRYPTION_SECRET env variable (32 bytes).
+ * Gets the encryption secret, falling back to a default only in non-production.
  */
-export function encryptKey(plainKey: string | Buffer): EncryptedData {
-  const secret = process.env.SERVER_KEY_ENCRYPTION_SECRET || '00'.repeat(32);
-  if (!secret || Buffer.from(secret, 'hex').length !== 32) {
-    throw new Error('SERVER_KEY_ENCRYPTION_SECRET must be a 32-byte hex string');
+function getSecret(): string {
+  const secret = process.env.SERVER_KEY_ENCRYPTION_SECRET;
+  if (secret && Buffer.from(secret, 'hex').length === 32) {
+    return secret;
   }
 
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('CRITICAL SECURITY ERROR: SERVER_KEY_ENCRYPTION_SECRET must be set in production!');
+  }
+
+  return '00'.repeat(32); // Dev fallback
+}
+
+/**
+ * Encrypts a private key using AES-256-GCM.
+ */
+export function encryptKey(plainKey: string | Buffer): EncryptedData {
+  const secret = getSecret();
   const key = Buffer.from(secret, 'hex');
   const iv = randomBytes(IV_LENGTH);
   const cipher = createCipheriv(ALGORITHM, key, iv);
@@ -42,11 +53,7 @@ export function encryptKey(plainKey: string | Buffer): EncryptedData {
  * Decrypts an encrypted key using AES-256-GCM.
  */
 export function decryptKey(data: EncryptedData): Buffer {
-  const secret = process.env.SERVER_KEY_ENCRYPTION_SECRET || '00'.repeat(32);
-  if (!secret || Buffer.from(secret, 'hex').length !== 32) {
-    throw new Error('SERVER_KEY_ENCRYPTION_SECRET must be a 32-byte hex string');
-  }
-
+  const secret = getSecret();
   const key = Buffer.from(secret, 'hex');
   const iv = Buffer.from(data.iv, 'base64');
   const authTag = Buffer.from(data.authTag, 'base64');

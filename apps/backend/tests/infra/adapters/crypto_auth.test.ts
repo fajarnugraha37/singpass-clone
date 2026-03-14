@@ -1,5 +1,6 @@
 import { expect, test, describe, beforeAll } from "bun:test";
 import { JoseCryptoService } from "../../../src/infra/adapters/jose_crypto";
+import { DrizzleServerKeyManager } from "../../../src/infra/adapters/db/drizzle_key_manager";
 import * as jose from "jose";
 
 describe("JoseCryptoService - Client Authentication", () => {
@@ -8,7 +9,8 @@ describe("JoseCryptoService - Client Authentication", () => {
 
   beforeAll(() => {
     process.env.SERVER_KEY_ENCRYPTION_SECRET = mockSecret;
-    cryptoService = new JoseCryptoService();
+    const keyManager = new DrizzleServerKeyManager();
+    cryptoService = new JoseCryptoService(keyManager);
   });
 
   test("should validate a valid private_key_jwt client assertion", async () => {
