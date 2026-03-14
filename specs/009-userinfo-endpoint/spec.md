@@ -19,6 +19,7 @@
 - Q: What level of **audit logging** is required for UserInfo requests? → A: Detailed Audit: Log subject, client ID, success/failure, and reason (no claims).
 - Q: How should the system handle cases where a user has **no data** for the authorized scopes? → A: Empty person_info: Return 200 OK with an empty or minimal `person_info` object.
 - Q: Should the system enforce **DPoP jti (JWT ID)** validation to prevent replay attacks? → A: Enforce Strict: Validate `jti` uniqueness within a short time window (e.g., 5 min).
+- Q: What is the caching strategy for the client's public encryption keys fetched from the jwks_uri? → A: In-memory cache (TTL-based): Essential for meeting SC-002 latency targets.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -62,7 +63,7 @@ As a Privacy Officer, I want the UserInfo endpoint to return only the specific u
 
 **Acceptance Scenarios**:
 
-1. **Given** an access token authorized only for the `openid` scope, **When** requesting UserInfo, **Then** the response contains the `sub` claim but no extended profile attributes.
+1. **Given** an access token authorized only for the `openid scope`, **When** requesting UserInfo, **Then** the response contains the `sub` claim but no extended profile attributes.
 2. **Given** an access token authorized for `openid profile`, **When** requesting UserInfo, **Then** the response contains profile attributes like name and picture.
 
 ---
@@ -83,11 +84,10 @@ As a Privacy Officer, I want the UserInfo endpoint to return only the specific u
 - **FR-003**: System MUST validate the `DPoP` proof JWT according to RFC 9449, including checking the `htm` (matching GET or POST), `htu` (URL), and `jti` (JWT ID) claims.
 - **FR-004**: System MUST enforce `jti` uniqueness for DPoP proofs within a configurable time window (e.g., 5 minutes) to prevent replay attacks.
 - **FR-005**: System MUST verify that the access token's `cnf.jkt` claim matches the thumbprint of the public key used in the DPoP proof.
-- **FR-004**: System MUST verify that the access token's `cnf.jkt` claim matches the thumbprint of the public key used in the DPoP proof.
 - **FR-006**: System MUST retrieve user identity attributes from the **local database** (populated during authentication) based on the `sub` and `scopes` associated with the access token. If no attributes match the requested scopes, an empty `person_info` object MUST be returned.
 - **FR-007**: System MUST return the UserInfo response as a **raw JWE string** (nested JWS inside JWE) containing a **nested `person_info` object** for identity claims.
 - **FR-008**: System MUST sign the UserInfo payload using the server's private **ES256** key (JWS).
-- **FR-009**: System MUST encrypt the resulting JWS using the Client's public encryption key retrieved from their **`jwks_uri`** via **ECDH-ES+A256KW** with **A256GCM** for content encryption (JWE).
+- **FR-009**: System MUST encrypt the resulting JWS using the Client's public encryption key retrieved from their **`jwks_uri`** (using an in-memory TTL-based cache) via **ECDH-ES+A256KW** with **A256GCM** for content encryption (JWE).
 - **FR-010**: System MUST return 401 Unauthorized with appropriate error codes (`invalid_token`, `invalid_dpop_proof`) for validation failures.
 - **FR-011**: System MUST record a detailed audit log for every UserInfo request, including client ID, subject, request status, and failure reason (if applicable), excluding actual claim values.
 
