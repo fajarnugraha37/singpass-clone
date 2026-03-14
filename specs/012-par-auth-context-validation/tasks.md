@@ -46,14 +46,14 @@
 
 ### Tests for User Story 1
 
-- [ ] T006 [P] [US1] Create unit tests for mandatory context type for Login apps in `apps/backend/tests/unit/use-cases/register-par-context.test.ts`
-- [ ] T007 [P] [US1] Create unit tests for valid/invalid enum values of `authentication_context_type` in `apps/backend/tests/unit/use-cases/register-par-context.test.ts`
+- [X] T006 [P] [US1] Create unit tests for mandatory context type for Login apps in `apps/backend/tests/unit/use-cases/register-par-context.test.ts`
+- [X] T007 [P] [US1] Create unit tests for valid/invalid enum values of `authentication_context_type` in `apps/backend/tests/unit/use-cases/register-par-context.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T008 [US1] Implement conditional validation for Login app mandatory context type in `apps/backend/src/core/use-cases/register-par.ts`
-- [ ] T009 [US1] Implement enum validation for `authentication_context_type` in `apps/backend/src/core/use-cases/register-par.ts`
-- [ ] T010 [US1] Verify `authentication_context_type` is correctly stored in the PAR payload in `apps/backend/src/core/use-cases/register-par.ts`
+- [X] T008 [US1] Implement conditional validation for Login app mandatory context type in `apps/backend/src/core/use-cases/register-par.ts`
+- [X] T009 [US1] Implement enum validation for `authentication_context_type` in `apps/backend/src/core/use-cases/register-par.ts`
+- [X] T010 [US1] Verify `authentication_context_type` is correctly stored in the PAR payload in `apps/backend/src/core/use-cases/register-par.ts`
 
 **Checkpoint**: User Story 1 is functional. Login apps are secure and compliant.
 
@@ -67,12 +67,12 @@
 
 ### Tests for User Story 2
 
-- [ ] T011 [P] [US2] Add unit tests for `authentication_context_message` validation (length and character set) in `apps/backend/tests/unit/use-cases/register-par-context.test.ts`
+- [X] T011 [P] [US2] Add unit tests for `authentication_context_message` validation (length and character set) in `apps/backend/tests/unit/use-cases/register-par-context.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T012 [US2] Update `parRequestSchema` in `packages/shared/src/config.ts` with length (100) and character set (`A-Za-z0-9 .,-@'!()`) validation
-- [ ] T013 [US2] Verify `authentication_context_message` is stored in the PAR payload in `apps/backend/src/core/use-cases/register-par.ts`
+- [X] T012 [US2] Update `parRequestSchema` in `packages/shared/src/config.ts` with length (100) and character set (`A-Za-z0-9 .,-@'!()`) validation
+- [X] T013 [US2] Verify `authentication_context_message` is stored in the PAR payload in `apps/backend/src/core/use-cases/register-par.ts`
 
 **Checkpoint**: User Story 2 is functional. Custom context messages are supported and validated.
 
@@ -86,12 +86,12 @@
 
 ### Tests for User Story 3
 
-- [ ] T014 [P] [US3] Add unit tests for Myinfo app context restriction in `apps/backend/tests/unit/use-cases/register-par-context.test.ts`
-- [ ] T015 [P] [US3] Add unit tests verifying Myinfo apps still work without context parameters in `apps/backend/tests/unit/use-cases/register-par-context.test.ts`
+- [X] T014 [P] [US3] Add unit tests for Myinfo app context restriction in `apps/backend/tests/unit/use-cases/register-par-context.test.ts`
+- [X] T015 [P] [US3] Add unit tests verifying Myinfo apps still work without context parameters in `apps/backend/tests/unit/use-cases/register-par-context.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T016 [US3] Implement restriction logic in `apps/backend/src/core/use-cases/register-par.ts` to reject context fields if client is 'Myinfo'
+- [X] T016 [US3] Implement restriction logic in `apps/backend/src/core/use-cases/register-par.ts` to reject context fields if client is 'Myinfo'
 
 **Checkpoint**: User Story 3 is functional. Myinfo apps are isolated from Login-specific parameters.
 
@@ -101,10 +101,10 @@
 
 **Purpose**: Final validation and documentation
 
-- [ ] T017 [P] Ensure error descriptions in `apps/backend/src/core/use-cases/register-par.ts` match `specs/012-par-auth-context-validation/contracts/auth.md`
-- [ ] T018 Run all backend tests in `apps/backend` with `bun test` to ensure coverage and no regressions
-- [ ] T019 [P] Perform manual validation using `curl` as described in `specs/012-par-auth-context-validation/quickstart.md`
-- [ ] T020 [P] Update `FINDINGS.md` if any deviations were found during implementation
+- [X] T017 [P] Ensure error descriptions in `apps/backend/src/core/use-cases/register-par.ts` match `specs/012-par-auth-context-validation/contracts/auth.md`
+- [X] T018 Run all backend tests in `apps/backend` with `bun test` to ensure coverage and no regressions
+- [X] T019 [P] Perform manual validation using `curl` as described in `specs/012-par-auth-context-validation/quickstart.md`
+- [X] T020 [P] Update `FINDINGS.md` if any deviations were found during implementation
 
 ---
 

@@ -1,10 +1,15 @@
 import { expect, test, describe } from 'bun:test';
-import { validateDPoPProof } from '../../src/core/utils/dpop';
+import { DPoPValidator } from '../../src/core/utils/dpop_validator';
 import { validatePKCE } from '../../src/core/utils/pkce';
 import * as jose from 'jose';
 
 describe('Core Utilities', () => {
   describe('DPoP Validation', () => {
+    const validator = new DPoPValidator({
+      isUsed: async () => false,
+      markUsed: async () => {},
+    });
+
     test('should validate a correct DPoP proof', async () => {
       const keyPair = await jose.generateKeyPair('ES256');
       const jwk = await jose.exportJWK(keyPair.publicKey);
@@ -18,8 +23,8 @@ describe('Core Utilities', () => {
         .setIssuedAt()
         .sign(keyPair.privateKey);
 
-      const result = await validateDPoPProof({
-        header: jwt,
+      const result = await validator.validate('test-client', {
+        proof: jwt,
         method: 'POST',
         url: 'https://server.example.com/token',
       });
@@ -41,8 +46,8 @@ describe('Core Utilities', () => {
         .setIssuedAt()
         .sign(keyPair.privateKey);
 
-      const result = await validateDPoPProof({
-        header: jwt,
+      const result = await validator.validate('test-client', {
+        proof: jwt,
         method: 'POST',
         url: 'https://server.example.com/token',
       });
@@ -64,15 +69,15 @@ describe('Core Utilities', () => {
         .setIssuedAt()
         .sign(keyPair.privateKey);
 
-      const result = await validateDPoPProof({
-        header: jwt,
+      const result = await validator.validate('test-client', {
+        proof: jwt,
         method: 'POST',
         url: 'https://server.example.com/token',
         expectedJkt: 'wrong-jkt',
       });
 
       expect(result.isValid).toBe(false);
-      expect(result.error).toBe('invalid_jkt');
+      expect(result.error).toBe('DPoP jkt mismatch');
     });
   });
 

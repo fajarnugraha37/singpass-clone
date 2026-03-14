@@ -33,6 +33,7 @@ describe('PAR Endpoint', () => {
       nonce: 'test-nonce',
       code_challenge: 'test-challenge',
       code_challenge_method: 'S256',
+      authentication_context_type: 'APP_AUTHENTICATION_DEFAULT',
     });
 
     const res = await app.request('/api/par', {

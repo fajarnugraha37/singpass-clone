@@ -3,12 +3,13 @@ import type { CryptoService } from '../domain/crypto_service';
 import type { PARRepository, PARResponse, PushedAuthorizationRequest } from '../domain/par.types';
 import type { SecurityAuditService } from '../domain/audit_service';
 import { sharedConfig } from '../../../../../packages/shared/src/config';
-import { getClientConfig } from '../../infra/adapters/client_registry';
+import type { ClientRegistry } from '../domain/client_registry';
 
 export class RegisterParUseCase {
   constructor(
     private cryptoService: CryptoService,
     private parRepository: PARRepository,
+    private clientRegistry: ClientRegistry,
     private auditService?: SecurityAuditService
   ) {}
 
@@ -54,7 +55,7 @@ export class RegisterParUseCase {
     }
 
     // 3. Validate Client Assertion (Private Key JWT)
-    const client = getClientConfig(client_id);
+    const client = await this.clientRegistry.getClientConfig(client_id);
     if (!client) {
       await this.auditService?.logEvent({
         type: 'CLIENT_AUTH_FAIL',
@@ -65,10 +66,48 @@ export class RegisterParUseCase {
       throw new Error('Client not found');
     }
 
-    const publicKey = client.jwks.keys[0]; // Simplified for now
+    const publicKey = client.jwks?.keys[0]; // Simplified for now
     if (!publicKey) {
       throw new Error('Client has no registered keys');
     }
+
+    // --- Start Context Validation (US1, US2, US3) ---
+    const { 
+      authentication_context_type, 
+      authentication_context_message 
+    } = payload;
+
+    if (client.appType === 'Login') {
+      // Mandatory for Login apps
+      if (!authentication_context_type) {
+        throw new Error('authentication_context_type is mandatory for Login apps');
+      }
+      
+      // Zod already validates format if present, but we double-check or ensure it's mapped correctly here
+      // The tests expect specific error messages if Zod isn't enough or if we want custom domain errors
+      
+      // Basic manual check for enum if not already handled by Zod in the transport layer
+      // (Actually, the use case should be robust even if Zod is bypassed)
+      const VALID_TYPES = ['APP_AUTHENTICATION_DEFAULT', 'BANK_CASA_OPENING'];
+      if (authentication_context_type && !VALID_TYPES.includes(authentication_context_type)) {
+        throw new Error('authentication_context_type must be a valid Singpass enum');
+      }
+
+      // Message validation (double check)
+      if (authentication_context_message) {
+        const isValidMessage = /^[A-Za-z0-9 .,\-@'!()]*$/.test(authentication_context_message) && 
+                               authentication_context_message.length <= 100;
+        if (!isValidMessage) {
+          throw new Error('authentication_context_message exceeds 100 characters or contains invalid characters');
+        }
+      }
+    } else if (client.appType === 'Myinfo') {
+      // Forbidden for Myinfo apps
+      if (authentication_context_type || authentication_context_message) {
+        throw new Error('authentication_context parameters are only allowed for Login apps');
+      }
+    }
+    // --- End Context Validation ---
 
     const isValid = await this.cryptoService.validateClientAssertion(client_assertion, publicKey);
     if (!isValid) {

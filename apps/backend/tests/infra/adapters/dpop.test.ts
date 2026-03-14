@@ -69,7 +69,7 @@ describe("DPoP Binding & Validation (US4)", () => {
       await cryptoService.validateDPoPProof(proof, "GET", "http://localhost:3000/token", "mock-client-id");
       expect(true).toBe(false);
     } catch (e: any) {
-      expect(e.message).toContain("htm mismatch");
+      expect(e.message).toContain("invalid_htm");
     }
   });
 
@@ -99,7 +99,7 @@ describe("DPoP Binding & Validation (US4)", () => {
       await cryptoService.validateDPoPProof(proof, "POST", "http://localhost:3000/token", "mock-client-id");
       expect(true).toBe(false);
     } catch (e: any) {
-      expect(e.message).toContain("DPoP jti replay");
+      expect(e.message).toContain("jti_reused");
     }
   });
 

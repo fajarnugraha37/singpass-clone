@@ -2,9 +2,15 @@ import { expect, test, describe, beforeAll } from 'bun:test';
 import { TokenExchangeUseCase } from '../../src/core/use-cases/token-exchange';
 import { ClientAuthenticationService } from '../../src/core/application/services/client-auth.service';
 import { TokenService } from '../../src/core/application/services/token.service';
+import { DPoPValidator } from '../../src/core/utils/dpop_validator';
 import * as jose from 'jose';
 
 // Minimal Mocks for Performance Testing
+const mockJtiStore: any = {
+  isUsed: async () => false,
+  markUsed: async () => {},
+};
+
 const mockCryptoService: any = {
   validateClientAssertion: async () => true,
   getActiveKey: async () => {
@@ -20,6 +26,7 @@ const mockAuthCodeRepo: any = {
     redirectUri: 'http://localhost/cb',
     codeChallenge: 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM',
     dpopJkt: 'test-jkt',
+    scope: 'openid',
     userId: 'user-123',
     expiresAt: new Date(Date.now() + 10000),
   }),
@@ -39,11 +46,13 @@ describe('Token Exchange Performance', () => {
   beforeAll(async () => {
     const clientAuthService = new ClientAuthenticationService(mockCryptoService);
     const tokenService = new TokenService(mockCryptoService);
+    const dpopValidator = new DPoPValidator(mockJtiStore);
     useCase = new TokenExchangeUseCase(
       clientAuthService,
       tokenService,
       mockAuthCodeRepo,
       mockTokenRepo,
+      dpopValidator,
       'https://issuer.example.com'
     );
 
@@ -57,6 +66,7 @@ describe('Token Exchange Performance', () => {
       redirectUri: 'http://localhost/cb',
       codeChallenge: 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM',
       dpopJkt: jkt,
+      scope: 'openid',
       userId: 'user-123',
       expiresAt: new Date(Date.now() + 10000),
     });

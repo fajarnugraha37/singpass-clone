@@ -8,6 +8,7 @@ import * as jose from 'jose'
 describe('RegisterParUseCase', () => {
   let mockCryptoService: CryptoService;
   let mockPARRepository: PARRepository;
+  let mockClientRegistry: any;
   let mockAuditService: SecurityAuditService;
   let useCase: RegisterParUseCase;
   let validJwt: string;
@@ -31,11 +32,20 @@ describe('RegisterParUseCase', () => {
       consumeJti: async () => {},
     } as any;
 
+    mockClientRegistry = {
+      getClientConfig: async (clientId: string) => ({
+        clientId,
+        clientName: 'Mock Client',
+        appType: 'Login',
+        jwks: { keys: [{ kid: 'key-1' }] },
+      }),
+    };
+
     mockAuditService = {
       logEvent: async () => {},
     } as any;
 
-    useCase = new RegisterParUseCase(mockCryptoService, mockPARRepository, mockAuditService);
+    useCase = new RegisterParUseCase(mockCryptoService, mockPARRepository, mockClientRegistry, mockAuditService);
   });
 
   test('should successfully register a valid PAR request', async () => {
@@ -50,7 +60,7 @@ describe('RegisterParUseCase', () => {
       code_challenge_method: 'S256',
       state: 'state',
       nonce: 'nonce',
-      authentication_context_type: 'login',
+      authentication_context_type: 'APP_AUTHENTICATION_DEFAULT',
     } as any;
 
     const result = await useCase.execute(input);
@@ -64,6 +74,7 @@ describe('RegisterParUseCase', () => {
     mockCryptoService.validateClientAssertion = async () => false;
     
     const input = {
+      ...getBaseInputForTest(),
       client_assertion: validJwt,
       client_id: 'mock-client-id',
     } as any;
@@ -75,10 +86,24 @@ describe('RegisterParUseCase', () => {
     mockPARRepository.isJtiConsumed = async () => true;
     
     const input = {
+      ...getBaseInputForTest(),
       client_assertion: validJwt,
       client_id: 'mock-client-id',
     } as any;
 
     expect(useCase.execute(input)).rejects.toThrow('jti already used');
   });
+
+  function getBaseInputForTest() {
+    return {
+      response_type: 'code',
+      scope: 'openid',
+      redirect_uri: 'https://client.example.com/cb',
+      code_challenge: 'challenge',
+      code_challenge_method: 'S256',
+      state: 'state',
+      nonce: 'nonce',
+      authentication_context_type: 'APP_AUTHENTICATION_DEFAULT',
+    };
+  }
 });
