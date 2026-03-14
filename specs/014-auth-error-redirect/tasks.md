@@ -17,8 +17,8 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 [P] Update `AuthSessionStatus` enum to include `FAILED` in `apps/backend/src/core/domain/session.ts`
-- [ ] T002 [P] Update `sharedConfig` to include `MAX_AUTH_RETRIES: 3` in `packages/shared/src/config.ts`
+- [x] T001 [P] Update `AuthSessionStatus` enum to include `FAILED` in `apps/backend/src/core/domain/session.ts`
+- [x] T002 [P] Update `sharedConfig` to include `MAX_AUTH_RETRIES: 3` in `packages/shared/src/config.ts`
 
 ---
 
@@ -28,12 +28,12 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T003 Update database schema: add `retryCount` to `authSessions` in `apps/backend/src/infra/database/schema.ts`
-- [ ] T004 Run database migrations: `bun run db:generate` and `bun run db:migrate` in `apps/backend/`
-- [ ] T005 Update `AuthSession` interface to include `retryCount` in `apps/backend/src/core/domain/session.ts`
-- [ ] T006 Update `DrizzleAuthSessionRepository` to persist `retryCount` in `apps/backend/src/infra/adapters/db/drizzle_session_repository.ts`
-- [ ] T007 [P] Implement IP-based rate limiting middleware in `apps/backend/src/infra/middleware/rate-limiter.ts`
-- [ ] T008 Register rate limiting middleware in `apps/backend/src/index.ts`
+- [x] T003 Update database schema: add `retryCount` to `authSessions` in `apps/backend/src/infra/database/schema.ts`
+- [x] T004 Run database migrations: `bun run db:generate` and `bun run db:migrate` in `apps/backend/`
+- [x] T005 Update `AuthSession` interface to include `retryCount` in `apps/backend/src/core/domain/session.ts`
+- [x] T006 Update `DrizzleAuthSessionRepository` to persist `retryCount` in `apps/backend/src/infra/adapters/db/drizzle_session_repository.ts`
+- [x] T007 [P] Implement IP-based rate limiting middleware in `apps/backend/src/infra/middleware/rate-limiter.ts`
+- [x] T008 Register rate limiting middleware in `apps/backend/src/index.ts`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -45,20 +45,21 @@
 
 **Independent Test**: Simulate 3 failed login attempts and verify 302 redirect to client's `redirect_uri` with correct parameters.
 
-### Tests for User Story 1
+### Tests for User Story 1 (RED Phase)
 
-- [ ] T009 [P] [US1] Create unit tests for retry logic and terminal failure in `apps/backend/tests/core/use-cases/ValidateLogin.test.ts`
-- [ ] T010 [P] [US1] Create unit tests for retry logic and terminal failure in `apps/backend/tests/core/use-cases/Validate2FA.test.ts`
-- [ ] T011 [P] [US1] Create integration test for 302 redirect behavior in `apps/backend/tests/infra/http/auth.controller.test.ts`
+- [x] T009 [P] [US1] Create unit tests for retry logic and terminal failure in `apps/backend/tests/core/use-cases/ValidateLogin.test.ts`
+- [x] T010 [P] [US1] Create unit tests for retry logic and terminal failure in `apps/backend/tests/core/use-cases/Validate2FA.test.ts`
+- [x] T011 [P] [US1] Create integration test for 302 redirect behavior in `apps/backend/tests/infra/http/auth.test.ts`
+- [x] T011b [US1] **Checkpoint**: Verify all US1 tests FAIL before proceeding to implementation
 
-### Implementation for User Story 1
+### Implementation for User Story 1 (GREEN Phase)
 
-- [ ] T012 [US1] Update `ValidateLoginUseCase` to increment `retryCount` and trigger `FAILED` status in `apps/backend/src/core/use-cases/ValidateLogin.ts`
-- [ ] T013 [US1] Update `Validate2FAUseCase` to increment `retryCount` and trigger `FAILED` status in `apps/backend/src/core/use-cases/Validate2FA.ts`
-- [ ] T014 [US1] Implement `AUTH_TERMINAL_FAILURE` audit logging in `ValidateLoginUseCase` and `Validate2FAUseCase` using `SecurityAuditService`
-- [ ] T015 [US1] Update `auth.controller.ts` to fetch PAR payload and issue 302 redirect on `FAILED` status in `apps/backend/src/infra/http/controllers/auth.controller.ts`
-- [ ] T016 [US1] Update `LoginForm.svelte` to detect `res.redirected` and perform top-level navigation in `apps/frontend/src/components/LoginForm.svelte`
-- [ ] T017 [US1] Update `TwoFactorForm.svelte` to detect `res.redirected` and perform top-level navigation in `apps/frontend/src/components/TwoFactorForm.svelte`
+- [x] T012 [US1] Update `ValidateLoginUseCase` to increment `retryCount` and trigger `FAILED` status in `apps/backend/src/core/use-cases/ValidateLogin.ts`
+- [x] T013 [US1] Update `Validate2FAUseCase` to increment `retryCount` and trigger `FAILED` status in `apps/backend/src/core/use-cases/Validate2FA.ts`
+- [x] T014 [US1] Implement `AUTH_TERMINAL_FAILURE` audit logging in `ValidateLoginUseCase` and `Validate2FAUseCase` using `SecurityAuditService`
+- [x] T015 [US1] Update `auth.controller.ts` to fetch PAR payload and issue 302 redirect on `FAILED` status in `apps/backend/src/infra/http/controllers/auth.controller.ts`
+- [x] T016 [US1] Update `LoginForm.svelte` to detect `res.redirected` and perform top-level navigation in `apps/frontend/src/components/LoginForm.svelte`
+- [x] T017 [US1] Update `TwoFactorForm.svelte` to detect `res.redirected` and perform top-level navigation in `apps/frontend/src/components/TwoFactorForm.svelte`
 
 **Checkpoint**: User Story 1 is fully functional and testable independently
 
@@ -70,15 +71,16 @@
 
 **Independent Test**: Enter incorrect credentials once and verify JSON error response is displayed on the UI without redirect.
 
-### Tests for User Story 2
+### Tests for User Story 2 (RED Phase)
 
-- [ ] T018 [P] [US2] Create unit tests for JSON error responses in `apps/backend/tests/core/use-cases/ValidateLogin.test.ts`
-- [ ] T019 [P] [US2] Create unit tests for JSON error responses in `apps/backend/tests/core/use-cases/Validate2FA.test.ts`
+- [x] T018 [P] [US2] Create unit tests for JSON error responses in `apps/backend/tests/core/use-cases/ValidateLogin.test.ts`
+- [x] T019 [P] [US2] Create unit tests for JSON error responses in `apps/backend/tests/core/use-cases/Validate2FA.test.ts`
+- [x] T019b [US2] **Checkpoint**: Verify all US2 tests FAIL before proceeding to implementation
 
-### Implementation for User Story 2
+### Implementation for User Story 2 (GREEN Phase)
 
-- [ ] T020 [US2] Ensure `ValidateLoginUseCase` returns success=false and error message for temporary failures in `apps/backend/src/core/use-cases/ValidateLogin.ts`
-- [ ] T021 [US2] Ensure `Validate2FAUseCase` returns success=false and error message for temporary failures in `apps/backend/src/core/use-cases/Validate2FA.ts`
+- [x] T020 [US2] Ensure `ValidateLoginUseCase` returns success=false and error message for temporary failures in `apps/backend/src/core/use-cases/ValidateLogin.ts`
+- [x] T021 [US2] Ensure `Validate2FAUseCase` returns success=false and error message for temporary failures in `apps/backend/src/core/use-cases/Validate2FA.ts`
 
 **Checkpoint**: User Story 2 functional; inline feedback working correctly.
 
@@ -88,9 +90,11 @@
 
 **Purpose**: Final validation and documentation
 
-- [ ] T022 [P] Verify final security audit log entries for terminal failures in SQLite
-- [ ] T023 Run full `quickstart.md` validation flow
-- [ ] T024 Ensure code coverage for new logic is >= 80% using `bun test --coverage`
+- [x] T022 [P] Verify final security audit log entries for terminal failures in SQLite
+- [x] T023 Run full `quickstart.md` validation flow
+- [x] T024 Ensure code coverage for new logic is >= 80% using `bun test --coverage`
+- [x] T025 [P] Verify SC-004: Ensure redirect URLs contain ONLY `error` and `state` parameters (no internal session IDs or secrets) in `apps/backend/tests/infra/http/auth.test.ts`
+
 
 ---
 

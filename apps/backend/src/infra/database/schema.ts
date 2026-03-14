@@ -97,6 +97,7 @@ export const authSessions = sqliteTable('auth_sessions', {
   userId: text('user_id'),
   status: text('status').notNull(),
   otpCode: text('otp_code'),
+  retryCount: integer('retry_count').default(0).notNull(),
   expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),

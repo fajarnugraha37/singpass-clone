@@ -16,6 +16,11 @@
         json: { otp }
       });
 
+      if (res.redirected) {
+        window.location.href = res.url;
+        return;
+      }
+
       const data = await res.json();
 
       if (data.success && data.redirect_uri) {

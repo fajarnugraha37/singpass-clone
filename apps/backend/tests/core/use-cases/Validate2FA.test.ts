@@ -57,23 +57,57 @@ describe('Validate2FAUseCase', () => {
     expect(result).toHaveProperty('redirect_uri');
   });
 
-  test('should fail for invalid OTP', async () => {
+  test('should fail for invalid OTP and increment retryCount', async () => {
+    let updatedSession: any;
+    mockAuthSessionRepository.update = async (session) => {
+      updatedSession = session;
+    };
+    mockAuthSessionRepository.getById = async () => ({
+      id: 'valid-session-id',
+      clientId: 'client-123',
+      status: 'PRIMARY_AUTH_SUCCESS',
+      otpCode: '123456',
+      retryCount: 0,
+      expiresAt: new Date(Date.now() + 300000),
+    } as any);
+
     const result = await useCase.execute({
       sessionId: 'valid-session-id',
       otp: 'wrong-otp',
     });
 
     expect(result).toHaveProperty('success', false);
-    expect(result).toHaveProperty('error', 'Invalid OTP');
+    expect(updatedSession).toBeDefined();
+    expect(updatedSession.retryCount).toBe(1);
   });
 
-  test('should fail for invalid session', async () => {
+  test('should trigger terminal failure when OTP retries reach limit', async () => {
+    let updatedSession: any;
+    let loggedEvent: any;
+    mockAuthSessionRepository.update = async (session) => {
+      updatedSession = session;
+    };
+    mockAuthSessionRepository.getById = async () => ({
+      id: 'valid-session-id',
+      clientId: 'client-123',
+      status: 'PRIMARY_AUTH_SUCCESS',
+      otpCode: '123456',
+      retryCount: 2,
+      expiresAt: new Date(Date.now() + 300000),
+    } as any);
+    mockAuditService.logEvent = async (event) => {
+      loggedEvent = event;
+    };
+
     const result = await useCase.execute({
-      sessionId: 'invalid-session-id',
-      otp: '123456',
+      sessionId: 'valid-session-id',
+      otp: 'wrong-otp',
     });
 
     expect(result).toHaveProperty('success', false);
-    expect(result).toHaveProperty('error', 'Session not found or expired');
+    expect(updatedSession.retryCount).toBe(3);
+    expect(updatedSession.status).toBe('FAILED');
+    expect(loggedEvent).toBeDefined();
+    expect(loggedEvent.type).toBe('AUTH_TERMINAL_FAILURE');
   });
 });

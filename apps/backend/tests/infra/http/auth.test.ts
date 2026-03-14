@@ -113,6 +113,43 @@ describe('Auth Endpoints', () => {
       expect(res.status).toBe(401);
     });
 
+    test('should redirect back to client on terminal failure (3rd attempt)', async () => {
+      // Mock session at 2 retries
+      spyOn(DrizzleAuthSessionRepository.prototype, 'getById').mockImplementation(async (id: string) => {
+        if (id === 'terminal-session-id') {
+          return {
+            id,
+            clientId: 'mock-client',
+            parRequestUri: 'urn:ietf:params:oauth:request_uri:valid',
+            status: 'INITIATED',
+            retryCount: 2,
+            expiresAt: new Date(Date.now() + 300000),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
+        }
+        return null;
+      });
+
+      const res = await app.request('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cookie': 'vibe_auth_session=terminal-session-id'
+        },
+        body: JSON.stringify({
+          username: 'S1234567A',
+          password: 'wrong-password'
+        })
+      });
+
+      expect(res.status).toBe(302);
+      const location = res.headers.get('Location');
+      expect(location).toContain('https://client.example.com/cb');
+      expect(location).toContain('error=login_required');
+      expect(location).toContain('state=test-state');
+    });
+
     test('should return 400 for invalid request body', async () => {
       const res = await app.request('/api/auth/login', {
         method: 'POST',
@@ -184,6 +221,43 @@ describe('Auth Endpoints', () => {
       });
 
       expect(res.status).toBe(400);
+    });
+
+    test('should redirect back to client on terminal 2FA failure (3rd attempt)', async () => {
+      // Mock session at 2 retries
+      spyOn(DrizzleAuthSessionRepository.prototype, 'getById').mockImplementation(async (id: string) => {
+        if (id === 'terminal-2fa-session-id') {
+          return {
+            id,
+            clientId: 'mock-client',
+            parRequestUri: 'urn:ietf:params:oauth:request_uri:valid',
+            status: 'PRIMARY_AUTH_SUCCESS',
+            otpCode: '123456',
+            retryCount: 2,
+            expiresAt: new Date(Date.now() + 300000),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
+        }
+        return null;
+      });
+
+      const res = await app.request('/api/auth/2fa', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cookie': 'vibe_auth_session=terminal-2fa-session-id'
+        },
+        body: JSON.stringify({
+          otp: '000000'
+        })
+      });
+
+      expect(res.status).toBe(302);
+      const location = res.headers.get('Location');
+      expect(location).toContain('https://client.example.com/cb');
+      expect(location).toContain('error=login_required');
+      expect(location).toContain('state=test-state');
     });
   });
 });

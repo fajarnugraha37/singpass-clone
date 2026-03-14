@@ -17,7 +17,8 @@ export type SecurityEventType =
   | 'AUTH_CODE_GENERATION_FAILURE'
   | 'AUTH_CODE_GENERATED'
   | 'USERINFO_SUCCESS'
-  | 'USERINFO_FAILURE';
+  | 'USERINFO_FAILURE'
+  | 'AUTH_TERMINAL_FAILURE';
 
 export type SecurityEventSeverity = 'INFO' | 'WARN' | 'ERROR';
 

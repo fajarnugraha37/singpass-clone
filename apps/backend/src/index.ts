@@ -82,6 +82,8 @@ const authRouter = createAuthRouter(
   validateLoginUseCase,
   validate2FAUseCase,
   getUserInfoUseCase,
+  authSessionRepository,
+  parRepository,
   sharedConfig.OIDC.ISSUER
 );
 const api = new Hono()

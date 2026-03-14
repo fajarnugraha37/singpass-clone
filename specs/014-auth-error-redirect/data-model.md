@@ -22,3 +22,12 @@
 ## Constraints
 - `retryCount` MUST NOT exceed 3 failed attempts.
 - When `retryCount >= 3`, `status` MUST be set to `FAILED`.
+
+### SecurityAuditLog (Reference)
+- **id**: UUID
+- **eventType**: Enum ('AUTH_TERMINAL_FAILURE', etc.)
+- **severity**: Enum ('INFO', 'WARN', 'ERROR')
+- **details**: JSON (captures sessionId, username, failure reason)
+- **ipAddress**: String
+- **createdAt**: DateTime
+

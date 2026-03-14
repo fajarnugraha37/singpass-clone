@@ -3,6 +3,8 @@ import { setCookie, getCookie } from 'hono/cookie';
 import { InitiateAuthSessionUseCase } from '../../../core/use-cases/InitiateAuthSession';
 import { ValidateLoginUseCase } from '../../../core/use-cases/ValidateLogin';
 import { Validate2FAUseCase } from '../../../core/use-cases/Validate2FA';
+import type { AuthSessionRepository } from '../../../core/domain/session';
+import type { PARRepository } from '../../../core/domain/par.types';
 
 export const initiateAuth = (useCase: InitiateAuthSessionUseCase) => {
   return async (c: Context) => {
@@ -35,7 +37,26 @@ export const initiateAuth = (useCase: InitiateAuthSessionUseCase) => {
   };
 };
 
-export const login = (useCase: ValidateLoginUseCase) => {
+const handleTerminalFailure = async (c: Context, sessionId: string, sessionRepository: AuthSessionRepository, parRepository: PARRepository) => {
+  const session = await sessionRepository.getById(sessionId);
+  if (session) {
+    const parRequest = await parRepository.getByRequestUri(session.parRequestUri);
+    if (parRequest) {
+      const { redirect_uri, state } = parRequest.payload as any;
+      const redirectUrl = new URL(redirect_uri);
+      redirectUrl.searchParams.set('error', 'login_required');
+      if (state) {
+        redirectUrl.searchParams.set('state', state);
+      }
+      return c.redirect(redirectUrl.toString());
+    }
+  }
+  
+  // Fallback if session/PAR not found
+  return c.json({ success: false, error: 'Max retries exceeded' }, 401);
+};
+
+export const login = (useCase: ValidateLoginUseCase, sessionRepository: AuthSessionRepository, parRepository: PARRepository) => {
   return async (c: Context) => {
     try {
       const sessionId = getCookie(c, 'vibe_auth_session');
@@ -47,6 +68,9 @@ export const login = (useCase: ValidateLoginUseCase) => {
       const result = await useCase.execute({ sessionId, username, password });
 
       if (!result.success) {
+        if (result.status === 'FAILED') {
+          return await handleTerminalFailure(c, sessionId, sessionRepository, parRepository);
+        }
         return c.json(result, 401);
       }
 
@@ -58,7 +82,7 @@ export const login = (useCase: ValidateLoginUseCase) => {
   };
 };
 
-export const twoFactor = (useCase: Validate2FAUseCase) => {
+export const twoFactor = (useCase: Validate2FAUseCase, sessionRepository: AuthSessionRepository, parRepository: PARRepository) => {
   return async (c: Context) => {
     try {
       const sessionId = getCookie(c, 'vibe_auth_session');
@@ -70,6 +94,9 @@ export const twoFactor = (useCase: Validate2FAUseCase) => {
       const result = await useCase.execute({ sessionId, otp });
 
       if (!result.success) {
+        if (result.status === 'FAILED') {
+          return await handleTerminalFailure(c, sessionId, sessionRepository, parRepository);
+        }
         return c.json(result, 401);
       }
 

@@ -9,8 +9,11 @@ import { InitiateAuthSessionUseCase } from '../../core/use-cases/InitiateAuthSes
 import { ValidateLoginUseCase } from '../../core/use-cases/ValidateLogin';
 import { Validate2FAUseCase } from '../../core/use-cases/Validate2FA';
 import { GetUserInfoUseCase } from '../../core/use-cases/get-userinfo';
+import type { AuthSessionRepository } from '../../core/domain/session';
+import type { PARRepository } from '../../core/domain/par.types';
 import * as authController from './controllers/auth.controller';
 import * as userinfoController from './controllers/userinfo.controller';
+import { rateLimiter } from '../middleware/rate-limiter';
 
 /**
  * Auth Router for both OIDC flow initiation and RPC API endpoints.
@@ -20,9 +23,16 @@ export const createAuthRouter = (
   validateLoginUseCase: ValidateLoginUseCase,
   validate2FAUseCase: Validate2FAUseCase,
   getUserInfoUseCase: GetUserInfoUseCase,
+  sessionRepository: AuthSessionRepository,
+  parRepository: PARRepository,
   issuer: string
 ) => {
-  const authRouter = new Hono()
+  const authRouter = new Hono();
+
+  // Apply rate limiting to all auth endpoints (10 requests per minute per IP)
+  authRouter.use('*', rateLimiter(10, 60 * 1000));
+
+  authRouter
     // OIDC Initiation Endpoint (mounted at /auth)
     .get(
       '/',
@@ -39,10 +49,10 @@ export const createAuthRouter = (
     )
 
     // RPC API: Primary Login (mounted at /api/auth/login)
-    .post('/login', zValidator('json', loginRequestSchema), authController.login(validateLoginUseCase))
+    .post('/login', zValidator('json', loginRequestSchema), authController.login(validateLoginUseCase, sessionRepository, parRepository))
 
     // RPC API: 2FA Verification (mounted at /api/auth/2fa)
-    .post('/2fa', zValidator('json', twoFactorRequestSchema), authController.twoFactor(validate2FAUseCase))
+    .post('/2fa', zValidator('json', twoFactorRequestSchema), authController.twoFactor(validate2FAUseCase, sessionRepository, parRepository))
 
     // OIDC UserInfo Endpoint (mounted at /userinfo or /auth/userinfo)
     .get('/userinfo', userinfoController.getUserInfo(getUserInfoUseCase, issuer))

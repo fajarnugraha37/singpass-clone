@@ -1,4 +1,0 @@
-$json = @"
-Auth Error Redirect Compliance **Finding**: #4 (🟢 Low) **Branch Suggestion**: `fix/auth-error-redirect` ### Problem Auth errors during login/2FA return JSON responses instead of redirecting to the client's `redirect_uri` with error parameters per OIDC spec (Section 3.1.2.6). ### Acceptance Criteria 1. When user authentication permanently fails (max retries exceeded), the server SHOULD redirect to `redirect_uri?error=access_denied&state={state}`. 2. Temporary failures (wrong password, wrong OTP) MAY continue to return JSON responses since the frontend handles them. 3. The `state` parameter from the original PAR request MUST be included in error redirects.
-"@
-.specify/scripts/powershell/create-new-feature.ps1 -Json $json -Number 14 -ShortName "auth-error-redirect" "Auth Error Redirect Compliance"
