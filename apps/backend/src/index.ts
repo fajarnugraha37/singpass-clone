@@ -31,14 +31,17 @@ import { getUserInfo } from './infra/http/controllers/userinfo.controller';
 import { fapiErrorHandler } from './infra/middleware/fapi-error';
 import { sharedConfig } from '../../../packages/shared/src/config';
 import { DrizzleServerKeyManager } from './infra/adapters/db/drizzle_key_manager';
+import { swaggerUI } from '@hono/swagger-ui';
 
 const auditService = new DrizzleSecurityAuditService();
 const keyManager = new DrizzleServerKeyManager(auditService);
 const cryptoService = new JoseCryptoService(keyManager, auditService);
 
 // Ensure active keys exist on startup and handle rotation if needed
-await keyManager.ensureActiveKey();
-await keyManager.rotateKeys();
+await Promise.all([
+  keyManager.ensureActiveKey(),
+  keyManager.rotateKeys()
+]);
 const parRepository = new DrizzlePARRepository();
 const authSessionRepository = new DrizzleAuthSessionRepository();
 const authCodeRepository = new DrizzleAuthorizationCodeRepository();
@@ -71,6 +74,7 @@ const initiateAuthSessionUseCase = new InitiateAuthSessionUseCase(authSessionRep
 const validateLoginUseCase = new ValidateLoginUseCase(authSessionRepository, auditService);
 const generateAuthCodeUseCase = new GenerateAuthCodeUseCase(authCodeRepository, authSessionRepository, parRepository, auditService);
 const validate2FAUseCase = new Validate2FAUseCase(authSessionRepository, auditService, generateAuthCodeUseCase);
+
 const authRouter = createAuthRouter(
   initiateAuthSessionUseCase,
   validateLoginUseCase,
@@ -113,7 +117,22 @@ const app = new Hono()
   .get('/.well-known/keys', getJWKS(cryptoService))
   .post('/token', exchangeToken(tokenExchangeUseCase))
   .get('/userinfo', getUserInfo(getUserInfoUseCase, sharedConfig.OIDC.ISSUER))
-  .post('/userinfo', getUserInfo(getUserInfoUseCase, sharedConfig.OIDC.ISSUER))
+  .post('/userinfo', getUserInfo(getUserInfoUseCase, sharedConfig.OIDC.ISSUER));
+
+app
+  .get('/doc', (c) => c.json({
+    openapi: '3.0.0', // This is the required version field
+    info: {
+      title: 'API Documentation',
+      version: '1.0.0',
+      description: 'API documentation for your service',
+    },
+    servers: [
+      { url: 'http://localhost:3000', description: 'Local Server' },
+    ],
+  }))
+  // Swagger UI will be available at /ui
+  .get('/ui', swaggerUI({ url: '/doc' }))
   // SPA Fallback
   .get('/', serveStatic({ path: 'static/index.html' }))
   // Serve static assets from the frontend build
@@ -153,4 +172,5 @@ const shutdown = () => {
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
 
+export type AppType = typeof app;
 export default app;
