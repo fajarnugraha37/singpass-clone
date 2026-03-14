@@ -19,9 +19,9 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Register feature branch `012-par-auth-context-validation` and verify environment
-- [ ] T002 [P] Update `packages/shared/src/config.ts` to include `AuthenticationContextType` enum and valid values constant
-- [ ] T003 [P] Update `ClientConfig` interface in `apps/backend/src/core/domain/client_registry.ts` to include `appType: 'Login' | 'Myinfo'`
+- [X] T001 Register feature branch `012-par-auth-context-validation` and verify environment
+- [X] T002 [P] Update `packages/shared/src/config.ts` to include `AuthenticationContextType` enum and valid values constant
+- [X] T003 [P] Update `ClientConfig` interface in `apps/backend/src/core/domain/client_registry.ts` to include `appType: 'Login' | 'Myinfo'`
 
 ---
 
@@ -31,8 +31,8 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 [P] Update `parRequestSchema` in `packages/shared/src/config.ts` to include optional `authentication_context_type` and `authentication_context_message`
-- [ ] T005 Update `MOCK_CLIENT_REGISTRY` in `apps/backend/src/infra/adapters/client_registry.ts` to assign `appType` to mock clients
+- [X] T004 [P] Update `parRequestSchema` in `packages/shared/src/config.ts` to include optional `authentication_context_type` and `authentication_context_message`
+- [X] T005 Update `MOCK_CLIENT_REGISTRY` in `apps/backend/src/infra/adapters/client_registry.ts` to assign `appType` to mock clients
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 

@@ -3,6 +3,7 @@ import * as jose from 'jose';
 export interface ClientConfig {
   clientId: string;
   clientName: string;
+  appType: 'Login' | 'Myinfo';
   redirectUris?: string[];
   jwksUri?: string;
   jwks?: {

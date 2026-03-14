@@ -8,6 +8,8 @@ import { getClientConfig } from './client_registry';
 import type { SecurityAuditService } from '../../core/domain/audit_service';
 import type { ServerKeyManager } from '../../core/domain/key_manager';
 import { and, eq } from 'drizzle-orm';
+import { DPoPValidator } from '../../core/utils/dpop_validator';
+import { DrizzleJtiStore } from './db/drizzle_jti_store';
 
 /**
  * Production-grade implementation of CryptoService using jose and ServerKeyManager.
@@ -15,11 +17,14 @@ import { and, eq } from 'drizzle-orm';
  */
 export class JoseCryptoService implements CryptoService {
   private algorithm = 'ES256';
+  private dpopValidator: DPoPValidator;
 
   constructor(
     private keyManager: ServerKeyManager,
     private auditService?: SecurityAuditService
-  ) {}
+  ) {
+    this.dpopValidator = new DPoPValidator(new DrizzleJtiStore(), sharedConfig.SECURITY.DPOP_TTL_SECONDS);
+  }
 
   async generateKeyPair(): Promise<{ id: string; privateKey: Uint8Array; publicKey: JWK }> {
     // This is now primarily used for initial setup or tests.
@@ -103,36 +108,18 @@ export class JoseCryptoService implements CryptoService {
     clientId: string,
     expectedNonce?: string
   ): Promise<{ jkt: string }> {
-    const header = jose.decodeProtectedHeader(proof);
-    if (!header.jwk) throw new Error('DPoP proof missing jwk header');
-
-    const publicKey = await jose.importJWK(header.jwk as JWK, header.alg as string);
-    const { payload } = await jose.jwtVerify(proof, publicKey, { typ: 'dpop+jwt' });
-
-    if (payload.htm !== expectedMethod) throw new Error('DPoP htm mismatch');
-    if (payload.htu !== expectedUrl) throw new Error('DPoP htu mismatch');
-    if (expectedNonce && payload.nonce !== expectedNonce) throw new Error('DPoP nonce mismatch');
-
-    const now = Math.floor(Date.now() / 1000);
-    const ttl = sharedConfig.SECURITY.DPOP_TTL_SECONDS;
-    if (Math.abs(now - (payload.iat || 0)) > ttl) throw new Error('DPoP proof expired');
-
-    // Replay protection
-    const [existingJti] = await db.select()
-      .from(schema.usedJtis)
-      .where(and(eq(schema.usedJtis.jti, payload.jti as string), eq(schema.usedJtis.clientId, clientId)))
-      .limit(1);
-
-    if (existingJti) throw new Error('DPoP jti replay');
-
-    await db.insert(schema.usedJtis).values({
-      jti: payload.jti as string,
-      clientId,
-      expiresAt: new Date(Date.now() + ttl * 1000),
+    const result = await this.dpopValidator.validate(clientId, {
+      proof,
+      method: expectedMethod,
+      url: expectedUrl,
+      expectedNonce,
     });
 
-    const jkt = await jose.calculateJwkThumbprint(header.jwk as JWK);
-    return { jkt };
+    if (!result.isValid) {
+      throw new Error(`DPoP validation failed: ${result.error}`);
+    }
+
+    return { jkt: result.jkt };
   }
 
   async generateDPoPNonce(clientId: string): Promise<string> {

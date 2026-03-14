@@ -2,7 +2,7 @@ import { ClientAuthenticationService } from '../application/services/client-auth
 import { TokenService } from '../application/services/token.service';
 import { AuthorizationCodeRepository } from '../domain/authorizationCode';
 import { DrizzleTokenRepository } from '../../infra/adapters/db/drizzle_token_repository';
-import { validateDPoPProof } from '../utils/dpop';
+import { DPoPValidator } from '../utils/dpop_validator';
 import { validatePKCE } from '../utils/pkce';
 import { FapiErrors } from '../../infra/middleware/fapi-error';
 import type { TokenResponse } from '../../../../packages/shared/src/tokens';
@@ -25,6 +25,7 @@ export class TokenExchangeUseCase {
     private tokenService: TokenService,
     private authCodeRepository: AuthorizationCodeRepository,
     private tokenRepository: DrizzleTokenRepository,
+    private dpopValidator: DPoPValidator,
     private issuer: string
   ) {}
 
@@ -50,10 +51,10 @@ export class TokenExchangeUseCase {
     const { clientId } = await this.clientAuthService.authenticate(clientAssertion, clientAssertionType);
 
     // 3. Validate DPoP Proof
-    const dpopResult = await validateDPoPProof({
-      header: dpopHeader,
+    const dpopResult = await this.dpopValidator.validate(clientId, {
+      proof: dpopHeader,
       method,
-      url
+      url,
     });
 
     if (!dpopResult.isValid) {

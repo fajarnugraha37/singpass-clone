@@ -26,6 +26,13 @@ export const envSchema = z.object({
 export type Env = z.infer<typeof envSchema>;
 
 // FAPI 2.0 / PAR Validation Schemas
+export enum AuthenticationContextType {
+  APP_AUTHENTICATION_DEFAULT = 'APP_AUTHENTICATION_DEFAULT',
+  BANK_CASA_OPENING = 'BANK_CASA_OPENING',
+}
+
+export const VALID_AUTH_CONTEXT_TYPES = Object.values(AuthenticationContextType);
+
 export const parRequestSchema = z.object({
   response_type: z.literal('code'),
   client_id: z.string().min(1),
@@ -40,6 +47,8 @@ export const parRequestSchema = z.object({
   client_assertion_type: z.literal('urn:ietf:params:oauth:client-assertion-type:jwt-bearer'),
   client_assertion: z.string().min(1),
   dpop_jkt: z.string().optional(),
+  authentication_context_type: z.nativeEnum(AuthenticationContextType).optional(),
+  authentication_context_message: z.string().max(100).regex(/^[A-Za-z0-9 .,\-@'!()]*$/).optional(),
 });
 
 export type PARRequest = z.infer<typeof parRequestSchema>;
