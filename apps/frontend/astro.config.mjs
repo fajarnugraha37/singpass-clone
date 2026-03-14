@@ -8,6 +8,7 @@ export default defineConfig({
     locales: ["es", "en", "pt-br"],
     defaultLocale: "en",
   },
+  outDir: "../backend/static",
   integrations: [
     svelte()
   ],
