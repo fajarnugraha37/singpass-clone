@@ -35,7 +35,8 @@ description: "Task list for UserInfo Endpoint implementation"
 - [ ] T003 [P] Implement `signAndEncrypt` (JWS-in-JWE) in `JoseCryptoService` in `apps/backend/src/infra/adapters/jose_crypto.ts`
 - [ ] T004 [P] Create `UserInfoClaims` domain entity/mapping in `apps/backend/src/core/domain/userinfo_claims.ts`
 - [ ] T005 [P] Implement `DPoPValidator` utility in `apps/backend/src/core/utils/dpop_validator.ts`
-- [ ] T006 Configure `UserInfo` routes in `apps/backend/src/infra/http/authRouter.ts` (stub registration)
+- [ ] T006 [P] Implement `JWKSCacheService` (TTL-based) in `apps/backend/src/infra/adapters/jwks_cache.ts`
+- [ ] T007 Configure `UserInfo` routes in `apps/backend/src/infra/http/authRouter.ts` (stub registration)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -49,15 +50,15 @@ description: "Task list for UserInfo Endpoint implementation"
 
 ### Tests for User Story 1
 
-- [ ] T007 [P] [US1] Unit test for nested JWE (JWS-in-JWE) generation in `apps/backend/tests/core/crypto.test.ts`
-- [ ] T008 [P] [US1] Integration test for successful `GET /userinfo` in `apps/backend/tests/integration/userinfo.test.ts`
+- [ ] T008 [P] [US1] Unit test for nested JWE (JWS-in-JWE) generation in `apps/backend/tests/core/crypto.test.ts`
+- [ ] T009 [P] [US1] Integration test for successful `GET /userinfo` in `apps/backend/tests/integration/userinfo.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T009 [P] [US1] Implement `UserInfoRepository` for data retrieval in `apps/backend/src/infra/adapters/db/drizzle_userinfo_repository.ts`
-- [ ] T010 [US1] Implement `GetUserInfoUseCase` coordinating data retrieval and JWE encryption in `apps/backend/src/core/use-cases/get-userinfo.ts`
-- [ ] T011 [US1] Implement `UserInfoController` handling GET/POST requests in `apps/backend/src/infra/http/controllers/userinfo.controller.ts`
-- [ ] T012 [US1] Wire up `GET/POST /userinfo` in `apps/backend/src/infra/http/authRouter.ts`
+- [ ] T010 [P] [US1] Implement `UserInfoRepository` for data retrieval in `apps/backend/src/infra/adapters/db/drizzle_userinfo_repository.ts`
+- [ ] T011 [US1] Implement `GetUserInfoUseCase` coordinating data retrieval and JWE encryption in `apps/backend/src/core/use-cases/get-userinfo.ts`
+- [ ] T012 [US1] Implement `UserInfoController` handling GET/POST requests in `apps/backend/src/infra/http/controllers/userinfo.controller.ts`
+- [ ] T013 [US1] Wire up `GET/POST /userinfo` in `apps/backend/src/infra/http/authRouter.ts`
 
 **Checkpoint**: User Story 1 (MVP) is fully functional and testable independently.
 
@@ -71,12 +72,12 @@ description: "Task list for UserInfo Endpoint implementation"
 
 ### Tests for User Story 2
 
-- [ ] T013 [P] [US2] Integration test for DPoP binding failure in `apps/backend/tests/integration/userinfo_security.test.ts`
+- [ ] T014 [P] [US2] Integration test for DPoP binding failure in `apps/backend/tests/integration/userinfo_security.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T014 [US2] Enforce DPoP `jkt` binding check against the access token in `GetUserInfoUseCase`
-- [ ] T015 [US2] Ensure `jti` replay protection is active in `DPoPValidator` using `used_jtis` table
+- [ ] T015 [US2] Enforce DPoP `jkt` binding check against the access token in `GetUserInfoUseCase`
+- [ ] T016 [US2] Ensure `jti` replay protection is active in `DPoPValidator` using `used_jtis` table
 
 ---
 
@@ -88,11 +89,11 @@ description: "Task list for UserInfo Endpoint implementation"
 
 ### Tests for User Story 3
 
-- [ ] T016 [P] [US3] Unit test for scope-to-claims filtering logic in `apps/backend/tests/core/claims_filtering.test.ts`
+- [ ] T017 [P] [US3] Unit test for scope-to-claims filtering logic in `apps/backend/tests/core/claims_filtering.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T017 [US3] Implement scope-based filtering in `GetUserInfoUseCase` using the `UserInfoClaims` logic
+- [ ] T018 [US3] Implement scope-based filtering in `GetUserInfoUseCase` using the `UserInfoClaims` logic
 
 ---
 
@@ -100,9 +101,9 @@ description: "Task list for UserInfo Endpoint implementation"
 
 **Purpose**: Improvements, documentation, and final validation
 
-- [ ] T018 [P] Update Singpass server documentation in `docs/singpass-server/05-userinfo-endpoint.md`
-- [ ] T019 Implement detailed audit logging for UserInfo operations (SC-003) in `GetUserInfoUseCase`
-- [ ] T020 Run final validation using `specs/009-userinfo-endpoint/quickstart.md`
+- [ ] T019 [P] Update Singpass server documentation in `docs/singpass-server/05-userinfo-endpoint.md`
+- [ ] T020 Implement detailed audit logging for UserInfo operations (SC-003) in `GetUserInfoUseCase`
+- [ ] T021 Run final validation using `specs/009-userinfo-endpoint/quickstart.md`
 
 ---
 

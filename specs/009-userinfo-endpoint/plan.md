@@ -20,6 +20,7 @@ Implement the `GET /userinfo` endpoint in the Hono backend. This endpoint will v
 - DPoP validation (RFC 9449): Use `JoseCryptoService.validateDPoPProof` and compare `jkt` with access token `cnf.jkt`.
 - Nested JWS-in-JWE response: Use `jose.SignJWT` (JWS) followed by `jose.CompactEncrypt` (JWE) for the JWS string payload.
 - Singpass `person_info` claim mapping: Map `users` table fields (nric, name, email) to nested `{ value: string }` objects inside `person_info`.
+- JWKS Caching: Implement in-memory TTL-based cache for client public encryption keys to meet latency targets.
 
 ## Constitution Check
 
