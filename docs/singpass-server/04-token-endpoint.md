@@ -47,3 +47,17 @@ Return a `200 OK` JSON response with `application/json` content type:
 
 ### Error Handling
 Return structured JSON errors (e.g., `invalid_grant`, `invalid_client`, `invalid_dpop_proof`) mapped to HTTP 400 or 401.
+
+## Mock Client Configuration (Development)
+For local development and integration testing, a mock client is available with pre-configured keys.
+
+### Client ID: `mock-client-id`
+- **Redirect URI**: `http://localhost:3000/callback`
+- **JWKS (Public Encryption Key)**:
+  - **kid**: `mock-client-enc-key`
+  - **use**: `enc`
+  - **alg**: `ECDH-ES+A256KW`
+  - **kty**: `EC`
+  - **crv**: `P-256`
+  - **x**: `1HrSJLEHsUI8f3TCMdiFVtDyXOtmJeu0x2b0MT-a1vI`
+  - **y**: `cRC2KiCF4oQxfiZ39vVBMp5ng2rPEpYSSmNI7brbTiQ`

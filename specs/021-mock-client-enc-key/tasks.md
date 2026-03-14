@@ -17,7 +17,7 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Verify project environment and dependencies in `package.json` at repository root
+- [x] T001 Verify project environment and dependencies in `package.json` at repository root
 
 ---
 
@@ -25,7 +25,7 @@
 
 **Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
-- [ ] T002 [P] Locate and inspect `MOCK_CLIENT_REGISTRY` in `apps/backend/src/infra/adapters/client_registry.ts`
+- [x] T002 [P] Locate and inspect `MOCK_CLIENT_REGISTRY` in `apps/backend/src/infra/adapters/client_registry.ts`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -41,13 +41,13 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T003 [P] [US1] Create integration test `apps/backend/tests/integration/token_exchange_encryption.test.ts` to verify JWE generation for `mock-client-id`
+- [x] T003 [P] [US1] Create integration test `apps/backend/tests/integration/token_exchange_encryption.test.ts` to verify JWE generation for `mock-client-id`
 
 ### Implementation for User Story 1
 
-- [ ] T004 [US1] Update `mock-client-id` configuration in `apps/backend/src/infra/adapters/client_registry.ts` with the static `enc` key (ECDH-ES+A256KW) defined in `research.md`
-- [ ] T005 [US1] Verify that `TokenService` in `apps/backend/src/core/application/services/token.service.ts` correctly resolves the new `enc` key
-- [ ] T006 [US1] Run the integration test `apps/backend/tests/integration/token_exchange_encryption.test.ts` and ensure it passes
+- [x] T004 [US1] Update `mock-client-id` configuration in `apps/backend/src/infra/adapters/client_registry.ts` with the static `enc` key (ECDH-ES+A256KW) defined in `research.md`
+- [x] T005 [US1] Verify that `TokenService` in `apps/backend/src/core/application/services/token.service.ts` correctly resolves the new `enc` key
+- [x] T006 [US1] Run the integration test `apps/backend/tests/integration/token_exchange_encryption.test.ts` and ensure it passes
 
 **Checkpoint**: User Story 1 is fully functional and testable independently.
 
@@ -57,9 +57,9 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T007 [P] Run all backend tests in `apps/backend/tests/` to ensure no regressions
-- [ ] T008 [P] Document the new mock encryption key in `docs/singpass-server/04-token-endpoint.md` (if relevant)
-- [ ] T009 Run `quickstart.md` validation in `specs/021-mock-client-enc-key/quickstart.md`
+- [x] T007 [P] Run all backend tests in `apps/backend/tests/` to ensure no regressions
+- [x] T008 [P] Document the new mock encryption key in `docs/singpass-server/04-token-endpoint.md` (if relevant)
+- [x] T009 Run `quickstart.md` validation in `specs/021-mock-client-enc-key/quickstart.md`
 
 ---
 
