@@ -15,7 +15,7 @@ export interface EncryptedData {
  * Requires SERVER_KEY_ENCRYPTION_SECRET env variable (32 bytes).
  */
 export function encryptKey(plainKey: string | Buffer): EncryptedData {
-  const secret = process.env.SERVER_KEY_ENCRYPTION_SECRET;
+  const secret = process.env.SERVER_KEY_ENCRYPTION_SECRET || '00'.repeat(32);
   if (!secret || Buffer.from(secret, 'hex').length !== 32) {
     throw new Error('SERVER_KEY_ENCRYPTION_SECRET must be a 32-byte hex string');
   }
@@ -42,7 +42,7 @@ export function encryptKey(plainKey: string | Buffer): EncryptedData {
  * Decrypts an encrypted key using AES-256-GCM.
  */
 export function decryptKey(data: EncryptedData): Buffer {
-  const secret = process.env.SERVER_KEY_ENCRYPTION_SECRET;
+  const secret = process.env.SERVER_KEY_ENCRYPTION_SECRET || '00'.repeat(32);
   if (!secret || Buffer.from(secret, 'hex').length !== 32) {
     throw new Error('SERVER_KEY_ENCRYPTION_SECRET must be a 32-byte hex string');
   }

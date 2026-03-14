@@ -9,6 +9,8 @@ export const sharedConfig = {
     SESSION_TTL_SECONDS: 3600,
     AUTH_CODE_TTL_SECONDS: 60,
     SERVER_KEY_MIN_SIZE: 2048,
+    SERVER_KEY_ROTATION_DAYS: 7, // Rotate active key every 7 days
+    SERVER_KEY_GRACE_PERIOD_DAYS: 14, // Keep old keys for 14 days for verification
   },
   OIDC: {
     ISSUER: 'https://vibe-auth.example.com',

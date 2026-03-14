@@ -33,6 +33,10 @@ import { sharedConfig } from '../../../packages/shared/src/config';
 
 const auditService = new DrizzleSecurityAuditService();
 const cryptoService = new JoseCryptoService(auditService);
+
+// Ensure active keys exist on startup and handle rotation if needed
+await cryptoService.ensureActiveKey();
+await cryptoService.rotateKeys();
 const parRepository = new DrizzlePARRepository();
 const authSessionRepository = new DrizzleAuthSessionRepository();
 const authCodeRepository = new DrizzleAuthorizationCodeRepository();
@@ -119,7 +123,7 @@ const app = new Hono()
 const cleanupJob = new Cron('*/10 * * * *', async () => {
   try {
     const stats = await cleanupExpiredRecords();
-    if (stats.parCleaned > 0 || stats.authCodesCleaned > 0 || stats.sessionsCleaned > 0 || stats.jtisCleaned > 0) {
+    if (stats.parCleaned > 0 || stats.authCodesCleaned > 0 || stats.sessionsCleaned > 0 || stats.jtisCleaned > 0 || stats.keysCleaned > 0) {
       console.info(`[Cleanup] Purged expired records:`, stats);
     }
   } catch (error) {
@@ -127,10 +131,20 @@ const cleanupJob = new Cron('*/10 * * * *', async () => {
   }
 });
 
+// Daily Key Rotation Job (every day at midnight)
+const rotationJob = new Cron('0 0 * * *', async () => {
+  try {
+    await cryptoService.rotateKeys();
+  } catch (error) {
+    console.error(`[Rotation] Error during periodic key rotation:`, error);
+  }
+});
+
 // Graceful shutdown logic
 const shutdown = () => {
-  console.info('[Shutdown] Stopping cleanup job...');
+  console.info('[Shutdown] Stopping cleanup and rotation jobs...');
   cleanupJob.stop();
+  rotationJob.stop();
   process.exit(0);
 };
 

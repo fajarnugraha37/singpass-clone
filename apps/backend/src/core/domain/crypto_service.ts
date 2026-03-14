@@ -64,6 +64,19 @@ export interface CryptoService {
   getPublicJWKS(): Promise<{ keys: JWK[] }>;
 
   /**
+   * Ensures at least one active key exists.
+   * Generates a new key if none are present.
+   */
+  ensureActiveKey(): Promise<void>;
+
+  /**
+   * Rotates server keys based on configuration.
+   * - Generates a new key if the current one is older than ROTATION_DAYS.
+   * - Deactivates keys older than GRACE_PERIOD_DAYS.
+   */
+  rotateKeys(): Promise<void>;
+
+  /**
    * Calculates the S256 thumbprint (jkt) of a JWK.
    */
   calculateThumbprint(jwk: JWK): Promise<string>;

@@ -1,16 +1,16 @@
-import { lt } from 'drizzle-orm';
+import { lt, and, eq } from 'drizzle-orm';
 import { db } from './client';
-import { parRequests, authCodes, sessions, usedJtis } from './schema';
+import { parRequests, authCodes, sessions, usedJtis, serverKeys } from './schema';
 
 /**
  * Utility to clean up expired records from the database.
- * In a production environment, this would be triggered by a cron job or worker.
  */
 export async function cleanupExpiredRecords(): Promise<{
   parCleaned: number;
   authCodesCleaned: number;
   sessionsCleaned: number;
   jtisCleaned: number;
+  keysCleaned: number;
 }> {
   const now = new Date();
 
@@ -34,10 +34,20 @@ export async function cleanupExpiredRecords(): Promise<{
     .where(lt(usedJtis.expiresAt, now))
     .returning({ jti: usedJtis.jti });
 
+  // 5. Clean up old inactive server keys (e.g., older than 30 days)
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const keysResult = await db.delete(serverKeys)
+    .where(and(
+      eq(serverKeys.isActive, false),
+      lt(serverKeys.createdAt, thirtyDaysAgo)
+    ))
+    .returning({ id: serverKeys.id });
+
   return {
     parCleaned: parResult.length,
     authCodesCleaned: authCodeResult.length,
     sessionsCleaned: sessionResult.length,
     jtisCleaned: jtiResult.length,
+    keysCleaned: keysResult.length,
   };
 }
