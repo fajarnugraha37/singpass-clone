@@ -14,6 +14,11 @@
 - Q: Which algorithm should be used for the JWS signature? → A: ES256: ECDSA using P-256 and SHA-256 (Standard for Singpass/FAPI).
 - Q: Which algorithms should be used for Key Encryption (alg) and Content Encryption (enc)? → A: ECDH-ES+A256KW / A256GCM: Modern elliptic curve key agreement with AES-GCM for content.
 - Q: How should the user claims be organized within the JWT payload? → A: Nested: Claims are grouped under a `person_info` top-level key, following the exact Singpass structure defined in documentation.
+- Q: How should the system retrieve the **Client's public encryption key** required for FR-008? → A: JWKS URI: System fetches the key from the client's `jwks_uri` endpoint.
+- Q: Should the UserInfo endpoint support **POST** requests in addition to the specified GET? → A: Both GET and POST: Allow both for maximum OIDC compatibility.
+- Q: What level of **audit logging** is required for UserInfo requests? → A: Detailed Audit: Log subject, client ID, success/failure, and reason (no claims).
+- Q: How should the system handle cases where a user has **no data** for the authorized scopes? → A: Empty person_info: Return 200 OK with an empty or minimal `person_info` object.
+- Q: Should the system enforce **DPoP jti (JWT ID)** validation to prevent replay attacks? → A: Enforce Strict: Validate `jti` uniqueness within a short time window (e.g., 5 min).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -27,7 +32,7 @@ As a Client Application, I want to retrieve the authenticated user's profile inf
 
 **Acceptance Scenarios**:
 
-1. **Given** a valid access token bound to a specific public key (jkt), **When** a GET request is made to `/userinfo` with a valid DPoP proof signed by the corresponding private key, **Then** the system returns a 200 OK response with a JWE-encrypted payload.
+1. **Given** a valid access token bound to a specific public key (jkt), **When** a GET or POST request is made to `/userinfo` with a valid DPoP proof signed by the corresponding private key, **Then** the system returns a 200 OK response with a JWE-encrypted payload.
 2. **Given** a successful decryption of the response, **When** inspecting the payload, **Then** it contains the `sub` claim and authorized user attributes (e.g., name, email) nested within a `person_info` object as per Singpass standards.
 
 ---
@@ -67,21 +72,24 @@ As a Privacy Officer, I want the UserInfo endpoint to return only the specific u
 - **Token Expiration**: Accessing the endpoint with a token that was valid at the time of issuance but has since expired.
 - **Clock Skew**: Handling DPoP proofs with `iat` (issued at) times slightly in the future or past due to server clock differences.
 - **Revoked Keys**: Handling cases where the client's public encryption key has been rotated or revoked.
-- **Missing User Data**: Gracefully handling scenarios where requested claims are missing from the user's profile.
+- **Missing User Data**: Gracefully handling scenarios where requested claims are missing from the user's profile by returning a 200 OK with an empty `person_info` object.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: System MUST provide a `GET /userinfo` endpoint accessible via HTTPS.
+- **FR-001**: System MUST provide `GET /userinfo` and `POST /userinfo` endpoints accessible via HTTPS.
 - **FR-002**: System MUST validate the `Authorization: DPoP <token>` header.
-- **FR-003**: System MUST validate the `DPoP` proof JWT according to RFC 9449, including checking the `htm` (method) and `htu` (URL) claims.
+- **FR-003**: System MUST validate the `DPoP` proof JWT according to RFC 9449, including checking the `htm` (matching GET or POST), `htu` (URL), and `jti` (JWT ID) claims.
+- **FR-004**: System MUST enforce `jti` uniqueness for DPoP proofs within a configurable time window (e.g., 5 minutes) to prevent replay attacks.
+- **FR-005**: System MUST verify that the access token's `cnf.jkt` claim matches the thumbprint of the public key used in the DPoP proof.
 - **FR-004**: System MUST verify that the access token's `cnf.jkt` claim matches the thumbprint of the public key used in the DPoP proof.
-- **FR-005**: System MUST retrieve user identity attributes from the **local database** (populated during authentication) based on the `sub` and `scopes` associated with the access token.
-- **FR-006**: System MUST return the UserInfo response as a **raw JWE string** (nested JWS inside JWE) containing a **nested `person_info` object** for identity claims.
-- **FR-007**: System MUST sign the UserInfo payload using the server's private **ES256** key (JWS).
-- **FR-008**: System MUST encrypt the resulting JWS using the Client's registered public encryption key via **ECDH-ES+A256KW** with **A256GCM** for content encryption (JWE).
-- **FR-009**: System MUST return 401 Unauthorized with appropriate error codes (`invalid_token`, `invalid_dpop_proof`) for validation failures.
+- **FR-006**: System MUST retrieve user identity attributes from the **local database** (populated during authentication) based on the `sub` and `scopes` associated with the access token. If no attributes match the requested scopes, an empty `person_info` object MUST be returned.
+- **FR-007**: System MUST return the UserInfo response as a **raw JWE string** (nested JWS inside JWE) containing a **nested `person_info` object** for identity claims.
+- **FR-008**: System MUST sign the UserInfo payload using the server's private **ES256** key (JWS).
+- **FR-009**: System MUST encrypt the resulting JWS using the Client's public encryption key retrieved from their **`jwks_uri`** via **ECDH-ES+A256KW** with **A256GCM** for content encryption (JWE).
+- **FR-010**: System MUST return 401 Unauthorized with appropriate error codes (`invalid_token`, `invalid_dpop_proof`) for validation failures.
+- **FR-011**: System MUST record a detailed audit log for every UserInfo request, including client ID, subject, request status, and failure reason (if applicable), excluding actual claim values.
 
 ### Key Entities *(include if feature involves data)*
 
