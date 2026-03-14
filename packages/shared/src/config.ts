@@ -12,6 +12,7 @@ export const sharedConfig = {
     SERVER_KEY_ROTATION_DAYS: 7, // Rotate active key every 7 days
     SERVER_KEY_GRACE_PERIOD_DAYS: 14, // Keep old keys for 14 days for verification
     MAX_AUTH_RETRIES: 3,
+    ACCESS_TOKEN_LIFESPAN: 1800,
   },
   OIDC: {
     ISSUER: 'https://vibe-auth.example.com',

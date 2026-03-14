@@ -60,7 +60,7 @@ As a system administrator, I want to be able to change the access token lifespan
 ### Functional Requirements
 
 - **FR-001**: The system MUST return `expires_in: 1800` in the token response by default.
-- **FR-002**: Access tokens MUST contain a claim (e.g., `exp`) that is exactly 1800 seconds after the `iat` (issued at) time by default.
+- **FR-002**: ID Tokens MUST contain an `exp` claim that is exactly 1800 seconds after the `iat` (issued at) time by default. Access Tokens MUST have associated expiration metadata in the persistence layer matching this duration.
 - **FR-003**: The protected resource endpoints MUST validate the token expiration and reject expired tokens.
 - **FR-004**: The access token lifespan MUST be configurable via `sharedConfig.SECURITY.ACCESS_TOKEN_LIFESPAN` (or similar project-standard path).
 - **FR-005**: If the configuration is missing or invalid, the system MUST default to 1800 seconds.

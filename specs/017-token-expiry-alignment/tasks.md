@@ -16,7 +16,7 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 [P] Verify monorepo workspace links for `@vibe-auth/shared` in `apps/backend/package.json`
+- [x] T001 [P] Verify monorepo workspace links for `@vibe/shared` in `apps/backend/package.json`
 
 ---
 
@@ -26,7 +26,7 @@
 
 **⚠️ CRITICAL**: The configuration MUST be defined before the service can use it.
 
-- [ ] T002 Add `ACCESS_TOKEN_LIFESPAN: 1800` to `sharedConfig.SECURITY` in `packages/shared/src/config.ts`
+- [x] T002 Add `ACCESS_TOKEN_LIFESPAN: 1800` to `sharedConfig.SECURITY` in `packages/shared/src/config.ts`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin.
 
@@ -40,12 +40,12 @@
 
 ### Tests for User Story 1 (Requested in Spec) ⚠️
 
-- [ ] T003 [P] [US1] Create integration test for token issuance lifespan in `apps/backend/tests/integration/token_expiry_issuance.test.ts`
+- [x] T003 [P] [US1] Create integration test for token issuance lifespan in `apps/backend/tests/integration/token_expiry_issuance.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T004 [US1] Update `TokenService.generateTokens` to use `sharedConfig.SECURITY.ACCESS_TOKEN_LIFESPAN` for `expiresIn` variable in `apps/backend/src/core/application/services/token.service.ts`
-- [ ] T005 [US1] Ensure `expires_in` field in `TokenResponse` matches the configured lifespan in `apps/backend/src/core/application/services/token.service.ts`
+- [x] T004 [US1] Update `TokenService.generateTokens` to use `sharedConfig.SECURITY.ACCESS_TOKEN_LIFESPAN` for `expiresIn` variable in `apps/backend/src/core/application/services/token.service.ts`
+- [x] T005 [US1] Ensure `expires_in` field in `TokenResponse` matches the configured lifespan in `apps/backend/src/core/application/services/token.service.ts`
 
 **Checkpoint**: User Story 1 functional - tokens are issued with the correct 30-minute lifespan.
 
@@ -59,12 +59,12 @@
 
 ### Tests for User Story 2 (Requested in Spec) ⚠️
 
-- [ ] T006 [P] [US2] Create integration test for token expiration enforcement at UserInfo endpoint in `apps/backend/tests/integration/token_expiry_enforcement.test.ts`
+- [x] T006 [P] [US2] Create integration test for token expiration enforcement at UserInfo endpoint in `apps/backend/tests/integration/token_expiry_enforcement.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T007 [US2] Verify `expiresAt` calculation in `apps/backend/src/core/use-cases/token-exchange.ts` correctly uses the 1800s lifespan for persistence
-- [ ] T008 [US2] Verify token expiration check logic in `apps/backend/src/core/use-cases/get-userinfo.ts`
+- [x] T007 [US2] Verify `expiresAt` calculation in `apps/backend/src/core/use-cases/token-exchange.ts` correctly uses the 1800s lifespan for persistence
+- [x] T008 [US2] Verify token expiration check logic in `apps/backend/src/core/use-cases/get-userinfo.ts`
 
 **Checkpoint**: User Story 2 functional - tokens are strictly enforced to expire after 30 minutes.
 
@@ -78,11 +78,11 @@
 
 ### Tests for User Story 3 (Requested in Spec) ⚠️
 
-- [ ] T009 [P] [US3] Create integration test for dynamic lifespan configuration in `apps/backend/tests/integration/token_expiry_config.test.ts`
+- [x] T009 [P] [US3] Create integration test for dynamic lifespan configuration in `apps/backend/tests/integration/token_expiry_config.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T010 [US3] Verify that `TokenService` correctly reloads/references the shared configuration for each request in `apps/backend/src/core/application/services/token.service.ts`
+- [x] T010 [US3] Verify that `TokenService` correctly reloads/references the shared configuration for each request in `apps/backend/src/core/application/services/token.service.ts`
 
 ---
 
@@ -90,9 +90,9 @@
 
 **Purpose**: Documentation and final validation
 
-- [ ] T011 [P] Update OpenAPI example for `expires_in` to `1800` in `apps/backend/src/infra/http/openapi-spec.ts`
-- [ ] T012 Run all integration tests in `apps/backend/` and verify coverage >= 80%
-- [ ] T013 Final verification using `quickstart.md` steps
+- [x] T011 [P] Update OpenAPI example for `expires_in` to `1800` in `apps/backend/src/infra/http/openapi-spec.ts`
+- [x] T012 Run all integration tests in `apps/backend/` and verify coverage >= 80%
+- [x] T013 Final verification using `quickstart.md` steps (Verify configuration changes can be applied in under 1 minute)
 
 ---
 

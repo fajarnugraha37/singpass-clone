@@ -5,6 +5,7 @@ import { getClientConfig } from '../../../infra/adapters/client_registry';
 import { FapiErrors } from '../../../infra/middleware/fapi-error';
 import type { TokenResponse } from '../../../../packages/shared/src/tokens';
 import { buildSubAttributes, mapLoaToAcr, UserAttributes } from '../../domain/claims';
+import { sharedConfig } from '@vibe/shared/config';
 
 export interface TokenGenerationParams {
   userId: string;
@@ -30,7 +31,7 @@ export class TokenService {
     // 1. Generate Opaque Access Token (typically a random string or a JWT)
     // For this project, we'll use a random high-entropy string for the opaque token.
     const accessToken = crypto.randomBytes(32).toString('base64url');
-    const expiresIn = 3600; // 1 hour
+    const expiresIn = sharedConfig.SECURITY.ACCESS_TOKEN_LIFESPAN ?? 1800;
 
     // 2. Generate Refresh Token
     const refreshToken = crypto.randomBytes(48).toString('base64url');
@@ -41,7 +42,7 @@ export class TokenService {
       clientId,
       nonce,
       issuer,
-      expiresIn: 3600,
+      expiresIn: sharedConfig.SECURITY.ACCESS_TOKEN_LIFESPAN ?? 1800,
       loa,
       amr,
       scope,

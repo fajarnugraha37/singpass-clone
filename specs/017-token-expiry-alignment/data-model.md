@@ -15,7 +15,7 @@ Represents the runtime token object returned by the token service.
 | Field | Type | Description |
 |-------|------|-------------|
 | `access_token` | `string` | The opaque or JWT access token. |
-| `expires_in` | `number` (seconds) | Time in seconds until the token expires. Updated to `1800` (from `3600`). |
+| `expires_in` | `number` (seconds) | Metadata returned in JSON response and stored in DB `expiresAt`. |
 | `token_type` | `string` | The type of token (e.g., `DPoP`). |
 | `id_token` | `string` | The signed/encrypted OIDC ID Token. |
 | `refresh_token` | `string` | The refresh token. |
@@ -25,3 +25,6 @@ The `access_tokens` table stores the `expiresAt` timestamp calculated during the
 
 - **`expiresAt`**: `Date` (Unix timestamp in SQLite). Calculated as `IssueDate + (expires_in * 1000)`.
 - **Validation**: Queries to protected resources MUST include `WHERE expires_at > CURRENT_TIMESTAMP`.
+
+## ID Token Claims
+- **exp claim**: Calculated as `iat + sharedConfig.SECURITY.ACCESS_TOKEN_LIFESPAN`.
