@@ -56,7 +56,7 @@
 
 - [x] T005 [US1] Implement secure stripping logic in `getPublicJWKS()` within `apps/backend/src/infra/adapters/jose_crypto.ts`
 - [x] T006 [US1] Verify the fix by running the unit test from T004
-- [ ] T007 [US1] Perform manual verification of the `/.well-known/keys` endpoint using `curl` as described in `specs/011-secure-jwks-export/quickstart.md`
+- [x] T007 [US1] Perform manual verification of the `/.well-known/keys` endpoint using `curl` as described in `specs/011-secure-jwks-export/quickstart.md`
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently.
 
@@ -66,9 +66,9 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T008 [P] Run `bun lint` and `bun format` in `apps/backend/`
-- [ ] T009 [P] Final documentation review and update of `specs/011-secure-jwks-export/quickstart.md` if paths changed
-- [ ] T010 [P] Ensure test coverage for `JoseCryptoService` remains >= 80%
+- [x] T008 [P] Run `bun lint` and `bun format` in `apps/backend/`
+- [x] T009 [P] Final documentation review and update of `specs/011-secure-jwks-export/quickstart.md` if paths changed
+- [x] T010 [P] Ensure test coverage for `JoseCryptoService` remains >= 80%
 
 ---
 

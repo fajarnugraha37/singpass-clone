@@ -4,7 +4,7 @@ This guide provides the steps to verify that the JWKS endpoint is correctly expo
 
 ## Prerequisites
 
-- The backend service must be running.
+- The backend service must be running (for manual verification).
 - `curl` and `jq` command-line tools should be available.
 
 ## Verification Steps
@@ -15,10 +15,10 @@ The most direct way to verify the fix is to run the newly created unit test.
 
 ```bash
 # From the apps/backend directory
-bun test --test-file="path/to/your/new_jwks_test.ts"
+bun test ./tests/infra/adapters/jose_crypto_jwks.test.ts
 ```
 
-The test should pass, confirming that the `d` parameter is not found in the programmatically fetched JWKS.
+The test should pass, confirming that the `d` parameter (and other private components) are not found in the programmatically fetched JWKS.
 
 ### 2. Manually Inspect the Endpoint
 
@@ -56,4 +56,10 @@ You can also manually query the endpoint and inspect the output.
     curl -s http://localhost:3000/.well-known/keys | grep '"d":'
     ```
 
-If the command produces any output, the private key component is still being exposed.
+### 3. Programmatic Verification (One-liner)
+
+If you don't want to start the full server, you can verify the logic using this one-liner from the root:
+
+```bash
+cd apps/backend && bun -e "import { JoseCryptoService } from './src/infra/adapters/jose_crypto'; process.env.SERVER_KEY_ENCRYPTION_SECRET = '00'.repeat(32); const s = new JoseCryptoService(); await s.generateKeyPair(); console.log(JSON.stringify(await s.getPublicJWKS()))" | grep -v '"d":'
+```

@@ -290,7 +290,13 @@ export class JoseCryptoService implements CryptoService {
       const fullJWK = await jose.exportJWK(privateKey);
 
       // Security Fix: Explicitly strip private components
-      const { d, p, q, dp, dq, qi, ...publicKey } = fullJWK as any;
+      const publicKey = { ...fullJWK };
+      delete publicKey.d;
+      delete publicKey.p;
+      delete publicKey.q;
+      delete publicKey.dp;
+      delete publicKey.dq;
+      delete publicKey.qi;
 
       return {
         ...publicKey,
