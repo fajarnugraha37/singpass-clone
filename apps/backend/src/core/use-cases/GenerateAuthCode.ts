@@ -63,6 +63,7 @@ export class GenerateAuthCodeUseCase {
       clientId: session.clientId,
       codeChallenge: payload.code_challenge,
       dpopJkt: dpopJkt!,
+      scope: payload.scope,
       nonce: payload.nonce,
       redirectUri: payload.redirect_uri,
       expiresAt,

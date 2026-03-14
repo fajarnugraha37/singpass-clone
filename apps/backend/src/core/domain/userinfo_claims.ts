@@ -6,6 +6,7 @@ export interface PersonInfo {
   uinfin?: PersonInfoField;
   name?: PersonInfoField;
   email?: PersonInfoField;
+  mobileno?: PersonInfoField;
 }
 
 export interface UserInfoClaims {
@@ -21,6 +22,7 @@ export interface UserData {
   nric: string;
   name: string;
   email: string;
+  mobileno?: string | null;
 }
 
 /**
@@ -43,6 +45,9 @@ export function mapUserInfoClaims(
   }
   if (scopeSet.has('email')) {
     person_info.email = { value: user.email };
+  }
+  if (scopeSet.has('mobileno') && user.mobileno) {
+    person_info.mobileno = { value: user.mobileno };
   }
 
   return {

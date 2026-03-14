@@ -94,7 +94,7 @@ export class TokenExchangeUseCase {
       userId: authCode.userId,
       clientId: authCode.clientId,
       dpopJkt: dpopResult.jkt,
-      scope: 'openid', // This should come from the original request or auth code
+      scope: authCode.scope,
       nonce: authCode.nonce || undefined,
       issuer: this.issuer,
     });
@@ -105,7 +105,7 @@ export class TokenExchangeUseCase {
       userId: authCode.userId,
       clientId: authCode.clientId,
       dpopJkt: dpopResult.jkt,
-      scope: 'openid',
+      scope: authCode.scope,
       expiresAt: new Date(Date.now() + tokens.expires_in * 1000),
     });
 
@@ -115,7 +115,7 @@ export class TokenExchangeUseCase {
         userId: authCode.userId,
         clientId: authCode.clientId,
         dpopJkt: dpopResult.jkt,
-        scope: 'openid',
+        scope: authCode.scope,
         expiresAt: new Date(Date.now() + 30 * 24 * 3600 * 1000), // 30 days
       });
     }

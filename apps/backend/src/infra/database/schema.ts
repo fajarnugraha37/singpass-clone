@@ -6,6 +6,7 @@ export const users = sqliteTable('users', {
   nric: text('nric').unique(),
   name: text('name').notNull(),
   email: text('email').unique(),
+  mobileno: text('mobileno'),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 });
 
@@ -107,6 +108,7 @@ export const authorizationCodes = sqliteTable('authorization_codes', {
   clientId: text('client_id').notNull(),
   codeChallenge: text('code_challenge').notNull(),
   dpopJkt: text('dpop_jkt').notNull(),
+  scope: text('scope').notNull(),
   nonce: text('nonce'),
   redirectUri: text('redirect_uri').notNull(),
   expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),

@@ -4,6 +4,7 @@ export interface AuthorizationCode {
   clientId: string;
   codeChallenge: string;
   dpopJkt: string;
+  scope: string;
   nonce?: string | null;
   redirectUri: string;
   expiresAt: Date;
