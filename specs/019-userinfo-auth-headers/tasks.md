@@ -17,7 +17,7 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Confirm active branch is `019-userinfo-auth-headers` and environment is ready (Bun installed)
+- [X] T001 Confirm active branch is `019-userinfo-auth-headers` and environment is ready (Bun installed)
 
 ---
 
@@ -25,8 +25,8 @@
 
 **Purpose**: Core infrastructure and test setup that MUST be complete before ANY user story implementation
 
-- [ ] T002 [P] Prepare `apps/backend/tests/infra/userinfo_controller.test.ts` for new test cases (imports and mocks)
-- [ ] T003 [P] Add a base assertion utility or helper in `apps/backend/tests/infra/userinfo_controller.test.ts` to verify headers
+- [X] T002 [P] Prepare `apps/backend/tests/infra/userinfo_controller.test.ts` for new test cases (imports and mocks)
+- [X] T003 [P] Add a base assertion utility or helper in `apps/backend/tests/infra/userinfo_controller.test.ts` to verify headers
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -40,13 +40,13 @@
 
 ### Tests for User Story 1
 
-- [ ] T004 [P] [US1] Add failing test case for expired token header in `apps/backend/tests/infra/userinfo_controller.test.ts`
-- [ ] T005 [P] [US1] Add failing test case for invalid token header in `apps/backend/tests/infra/userinfo_controller.test.ts`
+- [X] T004 [P] [US1] Add failing test case for expired token header in `apps/backend/tests/infra/userinfo_controller.test.ts`
+- [X] T005 [P] [US1] Add failing test case for invalid token header in `apps/backend/tests/infra/userinfo_controller.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] Implement `WWW-Authenticate` header for `invalid_token` errors in the catch block of `apps/backend/src/infra/http/controllers/userinfo.controller.ts`
-- [ ] T007 [US1] Verify T004 and T005 pass: `bun test apps/backend/tests/infra/userinfo_controller.test.ts`
+- [X] T006 [US1] Implement `WWW-Authenticate` header for `invalid_token` errors in the catch block of `apps/backend/src/infra/http/controllers/userinfo.controller.ts`
+- [X] T007 [US1] Verify T004 and T005 pass: `bun test apps/backend/tests/infra/userinfo_controller.test.ts`
 
 **Checkpoint**: User Story 1 is fully functional and testable independently.
 
@@ -60,12 +60,12 @@
 
 ### Tests for User Story 2
 
-- [ ] T008 [P] [US2] Add failing test case for `invalid_dpop_proof` header in `apps/backend/tests/infra/userinfo_controller.test.ts`
+- [X] T008 [P] [US2] Add failing test case for `invalid_dpop_proof` header in `apps/backend/tests/infra/userinfo_controller.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T009 [US2] Implement `WWW-Authenticate` header for `invalid_dpop_proof` errors in the catch block of `apps/backend/src/infra/http/controllers/userinfo.controller.ts`
-- [ ] T010 [US2] Verify T008 passes: `bun test apps/backend/tests/infra/userinfo_controller.test.ts`
+- [X] T009 [US2] Implement `WWW-Authenticate` header for `invalid_dpop_proof` errors in the catch block of `apps/backend/src/infra/http/controllers/userinfo.controller.ts`
+- [X] T010 [US2] Verify T008 passes: `bun test apps/backend/tests/infra/userinfo_controller.test.ts`
 
 **Checkpoint**: User Stories 1 and 2 are functional.
 
@@ -79,14 +79,14 @@
 
 ### Tests for User Story 3
 
-- [ ] T011 [P] [US3] Add failing test case for missing Authorization header in `apps/backend/tests/infra/userinfo_controller.test.ts`
-- [ ] T012 [P] [US3] Add failing test case for missing DPoP header in `apps/backend/tests/infra/userinfo_controller.test.ts`
+- [X] T011 [P] [US3] Add failing test case for missing Authorization header in `apps/backend/tests/infra/userinfo_controller.test.ts`
+- [X] T012 [P] [US3] Add failing test case for missing DPoP header in `apps/backend/tests/infra/userinfo_controller.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T013 [US3] Update `WWW-Authenticate` header for missing `Authorization` (use `invalid_request`) in `apps/backend/src/infra/http/controllers/userinfo.controller.ts`
-- [ ] T014 [US3] Update `WWW-Authenticate` header for missing `DPoP` (add `error_description`) in `apps/backend/src/infra/http/controllers/userinfo.controller.ts`
-- [ ] T015 [US3] Verify T011 and T012 pass: `bun test apps/backend/tests/infra/userinfo_controller.test.ts`
+- [X] T013 [US3] Update `WWW-Authenticate` header for missing `Authorization` (use `invalid_request`) in `apps/backend/src/infra/http/controllers/userinfo.controller.ts`
+- [X] T014 [US3] Update `WWW-Authenticate` header for missing `DPoP` (add `error_description`) in `apps/backend/src/infra/http/controllers/userinfo.controller.ts`
+- [X] T015 [US3] Verify T011 and T012 pass: `bun test apps/backend/tests/infra/userinfo_controller.test.ts`
 
 **Checkpoint**: All user stories are independently functional.
 
@@ -96,9 +96,9 @@
 
 **Purpose**: Final verification and documentation
 
-- [ ] T016 Run all backend tests: `bun test apps/backend/tests/`
-- [ ] T017 [P] Manual verification using `curl` as specified in `specs/019-userinfo-auth-headers/quickstart.md`
-- [ ] T018 [P] Ensure no sensitive information is leaked in error descriptions
+- [X] T016 Run all backend tests: `bun test apps/backend/tests/`
+- [X] T017 [P] Manual verification using `curl` as specified in `specs/019-userinfo-auth-headers/quickstart.md`
+- [X] T018 [P] Ensure no sensitive information is leaked in error descriptions
 
 ---
 

@@ -7,20 +7,22 @@ export const getUserInfo = (useCase: GetUserInfoUseCase, issuer: string) => asyn
   const dpopHeader = c.req.header('DPoP');
 
   if (!authHeader || !authHeader.startsWith('DPoP ')) {
+    const error_description = 'Missing or invalid Authorization header';
     return c.json({
       error: 'invalid_request',
-      error_description: 'Missing or invalid Authorization header'
+      error_description
     }, 401, {
-      'WWW-Authenticate': 'DPoP error="invalid_token"'
+      'WWW-Authenticate': `DPoP error="invalid_request", error_description="${error_description}"`
     });
   }
 
   if (!dpopHeader) {
+    const error_description = 'Missing DPoP header';
     return c.json({
       error: 'invalid_dpop_proof',
-      error_description: 'Missing DPoP header'
+      error_description
     }, 401, {
-      'WWW-Authenticate': 'DPoP error="invalid_dpop_proof"'
+      'WWW-Authenticate': `DPoP error="invalid_dpop_proof", error_description="${error_description}"`
     });
   }
 
@@ -52,17 +54,36 @@ export const getUserInfo = (useCase: GetUserInfoUseCase, issuer: string) => asyn
     console.error('[UserInfo Error]', error.message);
     
     if (error.message.startsWith('invalid_dpop_proof')) {
+      const error_description = error.message.split(': ')[1] || 'DPoP validation failed';
       return c.json({
         error: 'invalid_dpop_proof',
-        error_description: error.message.split(': ')[1] || 'DPoP validation failed'
-      }, 401);
+        error_description
+      }, 401, {
+        'WWW-Authenticate': `DPoP error="invalid_dpop_proof", error_description="${error_description}"`
+      });
     }
 
     if (error.message === 'invalid_token') {
+      const error_description = 'The access token is invalid or has expired';
       return c.json({
         error: 'invalid_token',
-        error_description: 'The access token is invalid or has expired'
-      }, 401);
+        error_description
+      }, 401, {
+        'WWW-Authenticate': `DPoP error="invalid_token", error_description="${error_description}"`
+      });
+    }
+
+    if (error.message === 'invalid_client' || error.message === 'no_client_encryption_key' || error.message.startsWith('invalid_request')) {
+      const error_description = error.message === 'no_client_encryption_key' 
+        ? 'Client encryption key not found' 
+        : (error.message.split(': ')[1] || 'Invalid request');
+      
+      return c.json({
+        error: 'invalid_request',
+        error_description
+      }, 401, {
+        'WWW-Authenticate': `DPoP error="invalid_request", error_description="${error_description}"`
+      });
     }
 
     return c.json({
