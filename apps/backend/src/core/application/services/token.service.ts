@@ -75,7 +75,14 @@ export class TokenService {
     const { userId, clientId, nonce, issuer, expiresIn, loa, amr, scope, user } = params;
 
     // 1. Resolve Client Config and Public Encryption Key
-    const clientConfig = await this.clientRegistry.getClientConfig(clientId);
+    let clientConfig;
+    try {
+      clientConfig = await this.clientRegistry.getClientConfig(clientId);
+    } catch (err: any) {
+      console.error('[TokenService] Error fetching client config:', err);
+      throw FapiErrors.temporarilyUnavailable('Could not fetch client configuration at this time.');
+    }
+    
     if (!clientConfig) {
       throw FapiErrors.invalidClient('Client not found');
     }
@@ -88,7 +95,13 @@ export class TokenService {
     }
 
     // 2. Resolve Server Active Signing Key
-    const serverKey = await this.cryptoService.getActiveKey();
+    let serverKey;
+    try {
+      serverKey = await this.cryptoService.getActiveKey();
+    } catch (err: any) {
+      console.error('[TokenService] Error fetching active server key:', err);
+      throw FapiErrors.temporarilyUnavailable('Could not retrieve signing key at this time.');
+    }
 
     // 3. Prepare ID Token Claims
     const now = Math.floor(Date.now() / 1000);
@@ -106,11 +119,32 @@ export class TokenService {
     };
 
     // 4. Sign and Encrypt (Nested JWT)
-    return await generateEncryptedIDToken(
-      claims,
-      serverKey.privateKey,
-      serverKey.id,
-      clientEncKey
-    );
+    try {
+      return await generateEncryptedIDToken(
+        claims,
+        serverKey.privateKey,
+        serverKey.id,
+        clientEncKey
+      );
+    } catch (err: any) {
+      console.error('[TokenService] Error generating encrypted ID token:', err);
+      throw FapiErrors.serverError('Failed to generate ID token.');
+    }
   }
-}
+
+  private async generateIdToken(params: {
+    userId: string;
+    clientId: string;
+    nonce?: string;
+    issuer: string;
+    expiresIn: number;
+    loa: number;
+    amr: string[];
+    scope: string;
+    user?: UserAttributes;
+  }): Promise<string> {
+    const { userId, clientId, nonce, issuer, expiresIn, loa, amr, scope, user } = params;
+
+    if (!userId) {
+      throw FapiErrors.invalidToken('User ID is missing or invalid.');
+    }

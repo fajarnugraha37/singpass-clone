@@ -53,4 +53,8 @@ export const FapiErrors = {
   unsupportedGrantType: (description?: string) => new FapiError('unsupported_grant_type', description, 400),
   invalidScope: (description?: string) => new FapiError('invalid_scope', description, 400),
   invalidDpopProof: (description?: string) => new FapiError('invalid_dpop_proof', description, 400),
+  invalidToken: (description?: string) => new FapiError('invalid_token', description, 400), // Added for Singpass compliance
+  serverError: (description?: string) => new FapiError('server_error', description, 500), // Added for Singpass compliance
+  temporarilyUnavailable: (description?: string) => new FapiError('temporarily_unavailable', description, 503), // Added for Singpass compliance
 };
+

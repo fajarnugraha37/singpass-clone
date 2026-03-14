@@ -44,17 +44,27 @@ export const exchangeToken = (useCase: TokenExchangeUseCase) => async (c: Contex
   } = validation.data;
 
   // 3. Execute use case
-  const result = await useCase.execute({
-    grantType: grant_type,
-    code,
-    redirectUri: redirect_uri,
-    codeVerifier: code_verifier,
-    clientAssertionType: client_assertion_type,
-    clientAssertion: client_assertion,
-    dpopHeader,
-    method: c.req.method,
-    url: c.req.url,
-  });
-
-  return c.json(result);
+  try {
+    const result = await useCase.execute({
+      grantType: grant_type,
+      code,
+      redirectUri: redirect_uri,
+      codeVerifier: code_verifier,
+      clientAssertionType: client_assertion_type,
+      clientAssertion: client_assertion,
+      dpopHeader,
+      method: c.req.method,
+      url: c.req.url,
+    });
+    return c.json(result);
+  } catch (err: any) {
+    // If the error is already a FapiError, re-throw it directly
+    if (err instanceof FapiError || err.name === 'FapiError') {
+      throw err;
+    }
+    
+    console.error('[TokenController] Error executing use case:', err);
+    // For other unexpected errors, throw a server error
+    throw FapiErrors.serverError('An unexpected error occurred during token exchange.');
+  }
 };
