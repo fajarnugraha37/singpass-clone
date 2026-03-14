@@ -286,8 +286,12 @@ export class JoseCryptoService implements CryptoService {
         iv: k.iv,
         authTag: k.authTag,
       });
-      const privateKey = await jose.importPKCS8(decrypted.toString(), this.algorithm);
-      const publicKey = await jose.exportJWK(privateKey); // Simplified export
+      const privateKey = await jose.importPKCS8(decrypted.toString(), this.algorithm, { extractable: true });
+      const fullJWK = await jose.exportJWK(privateKey);
+
+      // Security Fix: Explicitly strip private components
+      const { d, p, q, dp, dq, qi, ...publicKey } = fullJWK as any;
+
       return {
         ...publicKey,
         kid: k.id,

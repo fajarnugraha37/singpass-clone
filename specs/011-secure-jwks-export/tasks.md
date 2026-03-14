@@ -23,8 +23,8 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Verify branch `011-secure-jwks-export` is active and synced
-- [ ] T002 [P] Verify backend environment (Bun 1.1+, Hono, `jose` installed) in `apps/backend/package.json`
+- [x] T001 Verify branch `011-secure-jwks-export` is active and synced
+- [x] T002 [P] Verify backend environment (Bun 1.1+, Hono, `jose` installed) in `apps/backend/package.json`
 
 ---
 
@@ -34,7 +34,7 @@
 
 *Note: For this surgical security fix, the foundation is already in place. We proceed directly to User Story 1.*
 
-- [ ] T003 [P] Identify the exact location of `getPublicJWKS()` in `apps/backend/src/core/services/jose-crypto-service.ts`
+- [x] T003 [P] Identify the exact location of `getPublicJWKS()` in `apps/backend/src/infra/adapters/jose_crypto.ts`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin.
 
@@ -50,12 +50,12 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T004 [US1] Create unit test in `apps/backend/tests/core/services/jose-crypto-service.test.ts` to assert that `d` is absent from the exported JWKS
+- [x] T004 [US1] Create unit test in `apps/backend/tests/infra/adapters/jose_crypto_jwks.test.ts` to assert that `d` is absent from the exported JWKS
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] Implement secure stripping logic in `getPublicJWKS()` within `apps/backend/src/core/services/jose-crypto-service.ts`
-- [ ] T006 [US1] Verify the fix by running the unit test from T004
+- [x] T005 [US1] Implement secure stripping logic in `getPublicJWKS()` within `apps/backend/src/infra/adapters/jose_crypto.ts`
+- [x] T006 [US1] Verify the fix by running the unit test from T004
 - [ ] T007 [US1] Perform manual verification of the `/.well-known/keys` endpoint using `curl` as described in `specs/011-secure-jwks-export/quickstart.md`
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently.
