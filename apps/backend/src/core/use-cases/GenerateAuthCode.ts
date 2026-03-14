@@ -65,6 +65,8 @@ export class GenerateAuthCodeUseCase {
       dpopJkt: dpopJkt!,
       scope: payload.scope,
       nonce: payload.nonce,
+      loa: session.loa,
+      amr: session.amr,
       redirectUri: payload.redirect_uri,
       expiresAt,
       used: false,

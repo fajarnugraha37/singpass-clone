@@ -1,3 +1,5 @@
+import { buildSubAttributes, mapLoaToAcr, SubAttributes } from './claims';
+
 export interface PersonInfoField {
   value: string;
 }
@@ -14,7 +16,11 @@ export interface UserInfoClaims {
   iss: string;
   aud: string;
   iat: number;
-  person_info: PersonInfo;
+  person_info?: PersonInfo; // Legacy field for compat
+  acr: string;
+  amr: string[];
+  sub_type: string;
+  sub_attributes?: SubAttributes;
 }
 
 export interface UserData {
@@ -32,10 +38,12 @@ export function mapUserInfoClaims(
   user: UserData,
   clientId: string,
   issuer: string,
-  scopes: string[]
+  scopes: string[],
+  loa: number,
+  amr: string[]
 ): UserInfoClaims {
-  const person_info: PersonInfo = {};
   const scopeSet = new Set(scopes);
+  const person_info: PersonInfo = {};
 
   if (scopeSet.has('uinfin')) {
     person_info.uinfin = { value: user.nric };
@@ -55,6 +63,15 @@ export function mapUserInfoClaims(
     iss: issuer,
     aud: clientId,
     iat: Math.floor(Date.now() / 1000),
+    acr: mapLoaToAcr(loa),
+    amr,
+    sub_type: 'user',
     person_info,
+    sub_attributes: buildSubAttributes({
+      nric: user.nric,
+      name: user.name,
+      email: user.email,
+      mobileno: user.mobileno || undefined
+    }, scopes),
   };
 }

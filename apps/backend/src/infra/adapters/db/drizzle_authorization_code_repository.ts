@@ -13,6 +13,8 @@ export class DrizzleAuthorizationCodeRepository implements AuthorizationCodeRepo
       dpopJkt: code.dpopJkt,
       scope: code.scope,
       nonce: code.nonce,
+      loa: code.loa,
+      amr: JSON.stringify(code.amr),
       redirectUri: code.redirectUri,
       expiresAt: code.expiresAt,
       used: code.used,
@@ -35,18 +37,10 @@ export class DrizzleAuthorizationCodeRepository implements AuthorizationCodeRepo
     if (!result) return null;
 
     return {
-      code: result.code,
-      userId: result.userId,
-      clientId: result.clientId,
-      codeChallenge: result.codeChallenge,
-      dpopJkt: result.dpopJkt,
-      scope: result.scope,
-      nonce: result.nonce,
-      redirectUri: result.redirectUri,
-      expiresAt: result.expiresAt,
-      used: result.used,
+      ...result,
+      amr: result.amr ? JSON.parse(result.amr) : [],
       createdAt: result.createdAt!,
-    };
+    } as AuthorizationCode;
   }
 
   async markAsUsed(code: string): Promise<void> {

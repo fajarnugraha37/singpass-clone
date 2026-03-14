@@ -88,6 +88,8 @@ export class Validate2FAUseCase {
     // 4. Update session on success
     session.status = 'COMPLETED';
     session.retryCount = 0;
+    session.loa = 2;
+    session.amr = ['pwd', 'otp-sms'];
     session.updatedAt = now;
     await this.authSessionRepository.update(session);
 

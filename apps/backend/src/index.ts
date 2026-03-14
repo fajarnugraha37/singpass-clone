@@ -62,6 +62,7 @@ const tokenExchangeUseCase = new TokenExchangeUseCase(
   authCodeRepository,
   tokenRepository,
   dpopValidator,
+  userInfoRepository,
   sharedConfig.OIDC.ISSUER
 );
 const getUserInfoUseCase = new GetUserInfoUseCase(

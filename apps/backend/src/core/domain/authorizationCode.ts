@@ -6,6 +6,8 @@ export interface AuthorizationCode {
   dpopJkt: string;
   scope: string;
   nonce?: string | null;
+  loa: number;
+  amr: string[];
   redirectUri: string;
   expiresAt: Date;
   used: boolean;

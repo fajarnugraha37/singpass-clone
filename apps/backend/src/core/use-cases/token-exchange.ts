@@ -6,6 +6,7 @@ import { DPoPValidator } from '../utils/dpop_validator';
 import { validatePKCE } from '../utils/pkce';
 import { FapiErrors } from '../../infra/middleware/fapi-error';
 import type { TokenResponse } from '../../../../packages/shared/src/tokens';
+import type { UserInfoRepository } from '../domain/userinfo_repository';
 
 export interface TokenExchangeRequest {
   grantType: string;
@@ -26,6 +27,7 @@ export class TokenExchangeUseCase {
     private authCodeRepository: AuthorizationCodeRepository,
     private tokenRepository: DrizzleTokenRepository,
     private dpopValidator: DPoPValidator,
+    private userinfoRepository: UserInfoRepository,
     private issuer: string
   ) {}
 
@@ -90,6 +92,9 @@ export class TokenExchangeUseCase {
     // 8. One-Time Use: Mark code as used
     await this.authCodeRepository.markAsUsed(code);
 
+    // Fetch user data for sub_attributes
+    const user = await this.userinfoRepository.getUserById(authCode.userId);
+
     // 9. Generate Tokens
     const tokens = await this.tokenService.generateTokens({
       userId: authCode.userId,
@@ -98,6 +103,14 @@ export class TokenExchangeUseCase {
       scope: authCode.scope,
       nonce: authCode.nonce || undefined,
       issuer: this.issuer,
+      loa: authCode.loa,
+      amr: authCode.amr,
+      user: user ? {
+        nric: user.nric,
+        name: user.name,
+        email: user.email,
+        mobileno: user.mobileno || undefined
+      } : undefined
     });
 
     // 10. Persist Tokens
@@ -107,6 +120,8 @@ export class TokenExchangeUseCase {
       clientId: authCode.clientId,
       dpopJkt: dpopResult.jkt,
       scope: authCode.scope,
+      loa: authCode.loa,
+      amr: authCode.amr,
       expiresAt: new Date(Date.now() + tokens.expires_in * 1000),
     });
 

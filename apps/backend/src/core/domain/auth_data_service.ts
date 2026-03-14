@@ -3,6 +3,7 @@ export interface Session {
   userId: string | null;
   dpopJkt: string | null;
   loa: number;
+  amr: string[];
   isAuthenticated: boolean;
   expiresAt: Date;
 }
@@ -13,6 +14,7 @@ export interface AuthCodeSessionData {
   userId: string | null;
   dpopJkt: string;
   loa: number;
+  amr: string[];
 }
 
 export interface AuthDataService {
@@ -32,9 +34,9 @@ export interface AuthDataService {
   createSession(userId?: string, dpopJkt?: string): Promise<{ sessionId: string }>;
 
   /**
-   * Updates session authentication status and LOA (Level of Assurance).
+   * Updates session authentication status, LOA, and AMR.
    */
-  updateSession(sessionId: string, data: { loa: number; isAuthenticated: boolean }): Promise<void>;
+  updateSession(sessionId: string, data: { loa: number; amr: string[]; isAuthenticated: boolean }): Promise<void>;
 
   /**
    * Retrieves an active session by its ID.

@@ -36,14 +36,15 @@ describe('Token Exchange Integration', () => {
           code: 'valid-code-123',
           userId: 'user-123',
           clientId: 'test-client',
-          codeChallenge: 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM', // matches dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
+          codeChallenge: 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM', // matches dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk      
           dpopJkt: jkt,
+          loa: 2,
+          amr: ['pwd', 'otp-sms'],
           redirectUri: 'http://localhost:3000/cb',
           expiresAt: new Date(Date.now() + 300000),
           used: false,
           createdAt: new Date()
-        };
-      }
+        };      }
       return null;
     });
     spyOn(DrizzleAuthorizationCodeRepository.prototype, 'markAsUsed').mockImplementation(async () => {});

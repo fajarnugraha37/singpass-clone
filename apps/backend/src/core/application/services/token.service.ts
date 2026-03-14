@@ -4,6 +4,7 @@ import { generateEncryptedIDToken, IDTokenClaims } from '../../utils/crypto';
 import { getClientConfig } from '../../../infra/adapters/client_registry';
 import { FapiErrors } from '../../../infra/middleware/fapi-error';
 import type { TokenResponse } from '../../../../packages/shared/src/tokens';
+import { buildSubAttributes, mapLoaToAcr, UserAttributes } from '../../domain/claims';
 
 export interface TokenGenerationParams {
   userId: string;
@@ -12,6 +13,9 @@ export interface TokenGenerationParams {
   scope: string;
   nonce?: string;
   issuer: string;
+  loa: number;
+  amr: string[];
+  user?: UserAttributes;
 }
 
 export class TokenService {
@@ -21,7 +25,7 @@ export class TokenService {
    * Generates a complete set of tokens (Access, ID, Refresh) for a user/client session.
    */
   async generateTokens(params: TokenGenerationParams): Promise<TokenResponse> {
-    const { userId, clientId, dpopJkt, scope, nonce, issuer } = params;
+    const { userId, clientId, dpopJkt, scope, nonce, issuer, loa, amr, user } = params;
 
     // 1. Generate Opaque Access Token (typically a random string or a JWT)
     // For this project, we'll use a random high-entropy string for the opaque token.
@@ -38,6 +42,10 @@ export class TokenService {
       nonce,
       issuer,
       expiresIn: 3600,
+      loa,
+      amr,
+      scope,
+      user
     });
 
     return {
@@ -55,8 +63,12 @@ export class TokenService {
     nonce?: string;
     issuer: string;
     expiresIn: number;
+    loa: number;
+    amr: string[];
+    scope: string;
+    user?: UserAttributes;
   }): Promise<string> {
-    const { userId, clientId, nonce, issuer, expiresIn } = params;
+    const { userId, clientId, nonce, issuer, expiresIn, loa, amr, scope, user } = params;
 
     // 1. Resolve Client Config and Public Encryption Key
     const clientConfig = getClientConfig(clientId);
@@ -83,7 +95,10 @@ export class TokenService {
       iat: now,
       exp: now + expiresIn,
       nonce,
-      // Add other standard OIDC/Singpass claims here if needed
+      acr: mapLoaToAcr(loa),
+      amr,
+      sub_type: 'user',
+      sub_attributes: user ? buildSubAttributes(user, scope.split(' ')) : undefined,
     };
 
     // 4. Sign and Encrypt (Nested JWT)

@@ -13,6 +13,8 @@ export class DrizzleAuthSessionRepository implements AuthSessionRepository {
       status: session.status,
       otpCode: session.otpCode,
       retryCount: session.retryCount,
+      loa: session.loa,
+      amr: JSON.stringify(session.amr),
       expiresAt: session.expiresAt,
       createdAt: session.createdAt,
       updatedAt: session.updatedAt,
@@ -34,6 +36,8 @@ export class DrizzleAuthSessionRepository implements AuthSessionRepository {
       status: result.status as AuthSessionStatus,
       otpCode: result.otpCode,
       retryCount: result.retryCount,
+      loa: result.loa,
+      amr: result.amr ? JSON.parse(result.amr) : [],
       expiresAt: result.expiresAt,
       createdAt: result.createdAt!,
       updatedAt: result.updatedAt!,
@@ -47,6 +51,8 @@ export class DrizzleAuthSessionRepository implements AuthSessionRepository {
         status: session.status,
         otpCode: session.otpCode,
         retryCount: session.retryCount,
+        loa: session.loa,
+        amr: JSON.stringify(session.amr),
         updatedAt: new Date(),
       })
       .where(eq(schema.authSessions.id, session.id));

@@ -6,6 +6,8 @@ export interface AccessTokenData {
   clientId: string;
   dpopJkt: string;
   scope: string;
+  loa: number;
+  amr: string[];
   expiresAt: Date;
   revoked: boolean;
 }

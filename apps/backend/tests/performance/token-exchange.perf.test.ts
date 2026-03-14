@@ -47,12 +47,16 @@ describe('Token Exchange Performance', () => {
     const clientAuthService = new ClientAuthenticationService(mockCryptoService);
     const tokenService = new TokenService(mockCryptoService);
     const dpopValidator = new DPoPValidator(mockJtiStore);
+    const mockUserInfoRepo: any = {
+      getUserById: async () => ({ id: 'user-123', nric: 'S1234567A', name: 'Test User' }),
+    };
     useCase = new TokenExchangeUseCase(
       clientAuthService,
       tokenService,
       mockAuthCodeRepo,
       mockTokenRepo,
       dpopValidator,
+      mockUserInfoRepo,
       'https://issuer.example.com'
     );
 
@@ -60,7 +64,6 @@ describe('Token Exchange Performance', () => {
     const jwk = await jose.exportJWK(clientKeyPair.publicKey);
     const jkt = await jose.calculateJwkThumbprint(jwk);
 
-    // Update mock to use correct JKT
     mockAuthCodeRepo.getByCode = async () => ({
       clientId: 'test-client',
       redirectUri: 'http://localhost/cb',
@@ -68,6 +71,8 @@ describe('Token Exchange Performance', () => {
       dpopJkt: jkt,
       scope: 'openid',
       userId: 'user-123',
+      loa: 2,
+      amr: ['pwd', 'otp-sms'],
       expiresAt: new Date(Date.now() + 10000),
     });
 

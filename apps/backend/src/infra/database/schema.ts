@@ -15,6 +15,7 @@ export const sessions = sqliteTable('sessions', {
   userId: text('user_id').references(() => users.id),
   dpopJkt: text('dpop_jkt'),
   loa: integer('loa').default(0).notNull(),
+  amr: text('amr'), // Stringified JSON array
   isAuthenticated: integer('is_authenticated', { mode: 'boolean' }).default(false).notNull(),
   expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
 });
@@ -63,6 +64,8 @@ export const accessTokens = sqliteTable('access_tokens', {
   clientId: text('client_id').notNull(),
   dpopJkt: text('dpop_jkt').notNull(),
   scope: text('scope').notNull(),
+  loa: integer('loa').default(0).notNull(),
+  amr: text('amr'), // Stringified JSON array
   expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
   revoked: integer('revoked', { mode: 'boolean' }).default(false).notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
@@ -98,6 +101,8 @@ export const authSessions = sqliteTable('auth_sessions', {
   status: text('status').notNull(),
   otpCode: text('otp_code'),
   retryCount: integer('retry_count').default(0).notNull(),
+  loa: integer('loa').default(0).notNull(),
+  amr: text('amr'), // Stringified JSON array
   expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
@@ -111,6 +116,8 @@ export const authorizationCodes = sqliteTable('authorization_codes', {
   dpopJkt: text('dpop_jkt').notNull(),
   scope: text('scope').notNull(),
   nonce: text('nonce'),
+  loa: integer('loa').default(0).notNull(),
+  amr: text('amr'), // Stringified JSON array
   redirectUri: text('redirect_uri').notNull(),
   expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
   used: integer('used', { mode: 'boolean' }).default(false).notNull(),

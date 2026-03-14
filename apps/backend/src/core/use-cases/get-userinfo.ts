@@ -62,7 +62,9 @@ export class GetUserInfoUseCase {
         user,
         tokenData.clientId,
         issuer,
-        tokenData.scope.split(' ')
+        tokenData.scope.split(' '),
+        tokenData.loa,
+        tokenData.amr
       );
 
       // 6. Get Client Encryption Key

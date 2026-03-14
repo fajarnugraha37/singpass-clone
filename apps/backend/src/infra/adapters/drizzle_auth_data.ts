@@ -84,6 +84,7 @@ export class DrizzleAuthDataService implements AuthDataService {
       userId: userId || null,
       dpopJkt: dpopJkt || null,
       loa: 0,
+      amr: JSON.stringify([]),
       isAuthenticated: false,
       expiresAt,
     }).returning({ id: sessions.id });
@@ -91,10 +92,11 @@ export class DrizzleAuthDataService implements AuthDataService {
     return { sessionId: inserted.id };
   }
 
-  async updateSession(sessionId: string, data: { loa: number; isAuthenticated: boolean }): Promise<void> {
+  async updateSession(sessionId: string, data: { loa: number; amr: string[]; isAuthenticated: boolean }): Promise<void> {
     await db.update(sessions)
       .set({ 
         loa: data.loa, 
+        amr: JSON.stringify(data.amr),
         isAuthenticated: data.isAuthenticated 
       })
       .where(eq(sessions.id, sessionId));
@@ -111,7 +113,12 @@ export class DrizzleAuthDataService implements AuthDataService {
         )
       );
 
-    return result || null;
+    if (!result) return null;
+
+    return {
+      ...result,
+      amr: result.amr ? JSON.parse(result.amr) : [],
+    } as Session;
   }
 
   async issueAuthCode(
@@ -120,6 +127,9 @@ export class DrizzleAuthDataService implements AuthDataService {
     codeChallenge: string,
     dpopJkt: string
   ): Promise<{ code: string }> {
+    const session = await this.getSession(sessionId);
+    if (!session) throw new Error('Session not found');
+
     const code = crypto.randomUUID(); // Simplification for now
     const expiresAt = new Date(Date.now() + this.authCodeTtlSeconds * 1000);
 
@@ -130,6 +140,8 @@ export class DrizzleAuthDataService implements AuthDataService {
       codeChallenge,
       codeChallengeMethod: 'S256',
       dpopJkt,
+      loa: session.loa,
+      amr: JSON.stringify(session.amr),
       expiresAt,
     });
 
@@ -150,6 +162,7 @@ export class DrizzleAuthDataService implements AuthDataService {
       dpopJkt: authCodes.dpopJkt,
       userId: sessions.userId,
       loa: sessions.loa,
+      amr: sessions.amr,
     })
       .from(authCodes)
       .innerJoin(sessions, eq(authCodes.sessionId, sessions.id))
@@ -171,7 +184,10 @@ export class DrizzleAuthDataService implements AuthDataService {
       details: { sessionId: result.sessionId, parId: result.parId },
     });
 
-    return result as AuthCodeSessionData;
+    return {
+      ...result,
+      amr: result.amr ? JSON.parse(result.amr) : [],
+    } as AuthCodeSessionData;
   }
 
   async invalidateSession(sessionId: string): Promise<void> {

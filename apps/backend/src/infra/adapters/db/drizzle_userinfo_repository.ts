@@ -23,6 +23,8 @@ export class DrizzleUserInfoRepository implements UserInfoRepository {
       clientId: result.clientId,
       dpopJkt: result.dpopJkt,
       scope: result.scope,
+      loa: result.loa,
+      amr: result.amr ? JSON.parse(result.amr) : [],
       expiresAt: result.expiresAt,
       revoked: result.revoked,
     };
@@ -45,6 +47,7 @@ export class DrizzleUserInfoRepository implements UserInfoRepository {
       nric: result.nric || '',
       name: result.name,
       email: result.email || '',
+      mobileno: result.mobileno,
     };
   }
 }

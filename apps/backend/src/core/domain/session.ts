@@ -8,6 +8,8 @@ export interface AuthSession {
   status: AuthSessionStatus;
   otpCode?: string | null;
   retryCount: number;
+  loa: number;
+  amr: string[];
   expiresAt: Date;
   createdAt: Date;
   updatedAt: Date;

@@ -8,6 +8,8 @@ export interface TokenRecord {
   clientId: string;
   dpopJkt: string;
   scope: string;
+  loa: number;
+  amr: string[];
   expiresAt: Date;
 }
 
@@ -22,6 +24,8 @@ export class DrizzleTokenRepository {
       clientId: record.clientId,
       dpopJkt: record.dpopJkt,
       scope: record.scope,
+      loa: record.loa,
+      amr: JSON.stringify(record.amr),
       expiresAt: record.expiresAt,
     });
   }

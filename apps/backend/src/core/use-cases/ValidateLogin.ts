@@ -80,6 +80,8 @@ export class ValidateLoginUseCase {
     session.userId = username; // For now using username as userId
     session.otpCode = otpCode;
     session.retryCount = 0; // Reset on success? Requirement doesn't specify, but good practice.
+    session.loa = 1;
+    session.amr = ['pwd'];
     session.updatedAt = now;
 
     await this.authSessionRepository.update(session);

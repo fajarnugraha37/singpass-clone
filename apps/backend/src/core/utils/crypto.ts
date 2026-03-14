@@ -14,6 +14,8 @@ export interface IDTokenClaims extends jose.JWTPayload {
   // FAPI 2.0 / Singpass specific
   acr?: string;
   amr?: string[];
+  sub_type?: string;
+  sub_attributes?: Record<string, any>;
 }
 
 /**
