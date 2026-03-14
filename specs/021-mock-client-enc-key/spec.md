@@ -10,7 +10,7 @@
 ### Session 2026-03-15
 
 - Q: How should the encryption key for the mock client be provided? → A: Static hardcoded key defined in the configuration.
-- Q: Where is the client registry currently defined? → A: Stored in a separate JSON/YAML configuration file.
+- Q: Where is the client registry currently defined? → A: Stored as an in-memory TypeScript object in `apps/backend/src/infra/adapters/client_registry.ts`.
 - Q: What is the expected format of the ID Token after successful exchange? → A: ID Token MUST be returned as a JWE (JSON Web Encryption) object.
 
 ## User Scenarios & Testing *(mandatory)*
