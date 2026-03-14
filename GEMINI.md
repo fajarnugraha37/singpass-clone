@@ -1,4 +1,4 @@
-# vibe-auth Project Context
+﻿# vibe-auth Project Context
 
 **Current Feature**: 008-token-exchange
 **Tech Stack**:
