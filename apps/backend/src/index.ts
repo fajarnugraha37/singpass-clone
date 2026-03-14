@@ -32,6 +32,7 @@ import { fapiErrorHandler } from './infra/middleware/fapi-error';
 import { sharedConfig } from '../../../packages/shared/src/config';
 import { DrizzleServerKeyManager } from './infra/adapters/db/drizzle_key_manager';
 import { swaggerUI } from '@hono/swagger-ui';
+import { openapiSpec } from './infra/http/openapi-spec';
 
 const auditService = new DrizzleSecurityAuditService();
 const keyManager = new DrizzleServerKeyManager(auditService);
@@ -120,17 +121,7 @@ const app = new Hono()
   .post('/userinfo', getUserInfo(getUserInfoUseCase, sharedConfig.OIDC.ISSUER));
 
 app
-  .get('/doc', (c) => c.json({
-    openapi: '3.0.0', // This is the required version field
-    info: {
-      title: 'API Documentation',
-      version: '1.0.0',
-      description: 'API documentation for your service',
-    },
-    servers: [
-      { url: 'http://localhost:3000', description: 'Local Server' },
-    ],
-  }))
+  .get('/doc', (c) => c.json(openapiSpec))
   // Swagger UI will be available at /ui
   .get('/ui', swaggerUI({ url: '/doc' }))
   // SPA Fallback
