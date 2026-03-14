@@ -1,4 +1,4 @@
-import type { JWK } from 'jose';
+import type { JWK, KeyLike } from 'jose';
 
 export interface CryptoService {
   /**
@@ -15,6 +15,17 @@ export interface CryptoService {
    * Signs a payload (e.g., ID Token) using an active server private key.
    */
   sign(payload: Record<string, any>, keyId?: string): Promise<string>;
+
+  /**
+   * Generates a nested JWS-in-JWE (Signed then Encrypted) payload.
+   * Signs the payload with the server private key (ES256).
+   * Encrypts the JWS string with the client public encryption key (ECDH-ES+A256KW).
+   */
+  signAndEncrypt(
+    payload: Record<string, any>,
+    clientPublicKey: JWK,
+    serverKeyId?: string
+  ): Promise<string>;
 
   /**
    * Validates a client_assertion (private_key_jwt).
@@ -65,5 +76,5 @@ export interface CryptoService {
   /**
    * Returns an active server key for signing or encryption.
    */
-  getActiveKey(): Promise<{ id: string; privateKey: jose.KeyLike; publicKey: JWK }>;
+  getActiveKey(): Promise<{ id: string; privateKey: KeyLike; publicKey: JWK }>;
 }

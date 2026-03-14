@@ -8,7 +8,9 @@ import {
 import { InitiateAuthSessionUseCase } from '../../core/use-cases/InitiateAuthSession';
 import { ValidateLoginUseCase } from '../../core/use-cases/ValidateLogin';
 import { Validate2FAUseCase } from '../../core/use-cases/Validate2FA';
+import { GetUserInfoUseCase } from '../../core/use-cases/get-userinfo';
 import * as authController from './controllers/auth.controller';
+import * as userinfoController from './controllers/userinfo.controller';
 
 /**
  * Auth Router for both OIDC flow initiation and RPC API endpoints.
@@ -16,7 +18,9 @@ import * as authController from './controllers/auth.controller';
 export const createAuthRouter = (
   initiateAuthUseCase: InitiateAuthSessionUseCase,
   validateLoginUseCase: ValidateLoginUseCase,
-  validate2FAUseCase: Validate2FAUseCase
+  validate2FAUseCase: Validate2FAUseCase,
+  getUserInfoUseCase: GetUserInfoUseCase,
+  issuer: string
 ) => {
   const authRouter = new Hono()
     // OIDC Initiation Endpoint (mounted at /auth)
@@ -38,7 +42,11 @@ export const createAuthRouter = (
     .post('/login', zValidator('json', loginRequestSchema), authController.login(validateLoginUseCase))
 
     // RPC API: 2FA Verification (mounted at /api/auth/2fa)
-    .post('/2fa', zValidator('json', twoFactorRequestSchema), authController.twoFactor(validate2FAUseCase));
+    .post('/2fa', zValidator('json', twoFactorRequestSchema), authController.twoFactor(validate2FAUseCase))
+
+    // OIDC UserInfo Endpoint (mounted at /userinfo or /auth/userinfo)
+    .get('/userinfo', userinfoController.getUserInfo(getUserInfoUseCase, issuer))
+    .post('/userinfo', userinfoController.getUserInfo(getUserInfoUseCase, issuer));
 
   return authRouter;
 };

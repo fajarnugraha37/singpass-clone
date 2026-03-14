@@ -15,7 +15,9 @@ export type SecurityEventType =
   | '2FA_SUCCESS'
   | '2FA_FAILURE'
   | 'AUTH_CODE_GENERATION_FAILURE'
-  | 'AUTH_CODE_GENERATED';
+  | 'AUTH_CODE_GENERATED'
+  | 'USERINFO_SUCCESS'
+  | 'USERINFO_FAILURE';
 
 export type SecurityEventSeverity = 'INFO' | 'WARN' | 'ERROR';
 

@@ -16,10 +16,17 @@ import { ValidateLoginUseCase } from './core/use-cases/ValidateLogin'
 import { Validate2FAUseCase } from './core/use-cases/Validate2FA'
 import { GenerateAuthCodeUseCase } from './core/use-cases/GenerateAuthCode'
 import { TokenExchangeUseCase } from './core/use-cases/token-exchange'
+import { GetUserInfoUseCase } from './core/use-cases/get-userinfo'
 import { ClientAuthenticationService } from './core/application/services/client-auth.service'
 import { TokenService } from './core/application/services/token.service'
 import { DrizzleTokenRepository } from './infra/adapters/db/drizzle_token_repository'
+import { DrizzleUserInfoRepository } from './infra/adapters/db/drizzle_userinfo_repository'
+import { DrizzleClientRegistry } from './infra/adapters/client_registry'
+import { DrizzleJtiStore } from './infra/adapters/db/drizzle_jti_store'
+import { DPoPValidator } from './core/utils/dpop_validator'
+import { jwksCache } from './infra/adapters/jwks_cache'
 import { createAuthRouter } from './infra/http/authRouter'
+import { getUserInfo } from './infra/http/controllers/userinfo.controller'
 import { fapiErrorHandler } from './infra/middleware/fapi-error'
 import { sharedConfig } from '../../../packages/shared/src/config'
 
@@ -29,6 +36,10 @@ const parRepository = new DrizzlePARRepository();
 const authSessionRepository = new DrizzleAuthSessionRepository();
 const authCodeRepository = new DrizzleAuthorizationCodeRepository();
 const tokenRepository = new DrizzleTokenRepository();
+const userInfoRepository = new DrizzleUserInfoRepository();
+const clientRegistry = new DrizzleClientRegistry();
+const jtiStore = new DrizzleJtiStore();
+const dpopValidator = new DPoPValidator(jtiStore);
 
 const clientAuthService = new ClientAuthenticationService(cryptoService);
 const tokenService = new TokenService(cryptoService);
@@ -41,6 +52,14 @@ const tokenExchangeUseCase = new TokenExchangeUseCase(
   tokenRepository,
   sharedConfig.OIDC.ISSUER
 );
+const getUserInfoUseCase = new GetUserInfoUseCase(
+  userInfoRepository,
+  cryptoService,
+  dpopValidator,
+  jwksCache,
+  clientRegistry,
+  auditService
+);
 const initiateAuthSessionUseCase = new InitiateAuthSessionUseCase(authSessionRepository, parRepository, auditService);
 const validateLoginUseCase = new ValidateLoginUseCase(authSessionRepository, auditService);
 const generateAuthCodeUseCase = new GenerateAuthCodeUseCase(authCodeRepository, authSessionRepository, parRepository, auditService);
@@ -48,12 +67,16 @@ const validate2FAUseCase = new Validate2FAUseCase(authSessionRepository, auditSe
 const authRouter = createAuthRouter(
   initiateAuthSessionUseCase,
   validateLoginUseCase,
-  validate2FAUseCase
+  validate2FAUseCase,
+  getUserInfoUseCase,
+  sharedConfig.OIDC.ISSUER
 );
 const api = new Hono()
   .get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
   .post('/par', registerPar(registerParUseCase))
   .post('/token', exchangeToken(tokenExchangeUseCase))
+  .get('/userinfo', getUserInfo(getUserInfoUseCase, sharedConfig.OIDC.ISSUER))
+  .post('/userinfo', getUserInfo(getUserInfoUseCase, sharedConfig.OIDC.ISSUER))
   // API: Auth RPC Endpoints (mounted at /api/auth)
   .route('/auth', authRouter);
 
@@ -82,6 +105,8 @@ app
   .get('/.well-known/openid-configuration', getDiscoveryDocument)
   .get('/.well-known/keys', getJWKS(cryptoService))
   .post('/token', exchangeToken(tokenExchangeUseCase))
+  .get('/userinfo', getUserInfo(getUserInfoUseCase, sharedConfig.OIDC.ISSUER))
+  .post('/userinfo', getUserInfo(getUserInfoUseCase, sharedConfig.OIDC.ISSUER))
 
   // Auth Initiation (mounted at /auth)
   .route('/auth', authRouter)

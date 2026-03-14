@@ -1,13 +1,5 @@
 import type { JWK } from 'jose';
-
-export interface ClientConfig {
-  clientId: string;
-  clientName: string;
-  redirectUris: string[];
-  jwks: {
-    keys: JWK[];
-  };
-}
+import type { ClientRegistry, ClientConfig } from '../../core/domain/client_registry';
 
 // Mock registry for development/testing
 export const MOCK_CLIENT_REGISTRY: Record<string, ClientConfig> = {
@@ -57,6 +49,12 @@ export const MOCK_CLIENT_REGISTRY: Record<string, ClientConfig> = {
     },
   },
 };
+
+export class DrizzleClientRegistry implements ClientRegistry {
+  async getClientConfig(clientId: string): Promise<ClientConfig | null> {
+    return MOCK_CLIENT_REGISTRY[clientId] || null;
+  }
+}
 
 export function getClientConfig(clientId: string): ClientConfig | null {
   return MOCK_CLIENT_REGISTRY[clientId] || null;

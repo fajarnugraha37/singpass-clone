@@ -24,7 +24,7 @@ export class JoseCryptoService implements CryptoService {
     privateKey: Uint8Array;
     publicKey: JWK;
   }> {
-    const { publicKey, privateKey } = await jose.generateKeyPair(this.algorithm);
+    const { publicKey, privateKey } = await jose.generateKeyPair(this.algorithm, { extractable: true });
     
     const privateKeyExported = await jose.exportPKCS8(privateKey);
     const publicKeyJWK = await jose.exportJWK(publicKey);
@@ -53,28 +53,42 @@ export class JoseCryptoService implements CryptoService {
    * Signs a payload using an active server private key.
    */
   async sign(payload: Record<string, any>, keyId?: string): Promise<string> {
-    const query = keyId 
-      ? db.select().from(serverKeys).where(eq(serverKeys.id, keyId))
-      : db.select().from(serverKeys).where(eq(serverKeys.isActive, true)).limit(1);
-
-    const [keyRecord] = await query;
-    if (!keyRecord) {
-      throw new Error('No active signing key found');
-    }
-
-    const decryptedPrivateKey = decryptKey({
-      encryptedKey: keyRecord.encryptedKey,
-      iv: keyRecord.iv,
-      authTag: keyRecord.authTag,
-    });
-
-    const privateKey = await jose.importPKCS8(decryptedPrivateKey.toString(), this.algorithm);
-
+    const { id: kid, privateKey } = await this.getActiveKey();
+    
     return await new jose.SignJWT(payload)
-      .setProtectedHeader({ alg: this.algorithm, kid: keyRecord.id })
+      .setProtectedHeader({ alg: this.algorithm, kid })
       .setIssuedAt()
       .setExpirationTime('1h')
       .sign(privateKey);
+  }
+
+  /**
+   * Generates a nested JWS-in-JWE (Signed then Encrypted) payload.
+   */
+  async signAndEncrypt(
+    payload: Record<string, any>,
+    clientPublicKey: JWK,
+    serverKeyId?: string
+  ): Promise<string> {
+    const { id: kid, privateKey } = await this.getActiveKey(serverKeyId);
+
+    // 1. Sign (JWS)
+    const jws = await new jose.SignJWT(payload)
+      .setProtectedHeader({ alg: this.algorithm, kid })
+      .setIssuedAt()
+      .sign(privateKey);
+
+    // 2. Encrypt (JWE)
+    const encryptionAlg = (clientPublicKey.alg as string) || 'ECDH-ES+A256KW';
+    const publicKey = await jose.importJWK(clientPublicKey, encryptionAlg);
+
+    return await new jose.CompactEncrypt(new TextEncoder().encode(jws))
+      .setProtectedHeader({
+        alg: encryptionAlg,
+        enc: 'A256GCM',
+        kid: clientPublicKey.kid,
+      })
+      .encrypt(publicKey);
   }
 
   /**
@@ -304,11 +318,14 @@ export class JoseCryptoService implements CryptoService {
   /**
    * Returns an active server key for signing or encryption.
    */
-  async getActiveKey(): Promise<{ id: string; privateKey: jose.KeyLike; publicKey: JWK }> {
-    const query = db.select().from(serverKeys).where(eq(serverKeys.isActive, true)).limit(1);
+  async getActiveKey(keyId?: string): Promise<{ id: string; privateKey: jose.KeyLike; publicKey: JWK }> {
+    const query = keyId
+      ? db.select().from(serverKeys).where(eq(serverKeys.id, keyId))
+      : db.select().from(serverKeys).where(eq(serverKeys.isActive, true)).limit(1);
+
     const [keyRecord] = await query;
     if (!keyRecord) {
-      throw new Error('No active signing key found');
+      throw new Error(keyId ? `Key ${keyId} not found` : 'No active signing key found');
     }
 
     const decryptedPrivateKey = decryptKey({
@@ -317,14 +334,14 @@ export class JoseCryptoService implements CryptoService {
       authTag: keyRecord.authTag,
     });
 
-    const privateKey = await jose.importPKCS8(decryptedPrivateKey.toString(), this.algorithm);
-    const publicKey = await jose.exportJWK(privateKey);
+    const privateKey = await jose.importPKCS8(decryptedPrivateKey.toString(), this.algorithm, { extractable: true });
+    const publicKeyJWK = await jose.exportJWK(privateKey);
     
     return {
       id: keyRecord.id,
       privateKey,
       publicKey: {
-        ...publicKey,
+        ...publicKeyJWK,
         kid: keyRecord.id,
         use: 'sig',
         alg: this.algorithm,

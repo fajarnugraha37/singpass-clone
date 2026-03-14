@@ -27,10 +27,22 @@ Determine the user's data to return based on the `sub` associated with the acces
 ### Signing & Encryption (JWS/JWE)
 Like the `id_token`, Singpass wraps the Userinfo response in strict cryptography:
 1. **Sign** the payload using the server's private ES256 key (JWS).
-2. **Encrypt** the JWS using the Client's public encryption key (JWE).
+2. **Encrypt** the JWS string (not the JSON) using the Client's public encryption key (JWE).
+   - **alg**: `ECDH-ES+A256KW`
+   - **enc**: `A256GCM`
+
+### person_info Structure
+The `person_info` claim follows the Myinfo standard where each field is an object containing a `value`:
+```json
+"person_info": {
+  "uinfin": { "value": "S1234567A" },
+  "name": { "value": "JOHN DOE" },
+  "email": { "value": "john@example.com" }
+}
+```
 
 ### Response
-Return a `200 OK` response with `application/jwt` or the raw JWE string.
+Return a `200 OK` response with `Content-Type: application/jwt`. The body is a compact JWE string.
 
 ### Error Handling
 Return a 401 Unauthorized with standard OIDC error values (e.g., `invalid_token`, `invalid_dpop_proof`) in the response body and the `WWW-Authenticate` header.
