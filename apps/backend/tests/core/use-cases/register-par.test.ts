@@ -37,6 +37,7 @@ describe('RegisterParUseCase', () => {
         clientId,
         clientName: 'Mock Client',
         appType: 'Login',
+        redirectUris: ['https://client.example.com/cb'],
         jwks: { keys: [{ kid: 'key-1' }] },
       }),
     };
@@ -92,6 +93,81 @@ describe('RegisterParUseCase', () => {
     } as any;
 
     expect(useCase.execute(input)).rejects.toThrow('jti already used');
+  });
+
+  test('should fail if redirect_uri is missing', async () => {
+    const { redirect_uri, ...inputWithoutRedirectUri } = {
+      ...getBaseInputForTest(),
+      client_assertion: validJwt,
+      client_id: 'mock-client-id',
+    } as any;
+
+    expect(useCase.execute(inputWithoutRedirectUri)).rejects.toThrow('redirect_uri is required');
+  });
+
+  test('should fail if redirect_uri is not registered', async () => {
+    const input = {
+      ...getBaseInputForTest(),
+      client_assertion: validJwt,
+      client_id: 'mock-client-id',
+      redirect_uri: 'https://malicious.com/cb',
+    } as any;
+
+    expect(useCase.execute(input)).rejects.toThrow('redirect_uri is not registered');
+  });
+
+  test('should fail if redirect_uri case does not match', async () => {
+    const input = {
+      ...getBaseInputForTest(),
+      client_assertion: validJwt,
+      client_id: 'mock-client-id',
+      redirect_uri: 'https://CLIENT.example.com/cb', // Registered is lower case
+    } as any;
+
+    mockClientRegistry.getClientConfig = async (clientId: string) => ({
+      clientId,
+      appType: 'Login',
+      redirectUris: ['https://client.example.com/cb'],
+      jwks: { keys: [{ kid: 'key-1' }] },
+    });
+
+    expect(useCase.execute(input)).rejects.toThrow('redirect_uri is not registered');
+  });
+
+  test('should fail if client has no registered redirect URIs', async () => {
+    const input = {
+      ...getBaseInputForTest(),
+      client_assertion: validJwt,
+      client_id: 'mock-client-id',
+    } as any;
+
+    mockClientRegistry.getClientConfig = async (clientId: string) => ({
+      clientId,
+      appType: 'Login',
+      redirectUris: [],
+      jwks: { keys: [{ kid: 'key-1' }] },
+    });
+
+    expect(useCase.execute(input)).rejects.toThrow('redirect_uri is not registered');
+  });
+
+  test('should succeed if redirect_uri matches exactly one of many registered URIs', async () => {
+    const input = {
+      ...getBaseInputForTest(),
+      client_assertion: validJwt,
+      client_id: 'mock-client-id',
+      redirect_uri: 'https://client.example.com/cb2',
+    } as any;
+
+    mockClientRegistry.getClientConfig = async (clientId: string) => ({
+      clientId,
+      appType: 'Login',
+      redirectUris: ['https://client.example.com/cb1', 'https://client.example.com/cb2'],
+      jwks: { keys: [{ kid: 'key-1' }] },
+    });
+
+    const result = await useCase.execute(input);
+    expect(result).toHaveProperty('request_uri');
   });
 
   function getBaseInputForTest() {

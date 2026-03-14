@@ -41,6 +41,7 @@ describe('RegisterParUseCase - Context Validation', () => {
         clientId,
         clientName: 'Mock Client',
         appType: 'Login',
+        redirectUris: ['https://client.example.com/cb'],
         jwks: { keys: [{ kid: 'key-1' }] },
       }),
     };
@@ -121,6 +122,7 @@ describe('RegisterParUseCase - Context Validation', () => {
       clientId,
       clientName: 'Myinfo Client',
       appType: 'Myinfo',
+      redirectUris: ['https://client.example.com/cb'],
       jwks: { keys: [{ kid: 'key-1' }] },
     });
 
@@ -137,6 +139,7 @@ describe('RegisterParUseCase - Context Validation', () => {
       clientId,
       clientName: 'Myinfo Client',
       appType: 'Myinfo',
+      redirectUris: ['https://client.example.com/cb'],
       jwks: { keys: [{ kid: 'key-1' }] },
     });
 

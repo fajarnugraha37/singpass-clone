@@ -27,6 +27,12 @@ export class RegisterParUseCase {
       throw new Error('client_assertion is required');
     }
 
+    // 1.1 Redirect URI check
+    const { redirect_uri } = payload;
+    if (!redirect_uri) {
+      throw new Error('redirect_uri is required');
+    }
+
     // 2. DPoP binding (FAPI 2.0 / PAR requirement)
     let finalDpopJkt = dpop_jkt;
     if (dpop_header) {
@@ -64,6 +70,11 @@ export class RegisterParUseCase {
         details: { reason: 'Client not found' },
       });
       throw new Error('Client not found');
+    }
+
+    // 3.1 Validate redirect_uri against client configuration
+    if (!client.redirectUris || !client.redirectUris.includes(redirect_uri)) {
+      throw new Error('redirect_uri is not registered');
     }
 
     const publicKey = client.jwks?.keys[0]; // Simplified for now

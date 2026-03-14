@@ -28,7 +28,7 @@ describe('PAR Endpoint', () => {
       client_id: 'mock-client-id',
       response_type: 'code',
       scope: 'openid',
-      redirect_uri: 'https://client.example.com/cb',
+      redirect_uri: 'http://localhost:3000/callback',
       state: 'test-state',
       nonce: 'test-nonce',
       code_challenge: 'test-challenge',

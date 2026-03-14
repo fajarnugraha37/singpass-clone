@@ -26,7 +26,7 @@ As an OAuth 2.0 Client, I want my `redirect_uri` to be validated against my regi
 
 ### Edge Cases
 
-- **Missing `redirect_uri`**: If the `redirect_uri` is omitted in the PAR, the system should follow OAuth 2.0 rules (if multiple URIs are registered, it might be required; if one is registered, it might be optional). [NEEDS CLARIFICATION: Should `redirect_uri` be mandatory in PAR regardless of registration count?]
+- **Missing `redirect_uri`**: The `redirect_uri` MUST be present in the Pushed Authorization Request (PAR). If it is missing, the server will return an `invalid_request` error, even if the client has only one registered redirection URI. This ensures deterministic behavior and strict binding.
 - **Multiple Registered URIs**: If a client has multiple registered URIs, the provided one must match exactly one of them.
 - **Encoded URIs**: The comparison should be done on the decoded URI value if received as part of a form-encoded payload, but since Hono/Zod usually handles this, we assume the input to the use case is the actual URI string.
 
