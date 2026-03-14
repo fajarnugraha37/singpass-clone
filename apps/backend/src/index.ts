@@ -55,7 +55,7 @@ const dpopValidator = new DPoPValidator(jtiStore);
 const clientAuthService = new ClientAuthenticationService(cryptoService);
 const tokenService = new TokenService(cryptoService);
 
-const registerParUseCase = new RegisterParUseCase(cryptoService, parRepository, clientRegistry, auditService);
+const registerParUseCase = new RegisterParUseCase(cryptoService, parRepository, clientRegistry, dpopValidator, auditService);
 const tokenExchangeUseCase = new TokenExchangeUseCase(
   clientAuthService,
   tokenService,

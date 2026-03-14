@@ -22,7 +22,6 @@ describe('RegisterParUseCase - Context Validation', () => {
 
     mockCryptoService = {
       validateClientAssertion: async () => true,
-      validateDPoPProof: async () => ({ jkt: 'test-jkt' }),
     } as any;
 
     mockPARRepository = {
@@ -46,7 +45,17 @@ describe('RegisterParUseCase - Context Validation', () => {
       }),
     };
 
-    useCase = new RegisterParUseCase(mockCryptoService, mockPARRepository, mockClientRegistry, mockAuditService);
+    const mockDPoPValidator = {
+      validate: async () => ({ isValid: true, jkt: 'test-jkt' })
+    };
+
+    useCase = new RegisterParUseCase(
+      mockCryptoService, 
+      mockPARRepository, 
+      mockClientRegistry, 
+      mockDPoPValidator as any,
+      mockAuditService
+    );
   });
 
   const getBaseInput = () => ({

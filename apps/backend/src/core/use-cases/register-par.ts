@@ -4,12 +4,14 @@ import type { PARRepository, PARResponse, PushedAuthorizationRequest } from '../
 import type { SecurityAuditService } from '../domain/audit_service';
 import { sharedConfig } from '../../../../../packages/shared/src/config';
 import type { ClientRegistry } from '../domain/client_registry';
+import type { DPoPValidator } from '../utils/dpop_validator';
 
 export class RegisterParUseCase {
   constructor(
     private cryptoService: CryptoService,
     private parRepository: PARRepository,
     private clientRegistry: ClientRegistry,
+    private dpopValidator: DPoPValidator,
     private auditService?: SecurityAuditService
   ) {}
 
@@ -38,12 +40,17 @@ export class RegisterParUseCase {
     if (dpop_header) {
       try {
         // Validate DPoP proof
-        const { jkt } = await this.cryptoService.validateDPoPProof(
-          dpop_header,
-          'POST',
-          '/api/par',
-          client_id
-        );
+        const dpopResult = await this.dpopValidator.validate(client_id, {
+          proof: dpop_header,
+          method: 'POST',
+          url: '/api/par',
+        });
+        
+        if (!dpopResult.isValid) {
+          throw new Error(`DPoP validation failed: ${dpopResult.error}`);
+        }
+
+        const jkt = dpopResult.jkt;
         
         if (dpop_jkt && dpop_jkt !== jkt) {
           throw new Error('dpop_jkt mismatch with DPoP header');

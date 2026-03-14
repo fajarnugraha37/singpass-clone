@@ -58,7 +58,7 @@ As a security auditor, I want all DPoP-enabled endpoints to use the exact same v
 ### Key Entities *(include if feature involves data)*
 
 - **DPoPProof**: A JWT containing `htu` (HTTP URI), `htm` (HTTP Method), `jti` (JWT ID), and `iat` (Issued At) claims, bound to a public key.
-- **JTI Store**: A persistence mechanism (e.g., Redis or in-memory cache with TTL) used to track used `jti` values to prevent replays.
+- **JTI Store**: A persistence mechanism (implemented via SQLite/Drizzle with TTL pruning) used to track used `jti` values globally to prevent replays across all endpoints.
 
 ## Success Criteria *(mandatory)*
 
@@ -66,5 +66,5 @@ As a security auditor, I want all DPoP-enabled endpoints to use the exact same v
 
 - **SC-001**: 100% of DPoP validation logic is centralized in `DPoPValidator`.
 - **SC-002**: Zero instances of `htu` relaxed checking remain in the codebase.
-- **SC-003**: 100% of token exchange requests with re-used `jti` are rejected within the replay window.
+- **SC-003**: 100% of requests to DPoP-protected endpoints (PAR, Token, UserInfo) with re-used `jti` are rejected within the replay window.
 - **SC-004**: Code cleanup results in the deletion of `dpop.ts` and removal of `validateDPoPProof` from `CryptoService`.

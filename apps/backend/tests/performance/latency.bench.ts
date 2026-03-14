@@ -1,5 +1,6 @@
 import { bench, group, run } from "mitata";
 import { JoseCryptoService } from "../../src/infra/adapters/jose_crypto";
+import { DPoPValidator } from "../../src/core/utils/dpop_validator";
 import * as jose from "jose";
 
 /**
@@ -8,6 +9,7 @@ import * as jose from "jose";
  */
 
 const cryptoService = new JoseCryptoService();
+const dpopValidator = new DPoPValidator();
 process.env.SERVER_KEY_ENCRYPTION_SECRET = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 
 const { publicKey, privateKey } = await jose.generateKeyPair("ES256");
@@ -43,7 +45,11 @@ group("Cryptographic Operations (SC-001)", () => {
     // Note: This will fail jti check after first run unless we mock/clear it
     // But for latency measurement of the crypto itself, we're measuring the overhead.
     try {
-      await cryptoService.validateDPoPProof(dpopProof, "POST", "http://localhost:3000/token");
+      await dpopValidator.validate("mock-client-id", {
+        proof: dpopProof,
+        method: "POST",
+        url: "http://localhost:3000/token"
+      });
     } catch (e) {
       // Ignore jti replay errors during benchmark as we're measuring pure latency
     }

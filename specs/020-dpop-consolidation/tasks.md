@@ -6,16 +6,16 @@
 
 ## Phase 1: Setup
 
-- [ ] T001 Verify project environment and dependencies in `apps/backend/package.json`
-- [ ] T002 Ensure `DrizzleJtiStore` is correctly exported and accessible in `apps/backend/src/infra/adapters/db/drizzle_jti_store.ts`
+- [x] T001 Verify project environment and dependencies in `apps/backend/package.json`
+- [x] T002 Ensure `DrizzleJtiStore` is correctly exported and accessible in `apps/backend/src/infra/adapters/db/drizzle_jti_store.ts`
 
 ## Phase 2: Foundational (DPoP Validator Refinement)
 
 **Goal**: Ensure `DPoPValidator` implements the strictest possible validation logic according to the new contracts.
 
-- [ ] T003 [P] Add comprehensive test suite for strict `htu` and `jti` validation in `apps/backend/tests/unit/dpop_validator.test.ts`
-- [ ] T004 Refine `htu` matching logic in `apps/backend/src/core/utils/dpop_validator.ts` to ensure exact string matching post-normalization
-- [ ] T005 Verify `jti` replay window logic in `apps/backend/src/core/utils/dpop_validator.ts` matches requirements (±120s tolerance)
+- [x] T003 [P] Add comprehensive test suite for strict `htu` and `jti` validation in `apps/backend/tests/unit/dpop_validator.test.ts`
+- [x] T004 Refine `htu` matching logic in `apps/backend/src/core/utils/dpop_validator.ts` to ensure exact string matching post-normalization
+- [x] T005 Verify `jti` replay window logic in `apps/backend/src/core/utils/dpop_validator.ts` matches requirements (±120s tolerance)
 
 ## Phase 3: User Story 1 - Secure Token Exchange with DPoP (Priority: P1)
 
@@ -23,11 +23,11 @@
 
 **Independent Test**: Attempt PAR and Token Exchange with mismatched `htu` or reused `jti`; verify strict rejection.
 
-- [ ] T006 [P] [US1] Add integration test for PAR DPoP validation in `apps/backend/tests/infra/http/par_dpop.test.ts`
-- [ ] T007 [P] [US1] Add integration test for Token Exchange DPoP validation in `apps/backend/tests/infra/http/token_dpop.test.ts`
-- [ ] T008 [US1] Update `RegisterParUseCase` to inject and use `DPoPValidator` instead of `CryptoService.validateDPoPProof` in `apps/backend/src/core/use-cases/register-par.ts`
-- [ ] T009 [US1] Update dependency injection for `RegisterParUseCase` to include `DPoPValidator` in `apps/backend/src/index.ts`
-- [ ] T010 [US1] Verify `TokenExchangeUseCase` uses the refined `DPoPValidator` correctly in `apps/backend/src/core/use-cases/token-exchange.ts`
+- [x] T006 [P] [US1] Add integration test for PAR DPoP validation in `apps/backend/tests/infra/http/par_dpop.test.ts`
+- [x] T007 [P] [US1] Add integration test for Token Exchange DPoP validation in `apps/backend/tests/infra/http/token_dpop.test.ts`
+- [x] T008 [US1] Update `RegisterParUseCase` to inject and use `DPoPValidator` instead of `CryptoService.validateDPoPProof` in `apps/backend/src/core/use-cases/register-par.ts`
+- [x] T009 [US1] Update dependency injection for `RegisterParUseCase` to include `DPoPValidator` in `apps/backend/src/index.ts`
+- [x] T010 [US1] Verify `TokenExchangeUseCase` uses the refined `DPoPValidator` correctly in `apps/backend/src/core/use-cases/token-exchange.ts`
 
 ## Phase 4: User Story 2 - Consistent Security across OIDC Endpoints (Priority: P2)
 
@@ -35,17 +35,17 @@
 
 **Independent Test**: Verify UserInfo endpoint consistently rejects invalid proofs using the same logic as other endpoints.
 
-- [ ] T011 [P] [US2] Add integration test for UserInfo DPoP validation in `apps/backend/tests/infra/http/userinfo_dpop.test.ts`
-- [ ] T012 [US2] Verify `GetUserInfoUseCase` uses the unified `DPoPValidator` correctly in `apps/backend/src/core/use-cases/get-userinfo.ts`
-- [ ] T013 [US2] Remove `validateDPoPProof` method from the `CryptoService` interface in `apps/backend/src/core/domain/crypto_service.ts`
-- [ ] T014 [US2] Remove `validateDPoPProof` implementation from `JoseCryptoService` in `apps/backend/src/infra/adapters/jose_crypto.ts`
-- [ ] T015 [US2] Delete or ensure removal of legacy `apps/backend/src/core/utils/dpop.ts`
+- [x] T011 [P] [US2] Add integration test for UserInfo DPoP validation in `apps/backend/tests/infra/http/userinfo_dpop.test.ts`
+- [x] T012 [US2] Verify `GetUserInfoUseCase` uses the unified `DPoPValidator` correctly in `apps/backend/src/core/use-cases/get-userinfo.ts`
+- [x] T013 [US2] Remove `validateDPoPProof` method from the `CryptoService` interface in `apps/backend/src/core/domain/crypto_service.ts`
+- [x] T014 [US2] Remove `validateDPoPProof` implementation from `JoseCryptoService` in `apps/backend/src/infra/adapters/jose_crypto.ts`
+- [x] T015 [US2] Delete or ensure removal of legacy `apps/backend/src/core/utils/dpop.ts`
 
 ## Phase 5: Polish & Verification
 
-- [ ] T016 Run all DPoP related tests across the monorepo using `bun test`
-- [ ] T017 Verify zero occurrences of `validateDPoPProof` remain in the source code using `grep`
-- [ ] T018 Perform final code review for KISS/DRY compliance in `apps/backend/src/core/utils/dpop_validator.ts`
+- [x] T016 Run all DPoP related tests across the monorepo using `bun test`
+- [x] T017 Verify zero occurrences of `validateDPoPProof` remain in the source code using `grep`
+- [x] T018 Perform final code review for KISS/DRY compliance in `apps/backend/src/core/utils/dpop_validator.ts`
 
 ## Dependency Graph
 

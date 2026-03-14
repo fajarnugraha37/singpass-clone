@@ -8,23 +8,17 @@ import { getClientConfig } from './client_registry';
 import type { SecurityAuditService } from '../../core/domain/audit_service';
 import type { ServerKeyManager } from '../../core/domain/key_manager';
 import { and, eq } from 'drizzle-orm';
-import { DPoPValidator } from '../../core/utils/dpop_validator';
-import { DrizzleJtiStore } from './db/drizzle_jti_store';
-
 /**
  * Production-grade implementation of CryptoService using jose and ServerKeyManager.
  * Follows SOLID principles by delegating key lifecycle to KeyManager.
  */
 export class JoseCryptoService implements CryptoService {
   private algorithm = 'ES256';
-  private dpopValidator: DPoPValidator;
 
   constructor(
     private keyManager: ServerKeyManager,
     private auditService?: SecurityAuditService
-  ) {
-    this.dpopValidator = new DPoPValidator(new DrizzleJtiStore(), sharedConfig.SECURITY.DPOP_TTL_SECONDS);
-  }
+  ) {}
 
   async generateKeyPair(): Promise<{ id: string; privateKey: Uint8Array; publicKey: JWK }> {
     // This is now primarily used for initial setup or tests.
@@ -101,26 +95,7 @@ export class JoseCryptoService implements CryptoService {
     }
   }
 
-  async validateDPoPProof(
-    proof: string,
-    expectedMethod: string,
-    expectedUrl: string,
-    clientId: string,
-    expectedNonce?: string
-  ): Promise<{ jkt: string }> {
-    const result = await this.dpopValidator.validate(clientId, {
-      proof,
-      method: expectedMethod,
-      url: expectedUrl,
-      expectedNonce,
-    });
 
-    if (!result.isValid) {
-      throw new Error(`DPoP validation failed: ${result.error}`);
-    }
-
-    return { jkt: result.jkt };
-  }
 
   async generateDPoPNonce(clientId: string): Promise<string> {
     const { id: kid, privateKey } = await this.keyManager.getActiveKey();

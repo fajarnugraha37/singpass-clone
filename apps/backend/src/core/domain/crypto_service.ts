@@ -37,18 +37,6 @@ export interface CryptoService {
   ): Promise<boolean>;
 
   /**
-   * Validates a DPoP proof JWT.
-   * Checks signature, iat, jti, htm, htu, and optionally nonce.
-   */
-  validateDPoPProof(
-    proof: string,
-    expectedMethod: string,
-    expectedUrl: string,
-    clientId: string,
-    expectedNonce?: string
-  ): Promise<{ jkt: string }>;
-
-  /**
    * Generates a new DPoP-Nonce for a client.
    */
   generateDPoPNonce(clientId: string): Promise<string>;

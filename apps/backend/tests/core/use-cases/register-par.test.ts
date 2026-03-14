@@ -22,7 +22,6 @@ describe('RegisterParUseCase', () => {
 
     mockCryptoService = {
       validateClientAssertion: async () => true,
-      validateDPoPProof: async () => ({ jkt: 'test-jkt' }),
       calculateThumbprint: async () => 'test-jkt',
     } as any;
 
@@ -46,7 +45,17 @@ describe('RegisterParUseCase', () => {
       logEvent: async () => {},
     } as any;
 
-    useCase = new RegisterParUseCase(mockCryptoService, mockPARRepository, mockClientRegistry, mockAuditService);
+    const mockDPoPValidator = {
+      validate: async () => ({ isValid: true, jkt: 'test-jkt' })
+    };
+
+    useCase = new RegisterParUseCase(
+      mockCryptoService, 
+      mockPARRepository, 
+      mockClientRegistry, 
+      mockDPoPValidator as any,
+      mockAuditService
+    );
   });
 
   test('should successfully register a valid PAR request', async () => {
