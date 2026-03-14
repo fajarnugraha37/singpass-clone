@@ -118,4 +118,13 @@ describe('UserInfoController', () => {
     expect(res.data.error).toBe('invalid_dpop_proof');
     expect(res.headers['WWW-Authenticate']).toBe('DPoP error="invalid_dpop_proof", error_description="Missing DPoP header"');
   });
+
+  it('should prioritize missing Authorization over missing DPoP header', async () => {
+    const c = createMockContext({}); // Both missing
+
+    const res: any = await controller(c);
+    expect(res.status).toBe(401);
+    expect(res.data.error).toBe('invalid_request');
+    expect(res.headers['WWW-Authenticate']).toContain('error="invalid_request"');
+  });
 });

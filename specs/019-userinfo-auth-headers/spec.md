@@ -1,8 +1,8 @@
 # Feature Specification: UserInfo `WWW-Authenticate` Headers
 
-**Feature Branch**: `018-userinfo-auth-headers`  
+**Feature Branch**: `019-userinfo-auth-headers`  
 **Created**: 2026-03-15  
-**Status**: Draft  
+**Status**: Completed  
 **Input**: User description: "UserInfo `WWW-Authenticate` Headers **Finding**: #8 (🟡 Medium) **Branch Suggestion**: `fix/userinfo-www-authenticate` ### Problem UserInfo endpoint only sets `WWW-Authenticate` header for missing Authorization header, but not for `invalid_token` or `invalid_dpop_proof` errors as required by Singpass spec. ### Doc Reference `docs/singpass/technical-specifications/integration-guide/5.-requesting-for-userinfo.md`: "These parameters will also be returned in the `WWW-Authenticate` header." ### Expected Header Format ``` WWW-Authenticate: DPoP error="invalid_token", error_description="The access token is expired" WWW-Authenticate: DPoP error="invalid_dpop_proof", error_description="DPoP proof signature invalid" ``` ### Acceptance Criteria 1. All 401 responses from `/userinfo` MUST include a `WWW-Authenticate` header. 2. The header MUST use the format `DPoP error="<code>", error_description="<desc>"`. 3. Applicable error codes: `invalid_request`, `invalid_token`, `invalid_dpop_proof`."
 
 ## User Scenarios & Testing *(mandatory)*
