@@ -3,7 +3,7 @@ import type { CryptoService } from '../../domain/crypto_service';
 import { generateEncryptedIDToken, IDTokenClaims } from '../../utils/crypto';
 import type { ClientRegistry } from '../../domain/client_registry';
 import { FapiErrors, FapiError } from '../../../infra/middleware/fapi-error';
-import type { TokenResponse } from '../../../../packages/shared/src/tokens';
+import type { TokenResponse } from '../../../../../../packages/shared/src/tokens';
 import { buildSubAttributes, mapLoaToAcr, UserAttributes } from '../../domain/claims';
 import { sharedConfig } from '@vibe/shared/config';
 
@@ -93,7 +93,7 @@ export class TokenService {
       throw FapiErrors.invalidClient('Client not found');
     }
 
-    const clientEncKey = clientConfig.jwks.keys.find(k => k.use === 'enc');
+    const clientEncKey = clientConfig?.jwks?.keys.find(k => k.use === 'enc');
     if (!clientEncKey) {
       // In FAPI 2.0 / Singpass, encryption is often mandatory for PII.
       // If not found, we might fallback or throw based on policy.

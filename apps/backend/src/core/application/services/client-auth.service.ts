@@ -43,7 +43,7 @@ export class ClientAuthenticationService {
 
       // 3. Find matching signature key
       const kid = header.kid;
-      const clientKey = clientConfig.jwks.keys.find(k => k.use === 'sig' && (!kid || k.kid === kid));
+      const clientKey = clientConfig?.jwks?.keys.find(k => k.use === 'sig' && (!kid || k.kid === kid));
       
       if (!clientKey) {
         throw FapiErrors.invalidClient('No valid public key found for client');

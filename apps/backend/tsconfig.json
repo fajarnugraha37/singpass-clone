@@ -5,8 +5,12 @@
     "jsxImportSource": "hono/jsx",
     "baseUrl": ".",
     "paths": {
-      "@vibe/shared/*": ["../../packages/shared/src/*"],
-      "@vibe/config/*": ["../../packages/config/*"]
+      "@vibe/shared/*": [
+        "../../packages/shared/src/*"
+      ],
+      "@vibe/config/*": [
+        "../../packages/config/*"
+      ]
     }
   }
 }

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi, spyOn } from 'bun:test';
+import { describe, it, expect, beforeEach, vi, spyOn, type Mock } from 'bun:test';
 import { Hono } from 'hono';
 import type { Context } from 'hono';
 import { TokenExchangeUseCase } from '../../../src/core/use-cases/token-exchange';
@@ -6,9 +6,7 @@ import { exchangeToken } from '../../../src/infra/http/controllers/token.control
 import { FapiErrors, FapiError } from '../../../src/infra/middleware/fapi-error';
 
 // Mock dependencies and use case
-const mockTokenExchangeUseCase: Mock<TokenExchangeUseCase> = {
-  execute: vi.fn(),
-} as Mock<TokenExchangeUseCase>;
+const mockTokenExchangeUseCase = new TokenExchangeUseCase(null as any, null as any, null as any, null as any, null as any, null as any, null as any);
 
 // Mock Hono app and context
 const app = new Hono();

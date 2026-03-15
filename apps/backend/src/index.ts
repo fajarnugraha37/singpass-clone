@@ -28,7 +28,6 @@ import { DPoPValidator } from './core/utils/dpop_validator';
 import { jwksCache } from './infra/adapters/jwks_cache';
 import { createAuthRouter } from './infra/http/authRouter';
 import { getUserInfo } from './infra/http/controllers/userinfo.controller';
-import { fapiErrorHandler } from './infra/middleware/fapi-error';
 import { sharedConfig } from '../../../packages/shared/src/config';
 import { DrizzleServerKeyManager } from './infra/adapters/db/drizzle_key_manager';
 import { swaggerUI } from '@hono/swagger-ui';
