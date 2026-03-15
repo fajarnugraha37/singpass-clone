@@ -5,7 +5,7 @@ import { DrizzleTokenRepository } from '../../infra/adapters/db/drizzle_token_re
 import { DPoPValidator } from '../utils/dpop_validator';
 import { validatePKCE } from '../utils/pkce';
 import { FapiErrors } from '../../infra/middleware/fapi-error';
-import type { TokenResponse } from '../../../../packages/shared/src/tokens';
+import type { TokenResponse } from '../../../../../packages/shared/src/tokens';
 import type { UserInfoRepository } from '../domain/userinfo_repository';
 
 export interface TokenExchangeRequest {
