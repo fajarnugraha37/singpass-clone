@@ -126,10 +126,6 @@ export class TokenService {
       sub_attributes: user ? buildSubAttributes(user, scope.split(' ')) : undefined,
     };
 
-    if (scopeSet.has('uinfin') && user) {
-      claims.uinfin = user.nric;
-    }
-
     // 4. Sign and Encrypt (Nested JWT)
     try {
       return await generateEncryptedIDToken(

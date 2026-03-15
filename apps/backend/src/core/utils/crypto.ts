@@ -16,7 +16,6 @@ export interface IDTokenClaims extends jose.JWTPayload {
   amr?: string[];
   sub_type?: string;
   sub_attributes?: Record<string, any>;
-  uinfin?: string;
 }
 
 /**

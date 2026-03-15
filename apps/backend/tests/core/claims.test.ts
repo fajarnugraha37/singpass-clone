@@ -37,6 +37,20 @@ describe('Claims Mapping', () => {
       expect(result?.account_type).toBe('standard');
     });
 
+    it('should NOT include identity attributes when ONLY uinfin scope is present', () => {
+      const result = buildSubAttributes(mockUser, ['openid', 'uinfin']);
+      expect(result).toBeUndefined();
+    });
+
+    it('should include identity_coi and account_type even if nric is missing when user.identity is present', () => {
+      const noNricUser: UserAttributes = { nric: '', name: 'Tan' };
+      const result = buildSubAttributes(noNricUser, ['openid', 'user.identity']);
+      expect(result).toBeDefined();
+      expect(result?.identity_number).toBeUndefined();
+      expect(result?.identity_coi).toBe('SG');
+      expect(result?.account_type).toBe('standard');
+    });
+
     it('should include name when name scope is present', () => {
       const result = buildSubAttributes(mockUser, ['openid', 'name']);
       expect(result).toBeDefined();

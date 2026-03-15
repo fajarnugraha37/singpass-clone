@@ -1,4 +1,4 @@
-import { buildSubAttributes, mapLoaToAcr, SubAttributes } from './claims';
+import { mapLoaToAcr } from './claims';
 
 export interface PersonInfoField {
   value: string;
@@ -20,7 +20,6 @@ export interface UserInfoClaims {
   acr: string;
   amr: string[];
   sub_type: string;
-  sub_attributes?: SubAttributes;
 }
 
 export interface UserData {
@@ -28,7 +27,7 @@ export interface UserData {
   nric: string;
   name: string;
   email: string;
-  mobileno?: string | null;
+  mobileno: string | null;
 }
 
 /**
@@ -45,13 +44,13 @@ export function mapUserInfoClaims(
   const scopeSet = new Set(scopes);
   const person_info: PersonInfo = {};
 
-  if (scopeSet.has('uinfin')) {
+  if (scopeSet.has('uinfin') && user.nric) {
     person_info.uinfin = { value: user.nric };
   }
-  if (scopeSet.has('name')) {
+  if (scopeSet.has('name') && user.name) {
     person_info.name = { value: user.name };
   }
-  if (scopeSet.has('email')) {
+  if (scopeSet.has('email') && user.email) {
     person_info.email = { value: user.email };
   }
   if (scopeSet.has('mobileno') && user.mobileno) {
@@ -67,11 +66,5 @@ export function mapUserInfoClaims(
     amr,
     sub_type: 'user',
     person_info,
-    sub_attributes: buildSubAttributes({
-      nric: user.nric,
-      name: user.name,
-      email: user.email,
-      mobileno: user.mobileno || undefined
-    }, scopes),
   };
 }
