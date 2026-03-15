@@ -78,7 +78,7 @@
 
 - [x] T011 [US1] Implement DPoP and Access Token validation logic for `/userinfo` in `apps/backend/src/application/usecases/validate-userinfo-request.ts`
 - [x] T012 [US1] Implement JWS signing (ES256) and JWE encryption (ECDH-ES+A256KW/A256GCM) of `person_info` payload using `jose` in `apps/backend/src/application/usecases/generate-userinfo-payload.ts`
-- [x] T013 [US1] Implement `GET /userinfo` Hono endpoint integrating validation, data retrieval, and encryption in `apps/backend/src/infra/http/routes/userinfo-routes.ts`
+- [x] T013 [US1] Implement `GET /userinfo` and `POST /userinfo` Hono endpoints integrating Zod input validation (for Authorization and DPoP headers), data retrieval, and encryption in `apps/backend/src/infra/http/routes/userinfo-routes.ts`
 - [x] T014 [US1] Add standard OIDC error handling (e.g., `invalid_token`) returning 401 with `WWW-Authenticate` header in `apps/backend/src/infra/http/routes/userinfo-routes.ts`
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work seamlessly end-to-end.
@@ -92,6 +92,8 @@
 - [x] T015 [P] Run Drizzle migrations (`bun run db:generate` and `bun run db:migrate`) from the backend app root
 - [x] T016 Run unit test suite ensuring code coverage >= 80% for new logic
 - [x] T017 Validate `/userinfo` end-to-end with the instructions in `specs/027-userinfo-singpass-catalog/quickstart.md`
+- [x] T018 Verify performance Success Criterion SC-003 by running an authentication flow benchmark ensuring completion under 1 second using the seeded `test1234` accounts.
+
 
 ---
 

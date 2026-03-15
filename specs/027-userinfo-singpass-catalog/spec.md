@@ -44,7 +44,7 @@ As a relying party, I want the userinfo response to support the full scope of My
 ### Edge Cases
 
 - When a user does not have data for a specific catalog category (e.g., no property owned or no vehicle licence), the system MUST return explicit `null` values for those fields.
-- How does the system handle requested scopes that refer to deprecated or restricted data fields?
+- If the system encounters requested scopes that refer to deprecated, restricted, or unknown data fields, it MUST silently ignore them and process the remaining valid scopes, ensuring the request does not fail outright.
 
 ## Requirements *(mandatory)*
 
