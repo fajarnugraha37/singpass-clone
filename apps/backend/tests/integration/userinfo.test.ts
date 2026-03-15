@@ -5,6 +5,7 @@ import { JoseCryptoService } from '../../src/infra/adapters/jose_crypto';
 import { JWKSCacheService } from '../../src/infra/adapters/jwks_cache';
 import { DrizzleUserInfoRepository } from '../../src/infra/adapters/db/drizzle_userinfo_repository';
 import { DrizzleClientRegistry } from '../../src/infra/adapters/client_registry';
+import { createEmptyMyinfoPerson } from '../../src/core/domain/myinfo-person';
 
 describe('UserInfo Integration', () => {
   let clientKeyPair: jose.GenerateKeyPairResult;
@@ -41,7 +42,19 @@ describe('UserInfo Integration', () => {
           scope: 'openid uinfin name email',
           expiresAt: new Date(Date.now() + 3600000),
           revoked: false,
+          amr: [],
+          loa: 1,
         };
+      }
+      return null;
+    });
+
+    spyOn(DrizzleUserInfoRepository.prototype, 'getMyinfoProfile').mockImplementation(async (userId: string) => {
+      if (userId === 'user-123') {
+        const person = createEmptyMyinfoPerson(userId);
+        person.uinfin.value = 'S1234567A';
+        person.name.value = 'JOHN DOE';
+        return person;
       }
       return null;
     });

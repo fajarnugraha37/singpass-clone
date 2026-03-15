@@ -16,6 +16,7 @@ describe("DrizzleAuthDataService - Auth Data Lifecycle", () => {
     await db.delete(schema.authorizationCodes);
     await db.delete(schema.sessions);
     await db.delete(schema.parRequests);
+    await db.delete(schema.myinfoProfiles);
     await db.delete(schema.users);
   });
 

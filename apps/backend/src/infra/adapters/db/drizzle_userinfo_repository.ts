@@ -1,8 +1,9 @@
 import { eq, and } from 'drizzle-orm';
 import { db } from '../../database/client';
-import { users, accessTokens } from '../../database/schema';
+import { users, accessTokens, myinfoProfiles } from '../../database/schema';
 import { UserInfoRepository, AccessTokenData } from '../../../core/domain/userinfo_repository';
 import { UserData } from '../../../core/domain/userinfo_claims';
+import { MyinfoPerson } from '../../../core/domain/myinfo-person';
 
 export class DrizzleUserInfoRepository implements UserInfoRepository {
   /**
@@ -49,5 +50,20 @@ export class DrizzleUserInfoRepository implements UserInfoRepository {
       email: result.email || '',
       mobileno: result.mobileno,
     };
+  }
+
+  /**
+   * Retrieves full Myinfo profile for the user.
+   */
+  async getMyinfoProfile(userId: string): Promise<MyinfoPerson | null> {
+    const [result] = await db
+      .select()
+      .from(myinfoProfiles)
+      .where(eq(myinfoProfiles.userId, userId))
+      .limit(1);
+
+    if (!result) return null;
+
+    return result.data as MyinfoPerson;
   }
 }

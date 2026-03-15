@@ -1,4 +1,5 @@
 import { UserData } from './userinfo_claims';
+import { MyinfoPerson } from './myinfo-person';
 
 export interface AccessTokenData {
   token: string;
@@ -22,4 +23,9 @@ export interface UserInfoRepository {
    * Retrieves user data by subject (UUID).
    */
   getUserById(userId: string): Promise<UserData | null>;
+
+  /**
+   * Retrieves full Myinfo profile for the user.
+   */
+  getMyinfoProfile(userId: string): Promise<MyinfoPerson | null>;
 }

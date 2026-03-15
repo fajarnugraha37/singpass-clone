@@ -1,10 +1,10 @@
 import { UserInfoRepository } from '../domain/userinfo_repository';
 import { CryptoService } from '../domain/crypto_service';
-import { mapUserInfoClaims } from '../domain/userinfo_claims';
 import { DPoPValidator } from '../utils/dpop_validator';
 import { JWKSCacheService } from '../../infra/adapters/jwks_cache';
 import { ClientRegistry } from '../domain/client_registry';
 import { SecurityAuditService } from '../domain/audit_service';
+import { mapMyinfoProfile } from '../../application/mappers/myinfo-mapper';
 
 export interface GetUserInfoRequest {
   accessToken: string;
@@ -51,23 +51,25 @@ export class GetUserInfoUseCase {
         throw new Error(`invalid_dpop_proof: ${dpopResult.error}`);
       }
 
-      // 4. Retrieve User Data
-      const user = await this.repository.getUserById(tokenData.userId);
-      if (!user) {
+      // 4. Retrieve Full Myinfo Profile (aligned with Myinfo v5)
+      const person = await this.repository.getMyinfoProfile(tokenData.userId);
+      if (!person) {
         throw new Error('invalid_token');
       }
 
-      // 5. Map Claims based on Scopes
-      const claims = mapUserInfoClaims(
-        user,
-        tokenData.clientId,
-        issuer,
-        tokenData.scope.split(' '),
-        tokenData.loa,
-        tokenData.amr
-      );
+      // 5. Map Myinfo domain entity to the person_info format
+      const personInfo = mapMyinfoProfile(person);
 
-      // 6. Get Client Encryption Key
+      // 6. Construct the OIDC Userinfo claims payload
+      const claims = {
+        sub: person.userId,
+        iss: issuer,
+        aud: tokenData.clientId,
+        iat: Math.floor(Date.now() / 1000),
+        person_info: personInfo
+      };
+
+      // 7. Get Client Encryption Key
       const client = await this.clientRegistry.getClientConfig(tokenData.clientId);
       if (!client) {
         throw new Error('invalid_client');
@@ -88,14 +90,14 @@ export class GetUserInfoUseCase {
         throw new Error('no_client_encryption_key');
       }
 
-      // 7. Sign and Encrypt (JWS-in-JWE)
+      // 8. Sign and Encrypt (JWS-in-JWE)
       const result = await this.cryptoService.signAndEncrypt(claims, clientPublicKey);
 
       await this.auditService.logEvent({
         type: 'USERINFO_SUCCESS',
         severity: 'INFO',
         clientId: tokenData.clientId,
-        details: { sub: user.id, scopes: tokenData.scope }
+        details: { sub: person.userId, scopes: tokenData.scope }
       });
 
       return result;

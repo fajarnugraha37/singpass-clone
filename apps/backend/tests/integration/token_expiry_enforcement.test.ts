@@ -3,6 +3,7 @@ import app from '../../src/index';
 import * as jose from 'jose';
 import { DrizzleUserInfoRepository } from '../../src/infra/adapters/db/drizzle_userinfo_repository';
 import { JoseCryptoService } from '../../src/infra/adapters/jose_crypto';
+import { createEmptyMyinfoPerson } from '../../src/core/domain/myinfo-person';
 
 describe('Token Expiry Enforcement Integration', () => {
   let clientKeyPair: jose.GenerateKeyPairResult;
@@ -32,6 +33,8 @@ describe('Token Expiry Enforcement Integration', () => {
           scope: 'openid uinfin name email',
           expiresAt: new Date(Date.now() - 1000), // Expired 1 second ago
           revoked: false,
+          amr: [],
+          loa: 1,
         };
       }
       return null;
@@ -80,7 +83,15 @@ describe('Token Expiry Enforcement Integration', () => {
          scope: 'openid',
          expiresAt: new Date(Date.now() + 1800000), // Valid for 30 mins
          revoked: false,
+         amr: [],
+         loa: 1,
        };
+     });
+     spyOn(DrizzleUserInfoRepository.prototype, 'getMyinfoProfile').mockImplementation(async (userId: string) => {
+       if (userId === 'user-123') {
+         return createEmptyMyinfoPerson(userId);
+       }
+       return null;
      });
      spyOn(DrizzleUserInfoRepository.prototype, 'getUserById').mockImplementation(async () => ({
        id: 'user-123',

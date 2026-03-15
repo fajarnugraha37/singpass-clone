@@ -61,7 +61,7 @@ describe('Token Exchange Integration', () => {
           expiresAt: new Date(Date.now() + 300000),
           used: false,
           createdAt: new Date(),
-          scope: 'openid uinfin'
+          scope: 'openid uinfin user.identity'
         };      }
       return null;
     });
@@ -132,7 +132,6 @@ describe('Token Exchange Integration', () => {
     const { plaintext } = await jose.compactDecrypt(data.id_token, clientEncKeyPair.privateKey);
     const jws = new TextDecoder().decode(plaintext);
     const payload = jose.decodeJwt(jws);
-    expect(payload.uinfin).toBe('S1234567A');
     expect(payload.sub_attributes).toBeDefined();
     expect((payload.sub_attributes as any).identity_number).toBe('S1234567A');
   });

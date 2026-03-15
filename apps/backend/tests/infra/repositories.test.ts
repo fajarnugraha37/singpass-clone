@@ -23,6 +23,7 @@ describe('Drizzle Repositories Integration', () => {
     await db.delete(schema.authSessions);
     await db.delete(schema.parRequests);
     await db.delete(schema.usedJtis);
+    await db.delete(schema.myinfoProfiles);
     await db.delete(schema.users);
   });
 
@@ -232,6 +233,31 @@ describe('Drizzle Repositories Integration', () => {
       expect(tokenData).toBeDefined();
       expect(tokenData?.loa).toBe(1);
       expect(tokenData?.amr).toEqual(['pwd']);
+    });
+
+    it('should retrieve Myinfo profile by user id', async () => {
+      const userId = crypto.randomUUID();
+      await db.insert(schema.users).values({
+        id: userId,
+        nric: 'S7654321B',
+        name: 'Jane Doe',
+        email: 'jane@example.com'
+      });
+
+      const profileData = { userId, name: { value: 'Jane Doe' } };
+      await db.insert(schema.myinfoProfiles).values({
+        userId,
+        data: profileData
+      });
+
+      const profile = await userInfoRepo.getMyinfoProfile(userId);
+      expect(profile).toBeDefined();
+      expect((profile as any).name.value).toBe('Jane Doe');
+    });
+
+    it('should return null if Myinfo profile not found', async () => {
+      const profile = await userInfoRepo.getMyinfoProfile('non-existent-user');
+      expect(profile).toBeNull();
     });
   });
 });

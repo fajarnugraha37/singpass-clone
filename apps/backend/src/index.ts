@@ -27,7 +27,9 @@ import { DrizzleJtiStore } from './infra/adapters/db/drizzle_jti_store';
 import { DPoPValidator } from './core/utils/dpop_validator';
 import { jwksCache } from './infra/adapters/jwks_cache';
 import { createAuthRouter } from './infra/http/authRouter';
-import { getUserInfo } from './infra/http/controllers/userinfo.controller';
+import { ValidateUserInfoRequestUseCase } from './application/usecases/validate-userinfo-request';
+import { GenerateUserInfoPayloadUseCase } from './application/usecases/generate-userinfo-payload';
+import { createUserinfoRouter } from './infra/http/routes/userinfo-routes';
 import { sharedConfig } from '../../../packages/shared/src/config';
 import { DrizzleServerKeyManager } from './infra/adapters/db/drizzle_key_manager';
 import { swaggerUI } from '@hono/swagger-ui';
@@ -72,6 +74,19 @@ const getUserInfoUseCase = new GetUserInfoUseCase(
   clientRegistry,
   auditService
 );
+const validateUserInfoRequestUseCase = new ValidateUserInfoRequestUseCase(userInfoRepository, dpopValidator);
+const generateUserInfoPayloadUseCase = new GenerateUserInfoPayloadUseCase(cryptoService);
+
+const userinfoRouter = createUserinfoRouter(
+  validateUserInfoRequestUseCase,
+  generateUserInfoPayloadUseCase,
+  userInfoRepository,
+  clientRegistry,
+  jwksCache,
+  auditService,
+  sharedConfig.OIDC.ISSUER
+);
+
 const initiateAuthSessionUseCase = new InitiateAuthSessionUseCase(authSessionRepository, parRepository, auditService);
 const validateLoginUseCase = new ValidateLoginUseCase(authSessionRepository, auditService);
 const generateAuthCodeUseCase = new GenerateAuthCodeUseCase(authCodeRepository, authSessionRepository, parRepository, auditService);
@@ -90,8 +105,7 @@ const api = new Hono()
   .get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
   .post('/par', registerPar(registerParUseCase))
   .post('/token', exchangeToken(tokenExchangeUseCase))
-  .get('/userinfo', getUserInfo(getUserInfoUseCase, sharedConfig.OIDC.ISSUER))
-  .post('/userinfo', getUserInfo(getUserInfoUseCase, sharedConfig.OIDC.ISSUER))
+  .route('/userinfo', userinfoRouter)
   // API: Auth RPC Endpoints (mounted at /api/auth)
   .route('/auth', authRouter);
 
@@ -116,12 +130,12 @@ const app = new Hono()
   .route('/api', api)
   // Auth Initiation (mounted at /auth)
   .route('/auth', authRouter)
+  // UserInfo (aligned with Myinfo v5)
+  .route('/userinfo', userinfoRouter)
   // Public OIDC Endpoints at Root
   .get('/.well-known/openid-configuration', getDiscoveryDocument)
   .get('/.well-known/keys', getJWKS(cryptoService))
-  .post('/token', exchangeToken(tokenExchangeUseCase))
-  .get('/userinfo', getUserInfo(getUserInfoUseCase, sharedConfig.OIDC.ISSUER))
-  .post('/userinfo', getUserInfo(getUserInfoUseCase, sharedConfig.OIDC.ISSUER));
+  .post('/token', exchangeToken(tokenExchangeUseCase));
 
 app
   .get('/doc', (c) => c.json(openapiSpec))

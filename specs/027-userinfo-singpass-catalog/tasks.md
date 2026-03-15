@@ -22,7 +22,7 @@
 
 **Purpose**: Project initialization and basic structure verification
 
-- [ ] T001 Verify project structure and Drizzle ORM configuration in `apps/backend/drizzle.config.ts`
+- [x] T001 Verify project structure and Drizzle ORM configuration in `apps/backend/drizzle.config.ts`
 
 ---
 
@@ -32,9 +32,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T002 [P] Create Myinfo Catalog TypeScript interfaces (Personal, Finance, Education, Family, Vehicle, Property, Government Scheme) in `packages/shared/src/types/myinfo-catalog.ts`
-- [ ] T003 [P] Create `MyinfoPerson` domain entity in `apps/backend/src/core/domain/myinfo-person.ts`
-- [ ] T004 Update Drizzle schema for user profiles to support Myinfo catalog data storage (e.g., using a JSON column or related tables) in `apps/backend/src/infrastructure/database/schema.ts`
+- [x] T002 [P] Create Myinfo Catalog TypeScript interfaces (Personal, Finance, Education, Family, Vehicle, Property, Government Scheme) in `packages/shared/src/types/myinfo-catalog.ts`
+- [x] T003 [P] Create `MyinfoPerson` domain entity in `apps/backend/src/core/domain/myinfo-person.ts`
+- [x] T004 Update Drizzle schema for user profiles to support Myinfo catalog data storage in `apps/backend/src/infra/database/schema.ts`
+
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -50,13 +51,13 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T005 [P] [US2] Write unit tests for Myinfo data mapper to assert `{"value": ...}` wrapping and explicit nulls in `apps/backend/tests/unit/application/mappers/myinfo-mapper.test.ts`
+- [x] T005 [P] [US2] Write unit tests for Myinfo data mapper to assert `{"value": ...}` wrapping and explicit nulls in `apps/backend/tests/unit/application/mappers/myinfo-mapper.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T006 [P] [US2] Create Drizzle seed script for mock users with full catalog data and `test1234` password hash in `apps/backend/src/infrastructure/database/seed-myinfo.ts`
-- [ ] T007 [US2] Implement user repository method to retrieve Myinfo profile by user ID in `apps/backend/src/infrastructure/database/repositories/user-repository.ts`
-- [ ] T008 [US2] Implement `MyinfoMapper` to format fields with `{"value": "..."}` and handle explicit `null`s for missing data in `apps/backend/src/application/mappers/myinfo-mapper.ts`
+- [x] T006 [P] [US2] Create Drizzle seed script for mock users with full catalog data and `test1234` password hash in `apps/backend/src/infra/database/seed-myinfo.ts`
+- [x] T007 [US2] Implement user repository method to retrieve Myinfo profile by user ID in `apps/backend/src/infra/database/repositories/user-repository.ts`
+- [x] T008 [US2] Implement `MyinfoMapper` to format fields with `{"value": "..."}` and handle explicit `null`s for missing data in `apps/backend/src/application/mappers/myinfo-mapper.ts`
 
 **Checkpoint**: At this point, User Story 2 should be fully functional with populated mock database and proper data mappers.
 
@@ -70,15 +71,15 @@
 
 ### Tests for User Story 1 ⚠️
 
-- [ ] T009 [P] [US1] Write unit tests for userinfo payload generation and cryptography in `apps/backend/tests/unit/application/usecases/generate-userinfo-payload.test.ts`
-- [ ] T010 [P] [US1] Write unit tests for Userinfo DPoP validation logic in `apps/backend/tests/unit/application/usecases/validate-userinfo-request.test.ts`
+- [x] T009 [P] [US1] Write unit tests for userinfo payload generation and cryptography in `apps/backend/tests/unit/application/usecases/generate-userinfo-payload.test.ts`
+- [x] T010 [P] [US1] Write unit tests for Userinfo DPoP validation logic in `apps/backend/tests/unit/application/usecases/validate-userinfo-request.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T011 [US1] Implement DPoP and Access Token validation logic for `/userinfo` in `apps/backend/src/application/usecases/validate-userinfo-request.ts`
-- [ ] T012 [US1] Implement JWS signing (ES256) and JWE encryption (ECDH-ES+A256KW/A256GCM) of `person_info` payload using `jose` in `apps/backend/src/application/usecases/generate-userinfo-payload.ts`
-- [ ] T013 [US1] Implement `GET /userinfo` Hono endpoint integrating validation, data retrieval, and encryption in `apps/backend/src/infrastructure/http/routes/userinfo-routes.ts`
-- [ ] T014 [US1] Add standard OIDC error handling (e.g., `invalid_token`) returning 401 with `WWW-Authenticate` header in `apps/backend/src/infrastructure/http/routes/userinfo-routes.ts`
+- [x] T011 [US1] Implement DPoP and Access Token validation logic for `/userinfo` in `apps/backend/src/application/usecases/validate-userinfo-request.ts`
+- [x] T012 [US1] Implement JWS signing (ES256) and JWE encryption (ECDH-ES+A256KW/A256GCM) of `person_info` payload using `jose` in `apps/backend/src/application/usecases/generate-userinfo-payload.ts`
+- [x] T013 [US1] Implement `GET /userinfo` Hono endpoint integrating validation, data retrieval, and encryption in `apps/backend/src/infra/http/routes/userinfo-routes.ts`
+- [x] T014 [US1] Add standard OIDC error handling (e.g., `invalid_token`) returning 401 with `WWW-Authenticate` header in `apps/backend/src/infra/http/routes/userinfo-routes.ts`
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work seamlessly end-to-end.
 
@@ -88,9 +89,9 @@
 
 **Purpose**: Improvements that affect multiple user stories and ensuring compliance
 
-- [ ] T015 [P] Run Drizzle migrations (`bun run db:generate` and `bun run db:migrate`) from the backend app root
-- [ ] T016 Run unit test suite ensuring code coverage >= 80% for new logic
-- [ ] T017 Validate `/userinfo` end-to-end with the instructions in `specs/027-userinfo-singpass-catalog/quickstart.md`
+- [x] T015 [P] Run Drizzle migrations (`bun run db:generate` and `bun run db:migrate`) from the backend app root
+- [x] T016 Run unit test suite ensuring code coverage >= 80% for new logic
+- [x] T017 Validate `/userinfo` end-to-end with the instructions in `specs/027-userinfo-singpass-catalog/quickstart.md`
 
 ---
 

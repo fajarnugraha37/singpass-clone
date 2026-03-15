@@ -7,7 +7,15 @@ export const users = sqliteTable('users', {
   name: text('name').notNull(),
   email: text('email').unique(),
   mobileno: text('mobileno'),
+  passwordHash: text('password_hash'),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+});
+
+export const myinfoProfiles = sqliteTable('myinfo_profiles', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text('user_id').references(() => users.id).notNull(),
+  data: text('data', { mode: 'json' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 });
 
 export const sessions = sqliteTable('sessions', {
