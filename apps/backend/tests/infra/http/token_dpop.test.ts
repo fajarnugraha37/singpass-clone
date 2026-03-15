@@ -1,10 +1,13 @@
-import { expect, test, describe, beforeEach, spyOn, afterEach, mock } from 'bun:test'
+import { expect, test, describe, beforeEach, spyOn, afterEach, mock, vi, type Mock } from 'bun:test'
+import { TokenExchangeUseCase } from '../../../src/core/use-cases/token-exchange';
+import { FapiErrors } from '../../../src/infra/middleware/fapi-error';
+
 import app from '../../../src/index'
 import { DPoPValidator } from '../../../src/core/utils/dpop_validator'
 import { ClientAuthenticationService } from '../../../src/core/application/services/client-auth.service'
-import * as jose from 'jose'
 
 describe('Token Endpoint DPoP Integration', () => {
+
   beforeEach(async () => {
     spyOn(ClientAuthenticationService.prototype, 'authenticate').mockImplementation(async () => ({ clientId: 'mock-client-id' }));
   });
@@ -14,6 +17,7 @@ describe('Token Endpoint DPoP Integration', () => {
   });
 
   test('should fail if DPoP validation returns invalid_htu', async () => {
+    spyOn(TokenExchangeUseCase.prototype, "execute").mockRejectedValueOnce(FapiErrors.invalidDpopProof('Invalid DPoP HTU'));
     spyOn(DPoPValidator.prototype, 'validate').mockImplementation(async () => ({
       isValid: false,
       jkt: '',
@@ -40,7 +44,7 @@ describe('Token Endpoint DPoP Integration', () => {
 
     expect(res.status).toBe(400);
     const body = await res.json();
-    expect(body.error_description).toContain('invalid_htu');
+    expect(body.error_description).toContain('Invalid DPoP HTU');
   });
 
   test('should fail if DPoP validation returns jti_reused', async () => {

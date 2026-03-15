@@ -1,7 +1,7 @@
 import { Context } from 'hono';
 import { z } from 'zod';
 import { TokenExchangeUseCase } from '../../../core/use-cases/token-exchange';
-import { FapiErrors } from '../../middleware/fapi-error';
+import { FapiError, FapiErrors } from '../../middleware/fapi-error';
 
 /**
  * Request body schema for the token exchange endpoint.
@@ -21,7 +21,7 @@ export const tokenRequestSchema = z.object({
  */
 export const exchangeToken = (useCase: TokenExchangeUseCase) => async (c: Context) => {
   // 1. Mandatory DPoP header check
-  const dpopHeader = c.req.header('DPoP');
+  const dpopHeader = c.req?.header('DPoP');
   if (!dpopHeader) {
     throw FapiErrors.invalidDpopProof('Missing mandatory DPoP header');
   }

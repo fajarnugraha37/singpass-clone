@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import type { CryptoService } from '../../domain/crypto_service';
 import { generateEncryptedIDToken, IDTokenClaims } from '../../utils/crypto';
 import type { ClientRegistry } from '../../domain/client_registry';
-import { FapiErrors } from '../../../infra/middleware/fapi-error';
+import { FapiErrors, FapiError } from '../../../infra/middleware/fapi-error';
 import type { TokenResponse } from '../../../../packages/shared/src/tokens';
 import { buildSubAttributes, mapLoaToAcr, UserAttributes } from '../../domain/claims';
 import { sharedConfig } from '@vibe/shared/config';
@@ -74,12 +74,18 @@ export class TokenService {
   }): Promise<string> {
     const { userId, clientId, nonce, issuer, expiresIn, loa, amr, scope, user } = params;
 
+    // Basic validation for userId
+    if (!userId) {
+      throw FapiErrors.invalidToken('User ID is missing or invalid.');
+    }
+
     // 1. Resolve Client Config and Public Encryption Key
     let clientConfig;
     try {
       clientConfig = await this.clientRegistry.getClientConfig(clientId);
     } catch (err: any) {
       console.error('[TokenService] Error fetching client config:', err);
+      // Consider if this should be serverError or temporarilyUnavailable based on error type
       throw FapiErrors.temporarilyUnavailable('Could not fetch client configuration at this time.');
     }
     
@@ -100,6 +106,7 @@ export class TokenService {
       serverKey = await this.cryptoService.getActiveKey();
     } catch (err: any) {
       console.error('[TokenService] Error fetching active server key:', err);
+      // Assuming crypto service failure is temporary or infra-related
       throw FapiErrors.temporarilyUnavailable('Could not retrieve signing key at this time.');
     }
 
@@ -128,23 +135,8 @@ export class TokenService {
       );
     } catch (err: any) {
       console.error('[TokenService] Error generating encrypted ID token:', err);
+      // Catching potential errors during JWT generation
       throw FapiErrors.serverError('Failed to generate ID token.');
     }
   }
-
-  private async generateIdToken(params: {
-    userId: string;
-    clientId: string;
-    nonce?: string;
-    issuer: string;
-    expiresIn: number;
-    loa: number;
-    amr: string[];
-    scope: string;
-    user?: UserAttributes;
-  }): Promise<string> {
-    const { userId, clientId, nonce, issuer, expiresIn, loa, amr, scope, user } = params;
-
-    if (!userId) {
-      throw FapiErrors.invalidToken('User ID is missing or invalid.');
-    }
+}

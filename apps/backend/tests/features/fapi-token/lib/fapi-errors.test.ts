@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'bun:test';
-import { FapiErrors, FapiError } from '../../src/infra/middleware/fapi-error';
+import { FapiErrors, FapiError } from '../../../../src/infra/middleware/fapi-error';
 
 describe('FapiErrors', () => {
   describe('invalidToken', () => {
