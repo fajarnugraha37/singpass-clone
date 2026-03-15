@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@vibe/shared/*": ["../shared/src/*"],
+      "@vibe/config/*": ["../config/*"]
+    }
+  },
+  "include": ["src", "tests"]
+}

@@ -63,11 +63,11 @@ As a compliance reviewer, I want the tool to verify the developer portal app con
 - **FR-006**: System MUST ensure the `id_token` contains expected identity claims matching requested scopes (e.g., name, email, mobileno).
 - **FR-007**: System MUST execute a userinfo request using the access token (and DPoP header if required), verifying that returned claims map to the requested scopes and that invalid tokens result in HTTP 401/403.
 - **FR-008**: System MUST validate client registration properties, enforcing exact-match redirect URIs, 32-character alphanumeric client IDs, and token-based authentication method compliance.
-- **FR-009**: System MUST verify MyInfo scopes adhere to data minimization, and prompt for manual review on operations requiring human judgement, such as consent UX and developer portal role gating.
+- **FR-009**: System MUST verify MyInfo scopes adhere to data minimization, and prompt for manual review on operations requiring human judgement by detecting MyInfo scopes and emitting a MANUAL status for consent UX and developer portal role gating.
 - **FR-010**: System MUST conduct negative testing including replay attacks, mismatched redirect URIs, expired request URIs, and invalid client assertions, expecting proper error failures.
-- **FR-011**: System MUST verify the target clone logs adequate metadata (client_id, state, nonce, request_uri, timestamps, auth result) without leaking raw secrets.
-- **FR-012**: System MUST generate a final conformance report containing an executive summary (listing top 3 highest-risk findings first) and detailed results per check.
-- **FR-013**: System MUST include the status (PASS/FAIL/PARTIAL), a concise finding, required evidence, remediation steps, and references mapping to the official Singpass doc URLs for each check in the report.
+- **FR-011**: System MUST provide a manual checklist item in the AuditReport advising administrators to verify the target clone logs adequate metadata (client_id, state, nonce, request_uri, timestamps, auth result) without leaking raw secrets.
+- **FR-012**: System MUST generate a final AuditReport containing an executive summary (listing top 3 highest-risk findings first) and detailed results per check.
+- **FR-013**: System MUST include the status (PASS/FAIL/PARTIAL/MANUAL), a concise finding, required evidence, remediation steps, and references mapping to the official Singpass doc URLs for each check in the report.
 - **FR-014**: System MUST determine overall acceptance criteria: PASS (all HIGH/Critical pass, max 1 MEDIUM, no blocking LOWs), PARTIAL (1-2 mitigable HIGHs), or FAIL (any Critical issue present).
 
 ### Key Entities
@@ -82,6 +82,6 @@ As a compliance reviewer, I want the tool to verify the developer portal app con
 
 - **SC-001**: The auditor tool executes all automated checks (Discovery to Userinfo) against a target implementation in under 5 minutes without manual intervention.
 - **SC-002**: The tool successfully detects and reports 100% of injected non-compliant flaws (e.g., weak redirect URI validation, replayable codes, invalid ID token signatures) as FAIL or PARTIAL.
-- **SC-003**: The final conformance report unambiguously maps every finding to the corresponding official Singpass documentation reference URLs.
-- **SC-004**: System evaluators can identify critical security gaps within 1 minute by reading the top 3 items in the generated executive summary.
+- **SC-003**: The final AuditReport unambiguously maps every finding to the corresponding official Singpass documentation reference URLs.
+- **SC-004**: System evaluators can identify critical security gaps within 1 minute by reading the top 3 items in the generated executive summary in the AuditReport.
 - **SC-005**: All manual checks (consent UX, portal role gating) are successfully flagged in the tool's output for human review rather than silently skipped.
