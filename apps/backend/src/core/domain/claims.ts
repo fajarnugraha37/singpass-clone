@@ -31,7 +31,7 @@ export function buildSubAttributes(user: UserAttributes, scopes: string[]): SubA
   const subAttributes: SubAttributes = {};
   let hasAttributes = false;
 
-  if (scopes.includes('user.identity')) {
+  if (scopes.includes('user.identity') || scopes.includes('uinfin')) {
     subAttributes.identity_number = user.nric;
     subAttributes.identity_coi = 'SG';
     subAttributes.account_type = 'standard';

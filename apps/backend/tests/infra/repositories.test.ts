@@ -16,7 +16,6 @@ describe('Drizzle Repositories Integration', () => {
   beforeEach(async () => {
     // Cleanup data between tests to avoid constraints
     // Delete in order of dependencies to avoid FK issues
-    await db.delete(schema.authCodes);
     await db.delete(schema.authorizationCodes);
     await db.delete(schema.accessTokens);
     await db.delete(schema.refreshTokens);

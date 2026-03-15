@@ -24,8 +24,8 @@
 **Purpose**: Project initialization and basic structure
 
 - [x] T001 Confirm active branch is `025-fix-scope-propagation` and environment is ready
-- [ ] T002 [P] Create reproduction test case for missing scopes in `apps/backend/tests/repro_scope_propagation.test.ts`
-- [ ] T003 Verify reproduction test FAILS (confirming the bug)
+- [x] T002 [P] Create reproduction test case for missing scopes in `apps/backend/tests/repro_scope_propagation.test.ts`
+- [x] T003 Verify reproduction test FAILS (confirming the bug)
 
 ---
 
@@ -33,12 +33,12 @@
 
 **Purpose**: Core infrastructure and database changes that MUST be complete before user stories
 
-- [ ] T004 [P] Update `AuthorizationCode` interface to include `scope: string` in `apps/backend/src/core/domain/authorizationCode.ts`
-- [ ] T005 Update `authorizationCodes` table definition in `apps/backend/src/infra/database/schema.ts` (ensure `scope` is present and remove redundant `authCodes` table)
-- [ ] T006 Update `cleanup.ts` to use `authorizationCodes` table instead of `authCodes` in `apps/backend/src/infra/database/cleanup.ts`
-- [ ] T007 Update `DrizzleAuthorizationCodeRepository` to handle `scope` persistence in `apps/backend/src/infra/adapters/db/drizzle_authorization_code_repository.ts`
-- [ ] T008 [P] Update `GenerateAuthCodeUseCase` to read scope from `parRequest.payload.scope` and store it in the auth code in `apps/backend/src/core/use-cases/GenerateAuthCode.ts`
-- [ ] T009 [P] Update `TokenExchangeUseCase` to use `authCode.scope` for ID Token generation and Access Token storage in `apps/backend/src/core/use-cases/token-exchange.ts`
+- [x] T004 [P] Update `AuthorizationCode` interface to include `scope: string` in `apps/backend/src/core/domain/authorizationCode.ts`
+- [x] T005 Update `authorizationCodes` table definition in `apps/backend/src/infra/database/schema.ts` (ensure `scope` is present and remove redundant `authCodes` table)
+- [x] T006 Update `cleanup.ts` to use `authorizationCodes` table instead of `authCodes` in `apps/backend/src/infra/database/cleanup.ts`
+- [x] T007 Update `DrizzleAuthorizationCodeRepository` to handle `scope` persistence in `apps/backend/src/infra/adapters/db/drizzle_authorization_code_repository.ts`
+- [x] T008 [P] Update `GenerateAuthCodeUseCase` to read scope from `parRequest.payload.scope` and store it in the auth code in `apps/backend/src/core/use-cases/GenerateAuthCode.ts`
+- [x] T009 [P] Update `TokenExchangeUseCase` to use `authCode.scope` for ID Token generation and Access Token storage in `apps/backend/src/core/use-cases/token-exchange.ts`
 
 **Checkpoint**: Foundation ready - Database and core use cases updated to support scope propagation.
 
@@ -52,14 +52,14 @@
 
 ### Tests for User Story 1
 
-- [ ] T010 [P] [US1] Update integration test mocks in `apps/backend/tests/integration/token-exchange.test.ts` to include `scope` in `getByCode` mock
-- [ ] T011 [US1] Create end-to-end integration test for scope propagation in `apps/backend/tests/integration/userinfo_scope.test.ts`
+- [x] T010 [P] [US1] Update integration test mocks in `apps/backend/tests/integration/token-exchange.test.ts` to include `scope` in `getByCode` mock
+- [x] T011 [US1] Create end-to-end integration test for scope propagation in `apps/backend/tests/integration/userinfo_scope.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T012 [US1] Verify `TokenExchangeUseCase` correctly persists `scope` in `saveAccessToken` and `saveRefreshToken` via the repository
-- [ ] T013 [US1] Verify `GetUserInfoUseCase` correctly retrieves and splits `tokenData.scope` for claim mapping in `apps/backend/src/core/use-cases/get-userinfo.ts`
-- [ ] T014 [US1] Verify `mapUserInfoClaims` correctly filters claims based on the provided scopes in `apps/backend/src/core/domain/userinfo_claims.ts`
+- [x] T012 [US1] Verify `TokenExchangeUseCase` correctly persists `scope` in `saveAccessToken` and `saveRefreshToken` via the repository
+- [x] T013 [US1] Verify `GetUserInfoUseCase` correctly retrieves and splits `tokenData.scope` for claim mapping in `apps/backend/src/core/use-cases/get-userinfo.ts`
+- [x] T014 [US1] Verify `mapUserInfoClaims` correctly filters claims based on the provided scopes in `apps/backend/src/core/domain/userinfo_claims.ts`
 
 **Checkpoint**: User Story 1 functional - Access tokens now correctly carry scopes for data retrieval.
 
@@ -73,11 +73,11 @@
 
 ### Tests for User Story 2
 
-- [ ] T015 [US2] Add test case to `apps/backend/tests/integration/token-exchange.test.ts` to verify ID Token claims for specific scopes (e.g., `uinfin`)
+- [x] T015 [US2] Add test case to `apps/backend/tests/integration/token-exchange.test.ts` to verify ID Token claims for specific scopes (e.g., `uinfin`)
 
 ### Implementation for User Story 2
 
-- [ ] T016 [US2] Verify `TokenService.generateTokens` and `generateIdToken` correctly pass and use the `scope` parameter in `apps/backend/src/core/application/services/token.service.ts`
+- [x] T016 [US2] Verify `TokenService.generateTokens` and `generateIdToken` correctly pass and use the `scope` parameter in `apps/backend/src/core/application/services/token.service.ts`
 
 **Checkpoint**: User Story 2 functional - ID Tokens are now consistent with authorized scopes.
 
@@ -87,10 +87,10 @@
 
 **Purpose**: Final verification and cleanup
 
-- [ ] T017 [P] Run all integration tests to ensure no regressions: `bun test apps/backend/tests/integration/`
-- [ ] T018 [P] Verify code coverage for modified files is >= 80%
-- [ ] T019 [P] Run `quickstart.md` validation steps
-- [ ] T020 Final database schema sync check: `bunx drizzle-kit push:sqlite`
+- [x] T017 [P] Run all integration tests to ensure no regressions: `bun test apps/backend/tests/integration/`
+- [x] T018 [P] Verify code coverage for modified files is >= 80%
+- [x] T019 [P] Run `quickstart.md` validation steps
+- [x] T020 Final database schema sync check: `bunx drizzle-kit push:sqlite`
 
 ---
 

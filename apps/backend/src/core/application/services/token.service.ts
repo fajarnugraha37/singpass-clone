@@ -29,7 +29,7 @@ export class TokenService {
    * Generates a complete set of tokens (Access, ID, Refresh) for a user/client session.
    */
   async generateTokens(params: TokenGenerationParams): Promise<TokenResponse> {
-    const { userId, clientId, dpopJkt, scope, nonce, issuer, loa, amr, user } = params;
+    const { userId, clientId, dpopJkt, scope = 'openid', nonce, issuer, loa, amr, user } = params;
 
     // 1. Generate Opaque Access Token (typically a random string or a JWT)
     // For this project, we'll use a random high-entropy string for the opaque token.
@@ -112,6 +112,7 @@ export class TokenService {
 
     // 3. Prepare ID Token Claims
     const now = Math.floor(Date.now() / 1000);
+    const scopeSet = new Set(scope.split(' '));
     const claims: IDTokenClaims = {
       iss: issuer,
       sub: userId,
@@ -124,6 +125,10 @@ export class TokenService {
       sub_type: 'user',
       sub_attributes: user ? buildSubAttributes(user, scope.split(' ')) : undefined,
     };
+
+    if (scopeSet.has('uinfin') && user) {
+      claims.uinfin = user.nric;
+    }
 
     // 4. Sign and Encrypt (Nested JWT)
     try {

@@ -1,7 +1,7 @@
 import { eq, and, gt } from 'drizzle-orm';
 import type { AuthDataService, Session, AuthCodeSessionData } from '../../core/domain/auth_data_service';
 import { db } from '../database/client';
-import { parRequests, sessions, authCodes } from '../database/schema';
+import { parRequests, sessions, authorizationCodes } from '../database/schema';
 import { parRequestSchema, sharedConfig } from '../../../../../packages/shared/src/config';
 import type { SecurityAuditService } from '../../core/domain/audit_service';
 
@@ -133,16 +133,24 @@ export class DrizzleAuthDataService implements AuthDataService {
     const code = crypto.randomUUID(); // Simplification for now
     const expiresAt = new Date(Date.now() + this.authCodeTtlSeconds * 1000);
 
-    await db.insert(authCodes).values({
+    // Retrieve original PAR to get clientId and redirectUri and scope
+    const [par] = await db.select().from(parRequests).where(eq(parRequests.id, parId)).limit(1);
+    if (!par) throw new Error('PAR not found');
+
+    await db.insert(authorizationCodes).values({
       code,
-      sessionId,
-      parId,
+      userId: session.userId!,
+      clientId: par.clientId,
       codeChallenge,
-      codeChallengeMethod: 'S256',
       dpopJkt,
-      // loa: session.loa,
-      // amr: JSON.stringify(session.amr),
+      scope: (par.payload as any).scope || 'openid',
+      nonce: (par.payload as any).nonce || null,
+      loa: session.loa,
+      amr: JSON.stringify(session.amr),
+      redirectUri: (par.payload as any).redirect_uri,
       expiresAt,
+      used: false,
+      createdAt: new Date(),
     });
 
     await this.auditService?.logEvent({
@@ -157,35 +165,41 @@ export class DrizzleAuthDataService implements AuthDataService {
   async exchangeAuthCode(code: string): Promise<AuthCodeSessionData | null> {
     const now = new Date();
     const [result] = await db.select({
-      sessionId: authCodes.sessionId,
-      parId: authCodes.parId,
-      dpopJkt: authCodes.dpopJkt,
-      userId: sessions.userId,
-      loa: sessions.loa,
-      amr: sessions.amr,
+      code: authorizationCodes.code,
+      dpopJkt: authorizationCodes.dpopJkt,
+      userId: authorizationCodes.userId,
+      loa: authorizationCodes.loa,
+      amr: authorizationCodes.amr,
     })
-      .from(authCodes)
-      .innerJoin(sessions, eq(authCodes.sessionId, sessions.id))
+      .from(authorizationCodes)
       .where(
         and(
-          eq(authCodes.code, code),
-          gt(authCodes.expiresAt, now)
+          eq(authorizationCodes.code, code),
+          eq(authorizationCodes.used, false),
+          gt(authorizationCodes.expiresAt, now)
         )
       );
 
     if (!result) return null;
 
-    // Delete code after use
-    await db.delete(authCodes).where(eq(authCodes.code, code));
+    // Mark code as used
+    await db.update(authorizationCodes)
+      .set({ used: true })
+      .where(eq(authorizationCodes.code, code));
 
     await this.auditService?.logEvent({
       type: 'AUTH_CODE_EXCHANGED',
       severity: 'INFO',
-      details: { sessionId: result.sessionId, parId: result.parId },
+      details: { code: result.code },
     });
 
+    // Note: AuthCodeSessionData doesn't exactly match our new schema perfectly but we adapt
     return {
-      ...result,
+      sessionId: 'legacy-adapter', // We don't store sessionId in authorization_codes anymore
+      parId: 0, 
+      dpopJkt: result.dpopJkt,
+      userId: result.userId,
+      loa: result.loa,
       amr: result.amr ? JSON.parse(result.amr) : [],
     } as AuthCodeSessionData;
   }

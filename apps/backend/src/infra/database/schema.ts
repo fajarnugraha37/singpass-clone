@@ -30,17 +30,6 @@ export const parRequests = sqliteTable('par_requests', {
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 });
 
-export const authCodes = sqliteTable('auth_codes', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  code: text('code').unique().notNull(),
-  sessionId: text('session_id').notNull().references(() => sessions.id),
-  parId: integer('par_id').notNull().references(() => parRequests.id),
-  codeChallenge: text('code_challenge').notNull(),
-  codeChallengeMethod: text('code_challenge_method').default('S256').notNull(),
-  dpopJkt: text('dpop_jkt').notNull(),
-  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
-});
-
 export const serverKeys = sqliteTable('server_keys', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   encryptedKey: text('encrypted_key').notNull(),

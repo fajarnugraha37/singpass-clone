@@ -4,13 +4,16 @@ import * as jose from 'jose';
 import { DrizzleAuthorizationCodeRepository } from '../../src/infra/adapters/db/drizzle_authorization_code_repository';
 import { DrizzleTokenRepository } from '../../src/infra/adapters/db/drizzle_token_repository';
 import { JoseCryptoService } from '../../src/infra/adapters/jose_crypto';
+import { DrizzleUserInfoRepository } from '../../src/infra/adapters/db/drizzle_userinfo_repository';
 
 describe('Token Exchange Integration', () => {
   let clientKeyPair: jose.GenerateKeyPairResult;
+  let clientEncKeyPair: jose.GenerateKeyPairResult;
   let serverKeyPair: jose.GenerateKeyPairResult;
 
   beforeAll(async () => {
     clientKeyPair = await jose.generateKeyPair('ES256');
+    clientEncKeyPair = await jose.generateKeyPair('ECDH-ES+A256KW');
     serverKeyPair = await jose.generateKeyPair('ES256');
   });
 
@@ -20,6 +23,11 @@ describe('Token Exchange Integration', () => {
 
   test('POST /token should exchange auth code for tokens', async () => {
     const jwk = await jose.exportJWK(clientKeyPair.publicKey);
+    jwk.use = 'sig';
+    jwk.kid = 'test-client-key';
+    const encJwk = await jose.exportJWK(clientEncKeyPair.publicKey);
+    encJwk.use = 'enc';
+    encJwk.kid = 'client-enc-key';
     const jkt = await jose.calculateJwkThumbprint(jwk);
 
     // 0. Mocks
@@ -29,6 +37,15 @@ describe('Token Exchange Integration', () => {
       privateKey: serverKeyPair.privateKey,
       publicKey: await jose.exportJWK(serverKeyPair.publicKey)
     }));
+
+    spyOn(require('../../src/infra/adapters/client_registry').DrizzleClientRegistry.prototype, 'getClientConfig').mockImplementation(async () => ({
+      clientId: 'test-client',
+      clientSecret: 'secret',
+      redirectUris: ['http://localhost:3000/cb'],
+      jwks: {
+        keys: [jwk, encJwk]
+      }
+    } as any));
 
     spyOn(DrizzleAuthorizationCodeRepository.prototype, 'getByCode').mockImplementation(async (code: string) => {
       if (code === 'valid-code-123') {
@@ -43,13 +60,20 @@ describe('Token Exchange Integration', () => {
           redirectUri: 'http://localhost:3000/cb',
           expiresAt: new Date(Date.now() + 300000),
           used: false,
-          createdAt: new Date()
+          createdAt: new Date(),
+          scope: 'openid uinfin'
         };      }
       return null;
     });
     spyOn(DrizzleAuthorizationCodeRepository.prototype, 'markAsUsed').mockImplementation(async () => {});
     spyOn(DrizzleTokenRepository.prototype, 'saveAccessToken').mockImplementation(async () => {});
     spyOn(DrizzleTokenRepository.prototype, 'saveRefreshToken').mockImplementation(async () => {});
+    spyOn(DrizzleUserInfoRepository.prototype, 'getUserById').mockImplementation(async () => ({
+      id: 'user-123',
+      nric: 'S1234567A',
+      name: 'JOHN DOE',
+      email: 'john@example.com',
+    }));
 
     // 1. Generate DPoP proof
     const dpopProof = await new jose.SignJWT({
@@ -103,6 +127,14 @@ describe('Token Exchange Integration', () => {
     expect(data.access_token).toBeDefined();
     expect(data.id_token).toBeDefined();
     expect(data.token_type).toBe('DPoP');
+
+    // Verify ID Token content (Task T015)
+    const { plaintext } = await jose.compactDecrypt(data.id_token, clientEncKeyPair.privateKey);
+    const jws = new TextDecoder().decode(plaintext);
+    const payload = jose.decodeJwt(jws);
+    expect(payload.uinfin).toBe('S1234567A');
+    expect(payload.sub_attributes).toBeDefined();
+    expect((payload.sub_attributes as any).identity_number).toBe('S1234567A');
   });
 
   test('POST /token should return 400 for missing DPoP header', async () => {

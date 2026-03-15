@@ -1,6 +1,6 @@
 import { lt, and, eq } from 'drizzle-orm';
 import { db } from './client';
-import { parRequests, authCodes, sessions, usedJtis, serverKeys } from './schema';
+import { parRequests, authorizationCodes, sessions, usedJtis, serverKeys } from './schema';
 
 /**
  * Utility to clean up expired records from the database.
@@ -20,9 +20,9 @@ export async function cleanupExpiredRecords(): Promise<{
     .returning({ id: parRequests.id });
 
   // 2. Clean up expired Authorization Codes
-  const authCodeResult = await db.delete(authCodes)
-    .where(lt(authCodes.expiresAt, now))
-    .returning({ id: authCodes.id });
+  const authCodeResult = await db.delete(authorizationCodes)
+    .where(lt(authorizationCodes.expiresAt, now))
+    .returning({ id: authorizationCodes.code });
 
   // 3. Clean up expired Sessions
   const sessionResult = await db.delete(sessions)
