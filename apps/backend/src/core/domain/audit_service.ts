@@ -18,7 +18,8 @@ export type SecurityEventType =
   | 'AUTH_CODE_GENERATED'
   | 'USERINFO_SUCCESS'
   | 'USERINFO_FAILURE'
-  | 'AUTH_TERMINAL_FAILURE';
+  | 'AUTH_TERMINAL_FAILURE'
+  | 'KEY_ROTATION_GENERATE';
 
 export type SecurityEventSeverity = 'INFO' | 'WARN' | 'ERROR';
 

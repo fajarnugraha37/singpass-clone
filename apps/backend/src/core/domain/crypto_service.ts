@@ -1,4 +1,4 @@
-import type { JWK, KeyLike } from 'jose';
+import type { JWK, CryptoKey } from 'jose';
 
 export interface CryptoService {
   /**
@@ -77,5 +77,5 @@ export interface CryptoService {
   /**
    * Returns an active server key for signing or encryption.
    */
-  getActiveKey(): Promise<{ id: string; privateKey: KeyLike; publicKey: JWK }>;
+  getActiveKey(): Promise<{ id: string; privateKey: CryptoKey; publicKey: JWK }>;
 }

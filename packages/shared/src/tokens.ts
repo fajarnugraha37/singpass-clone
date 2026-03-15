@@ -24,6 +24,9 @@ export const tokenErrorResponseSchema = z.object({
     'unsupported_grant_type',
     'invalid_scope',
     'invalid_dpop_proof',
+    'invalid_token',
+    'server_error',
+    'temporarily_unavailable'
   ]),
   error_description: z.string().optional(),
   error_uri: z.string().url().optional(),

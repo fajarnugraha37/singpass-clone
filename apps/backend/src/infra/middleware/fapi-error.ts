@@ -1,5 +1,5 @@
 import { Context, Next } from 'hono';
-import { TokenErrorResponse } from '../../../../packages/shared/src/tokens';
+import { TokenErrorResponse } from '../../../../../packages/shared/src/tokens';
 
 export class FapiError extends Error {
   constructor(

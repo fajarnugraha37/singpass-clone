@@ -140,8 +140,8 @@ export class DrizzleAuthDataService implements AuthDataService {
       codeChallenge,
       codeChallengeMethod: 'S256',
       dpopJkt,
-      loa: session.loa,
-      amr: JSON.stringify(session.amr),
+      // loa: session.loa,
+      // amr: JSON.stringify(session.amr),
       expiresAt,
     });
 

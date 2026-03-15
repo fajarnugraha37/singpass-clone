@@ -1,13 +1,10 @@
 import * as jose from 'jose';
 import type { JWK } from 'jose';
 import type { CryptoService } from '../../core/domain/crypto_service';
-import { db } from '../database/client';
-import * as schema from '../database/schema';
-import { sharedConfig } from '../../../../../packages/shared/src/config';
 import type { ClientRegistry } from '../../core/domain/client_registry';
 import type { SecurityAuditService } from '../../core/domain/audit_service';
 import type { ServerKeyManager } from '../../core/domain/key_manager';
-import { and, eq } from 'drizzle-orm';
+
 /**
  * Production-grade implementation of CryptoService using jose and ServerKeyManager.
  * Follows SOLID principles by delegating key lifecycle to KeyManager.
@@ -135,6 +132,6 @@ export class JoseCryptoService implements CryptoService {
 
   async validateRedirectUri(clientId: string, redirectUri: string): Promise<boolean> {
     const client = await this.clientRegistry.getClientConfig(clientId);
-    return client?.redirectUris.includes(redirectUri) ?? false;
+    return client?.redirectUris?.includes(redirectUri) ?? false;
   }
 }

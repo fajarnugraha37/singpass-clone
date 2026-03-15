@@ -132,6 +132,8 @@ export class TokenExchangeUseCase {
         clientId: authCode.clientId,
         dpopJkt: dpopResult.jkt,
         scope: authCode.scope,
+        loa: authCode.loa,
+        amr: authCode.amr,
         expiresAt: new Date(Date.now() + 30 * 24 * 3600 * 1000), // 30 days
       });
     }

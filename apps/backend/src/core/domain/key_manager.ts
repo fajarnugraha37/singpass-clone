@@ -1,4 +1,4 @@
-import type { JWK, KeyLike } from 'jose';
+import type { JWK, CryptoKey } from 'jose';
 
 export interface KeyRecord {
   id: string;
@@ -24,7 +24,7 @@ export interface ServerKeyManager {
   /**
    * Returns a single active key (private and public).
    */
-  getActiveKey(keyId?: string): Promise<{ id: string; privateKey: KeyLike; publicKey: JWK }>;
+  getActiveKey(keyId?: string): Promise<{ id: string; privateKey: CryptoKey; publicKey: JWK }>;
 
   /**
    * Ensures at least one decryptable active key exists.

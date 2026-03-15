@@ -1,5 +1,5 @@
 import * as jose from 'jose';
-import type { JWK, KeyLike } from 'jose';
+import type { JWK, CryptoKey } from 'jose';
 import { db } from '../../database/client';
 import { serverKeys } from '../../database/schema';
 import { encryptKey, decryptKey } from '../encryption';
@@ -67,7 +67,7 @@ export class DrizzleServerKeyManager implements ServerKeyManager {
     return { keys };
   }
 
-  async getActiveKey(keyId?: string): Promise<{ id: string; privateKey: KeyLike; publicKey: JWK }> {
+  async getActiveKey(keyId?: string): Promise<{ id: string; privateKey: CryptoKey; publicKey: JWK }> {
     const query = keyId
       ? db.select().from(serverKeys).where(eq(serverKeys.id, keyId))
       : db.select().from(serverKeys).where(eq(serverKeys.isActive, true)).orderBy(desc(serverKeys.createdAt));
