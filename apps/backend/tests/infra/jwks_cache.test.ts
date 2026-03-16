@@ -26,14 +26,15 @@ describe('JWKSCacheService', () => {
       } as Response;
     });
 
-    const key = await cacheService.getClientEncryptionKey('client-1', 'https://example.com/jwks');
+    const jwksUri = 'https://example.com/jwks-cache-test';
+    const key = await cacheService.getClientEncryptionKey('client-1', jwksUri);
     expect(key.kid).toBe('key-1');
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls.filter(c => c[0] === jwksUri).length).toBe(1);
 
     // Second call should hit cache
-    const key2 = await cacheService.getClientEncryptionKey('client-1', 'https://example.com/jwks');
+    const key2 = await cacheService.getClientEncryptionKey('client-1', jwksUri);
     expect(key2.kid).toBe('key-1');
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls.filter(c => c[0] === jwksUri).length).toBe(1);
   });
 
   it('should throw error if fetch fails', async () => {
@@ -44,7 +45,7 @@ describe('JWKSCacheService', () => {
       } as Response;
     });
 
-    await expect(cacheService.getClientEncryptionKey('client-1', 'https://example.com/404'))
+    await expect(cacheService.getClientEncryptionKey('client-1', 'https://example.com/404-test'))
       .rejects.toThrow('Failed to fetch JWKS');
   });
 
@@ -56,7 +57,7 @@ describe('JWKSCacheService', () => {
       } as Response;
     });
 
-    await expect(cacheService.getClientEncryptionKey('client-1', 'https://example.com/sig-only'))
+    await expect(cacheService.getClientEncryptionKey('client-1', 'https://example.com/sig-only-test'))
       .rejects.toThrow('No suitable encryption key found');
   });
 
@@ -65,10 +66,11 @@ describe('JWKSCacheService', () => {
       return { ok: true, json: async () => mockJwks } as Response;
     });
 
-    await cacheService.getClientEncryptionKey('client-1', 'https://example.com/jwks');
-    cacheService.invalidate('client-1');
-    await cacheService.getClientEncryptionKey('client-1', 'https://example.com/jwks');
+    const jwksUri = 'https://example.com/jwks-invalidate-test';
+    await cacheService.getClientEncryptionKey('client-invalidate', jwksUri);
+    cacheService.invalidate('client-invalidate');
+    await cacheService.getClientEncryptionKey('client-invalidate', jwksUri);
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls.filter(c => c[0] === jwksUri).length).toBe(2);
   });
 });

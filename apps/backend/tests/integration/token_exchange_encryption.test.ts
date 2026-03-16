@@ -5,7 +5,7 @@ import { DrizzleAuthorizationCodeRepository } from '../../src/infra/adapters/db/
 import { DrizzleTokenRepository } from '../../src/infra/adapters/db/drizzle_token_repository';
 import { JoseCryptoService } from '../../src/infra/adapters/jose_crypto';
 import { DrizzleUserInfoRepository } from '../../src/infra/adapters/db/drizzle_userinfo_repository';
-import { MOCK_CLIENT_REGISTRY } from '../../src/infra/adapters/client_registry';
+import { HARDENED_CLIENT_REGISTRY } from '../../src/infra/adapters/client_registry';
 
 describe('Token Exchange Encryption Integration (mock-client-id)', () => {
   let clientKeyPair: jose.GenerateKeyPairResult;
@@ -24,7 +24,7 @@ describe('Token Exchange Encryption Integration (mock-client-id)', () => {
 
   afterEach(() => {
     // Restore the original enc key in the mock registry
-    const keys = MOCK_CLIENT_REGISTRY['mock-client-id']!.jwks.keys;
+    const keys = HARDENED_CLIENT_REGISTRY['mock-client-id']?.jwks?.keys!;
     if (keys && originalEncKey) {
       const idx = keys.findIndex(k => k.use === 'enc');
       if (idx !== -1) {
@@ -42,10 +42,10 @@ describe('Token Exchange Encryption Integration (mock-client-id)', () => {
     // 0a. Inject test encryption public key into the mock client registry
     //     so we hold the corresponding private key and can decrypt the JWE.
     const encPublicJwk = await jose.exportJWK(encKeyPair.publicKey);
-    const mockClientKeys = MOCK_CLIENT_REGISTRY['mock-client-id']!.jwks.keys;
-    const encKeyIdx = mockClientKeys.findIndex(k => k.use === 'enc');
+    const mockClientKeys = HARDENED_CLIENT_REGISTRY['mock-client-id']?.jwks?.keys!;
+    const encKeyIdx = mockClientKeys?.findIndex(k => k.use === 'enc');
     originalEncKey = { ...mockClientKeys[encKeyIdx] };
-    mockClientKeys[encKeyIdx] = {
+    mockClientKeys[encKeyIdx] = { 
       ...encPublicJwk,
       kid: 'mock-client-enc-key',
       use: 'enc',

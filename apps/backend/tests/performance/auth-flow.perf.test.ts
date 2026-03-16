@@ -9,19 +9,25 @@ describe('Performance Benchmark: Authentication Flow (SC-003)', () => {
   const testUserId = crypto.randomUUID();
 
   beforeAll(async () => {
-    // Check if test user exists
+    // Ensure test user exists with correct password
+    const password = 'test1234';
+    const passwordHash = await Bun.password.hash(password);
+
     const existingUser = await db.query.users.findFirst({
       where: eq(schema.users.nric, 'S1234567A')
     });
 
-    if (!existingUser) {
-      // Seed test user with password 'test1234'
+    if (existingUser) {
+      await db.update(schema.users)
+        .set({ passwordHash })
+        .where(eq(schema.users.nric, 'S1234567A'));
+    } else {
       await db.insert(schema.users).values({
         id: testUserId,
         nric: 'S1234567A',
         name: 'Perf Test User',
         email: 'perf@example.com',
-        passwordHash: '$2a$10$T1YI7B1aZ1z9U9d.4S.o0eL6L.z/U3.Y7VfG3GjA7W9X9qQ2A.K/O' // test1234
+        passwordHash
       });
     }
 
@@ -64,7 +70,7 @@ describe('Performance Benchmark: Authentication Flow (SC-003)', () => {
       },
       body: JSON.stringify({
         username: 'S1234567A',
-        password: 'password123' // Mock logic in ValidateLogin expects password123 currently
+        password: 'test1234' // Seeded password
       })
     });
     

@@ -3,9 +3,21 @@ import app from '../../../src/index'
 import { DrizzlePARRepository } from '../../../src/infra/adapters/db/drizzle_par_repository'
 import { DrizzleAuthSessionRepository } from '../../../src/infra/adapters/db/drizzle_session_repository'
 import { DrizzleAuthorizationCodeRepository } from '../../../src/infra/adapters/db/drizzle_authorization_code_repository'
+import { DrizzleUserInfoRepository } from '../../../src/infra/adapters/db/drizzle_userinfo_repository'
 
 describe('Auth Endpoints', () => {
   beforeEach(() => {
+    // Mock UserInfo repository
+    spyOn(DrizzleUserInfoRepository.prototype, 'getUserByNric').mockImplementation(async (nric: string) => {
+      if (nric === 'S1234567A') {
+        return {
+          userId: 'user-1',
+          passwordHash: await Bun.password.hash('password123'),
+        };
+      }
+      return null;
+    });
+
     // Mock PAR repository to return a valid request for a specific URI
     spyOn(DrizzlePARRepository.prototype, 'getByRequestUri').mockImplementation(async (uri: string) => {
       if (uri === 'urn:ietf:params:oauth:request_uri:valid') {

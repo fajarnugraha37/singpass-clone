@@ -2,10 +2,12 @@ import { expect, test, describe, beforeEach } from 'bun:test'
 import { ValidateLoginUseCase } from '../../../src/core/use-cases/ValidateLogin'
 import type { AuthSessionRepository } from '../../../src/core/domain/session'
 import type { SecurityAuditService } from '../../../src/core/domain/audit_service'
+import type { UserInfoRepository } from '../../../src/core/domain/userinfo_repository'
 
 describe('ValidateLoginUseCase', () => {
   let mockAuthSessionRepository: AuthSessionRepository;
   let mockAuditService: SecurityAuditService;
+  let mockUserRepository: UserInfoRepository;
   let useCase: ValidateLoginUseCase;
 
   beforeEach(() => {
@@ -17,6 +19,7 @@ describe('ValidateLoginUseCase', () => {
             id,
             clientId: 'client-123',
             status: 'INITIATED',
+            retryCount: 0,
             expiresAt: new Date(Date.now() + 300000),
           };
         }
@@ -30,9 +33,22 @@ describe('ValidateLoginUseCase', () => {
       logEvent: async () => {},
     } as any;
 
+    mockUserRepository = {
+      getUserByNric: async (nric: string) => {
+        if (nric === 'S1234567A') {
+          return {
+            userId: 'user-1',
+            passwordHash: await Bun.password.hash('password123'),
+          };
+        }
+        return null;
+      },
+    } as any;
+
     useCase = new ValidateLoginUseCase(
       mockAuthSessionRepository,
-      mockAuditService
+      mockAuditService,
+      mockUserRepository
     );
   });
 
