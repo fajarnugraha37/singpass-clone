@@ -22,7 +22,7 @@ export async function getSigningKey(): Promise<{ key: jose.CryptoKey, kid: strin
 
   // Handle newlines in PEM string (often passed with \n in env)
   const formattedPem = pem.replace(/\\n/g, '\n');
-  cachedPrivateKey = await jose.importPKCS8(formattedPem, 'ES256');
+  cachedPrivateKey = await jose.importPKCS8(formattedPem, 'ES256', { extractable: true });
   
   return { key: cachedPrivateKey, kid: 'server-v1' };
 }
@@ -34,10 +34,14 @@ export async function getSigningKey(): Promise<{ key: jose.CryptoKey, kid: strin
 export async function getPublicJWK(): Promise<jose.JWK> {
   const { key, kid } = await getSigningKey();
   
-  // Export public part to JWK
+  // Export part to JWK
   const jwk = await jose.exportJWK(key);
+  
+  // Security: Ensure private component is NOT included
+  const { d, ...publicJwk } = jwk;
+
   return {
-    ...jwk,
+    ...publicJwk,
     kid,
     use: 'sig',
     alg: 'ES256'

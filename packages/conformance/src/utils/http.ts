@@ -46,7 +46,7 @@ export async function generateDpopHeader(
     .setProtectedHeader({ 
       alg: 'ES256', 
       typ: 'dpop+jwt',
-      jwk: await jose.exportJWK(await jose.importJWK(await jose.exportJWK(privateKey), 'ES256')) // simplified for demo
+      jwk: await jose.exportJWK(privateKey).then(({ d, ...publicJwk }) => publicJwk)
     })
     .sign(privateKey);
   
