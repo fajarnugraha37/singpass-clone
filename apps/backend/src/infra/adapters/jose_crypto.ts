@@ -4,10 +4,14 @@ import type { CryptoService } from '../../core/domain/crypto_service';
 import type { ClientRegistry } from '../../core/domain/client_registry';
 import type { SecurityAuditService } from '../../core/domain/audit_service';
 import type { ServerKeyManager } from '../../core/domain/key_manager';
+import { getSigningKey, getPublicJWK } from '../../core/security/jwt_utils';
 
 /**
  * Production-grade implementation of CryptoService using jose and ServerKeyManager.
  * Follows SOLID principles by delegating key lifecycle to KeyManager.
+ * 
+ * HARDENING: Falls back to Environment Variables (OIDC_PRIVATE_KEY) for production deployments
+ * to ensure cryptographic keys are never stored in the database if configured via ENV.
  */
 export class JoseCryptoService implements CryptoService {
   private algorithm = 'ES256';
@@ -18,13 +22,21 @@ export class JoseCryptoService implements CryptoService {
     private auditService?: SecurityAuditService
   ) {}
 
+  private async useEnvKeys(): Promise<boolean> {
+    return !!process.env.OIDC_PRIVATE_KEY && !process.env.OIDC_PRIVATE_KEY.includes('-----BEGIN PRIVATE KEY-----\\n...');
+  }
+
   async generateKeyPair(): Promise<{ id: string; privateKey: Uint8Array; publicKey: JWK }> {
-    // This is now primarily used for initial setup or tests.
-    // The privateKey return is for legacy/internal consistency if needed.
+    if (await this.useEnvKeys()) {
+      const { key, kid } = await getSigningKey();
+      const jwk = await getPublicJWK();
+      const exported = await jose.exportPKCS8(key);
+      return { id: kid, privateKey: Buffer.from(exported), publicKey: jwk };
+    }
     const result = await this.keyManager.generateKeyPair();
     const { privateKey } = await this.keyManager.getActiveKey(result.id);
     
-    // Convert KeyLike to Uint8Array for the interface if necessary
+    // Convert CryptoKey to Uint8Array for the interface if necessary
     const exported = await jose.exportPKCS8(privateKey);
     return {
       id: result.id,
@@ -34,6 +46,14 @@ export class JoseCryptoService implements CryptoService {
   }
 
   async sign(payload: Record<string, any>, keyId?: string): Promise<string> {
+    if (await this.useEnvKeys()) {
+      const { key, kid } = await getSigningKey();
+      return await new jose.SignJWT(payload)
+        .setProtectedHeader({ alg: this.algorithm, kid })
+        .setIssuedAt()
+        .setExpirationTime('1h')
+        .sign(key);
+    }
     const { id: kid, privateKey } = await this.keyManager.getActiveKey(keyId);
     
     return await new jose.SignJWT(payload)
@@ -48,13 +68,24 @@ export class JoseCryptoService implements CryptoService {
     clientPublicKey: JWK,
     serverKeyId?: string
   ): Promise<string> {
-    const { id: kid, privateKey } = await this.keyManager.getActiveKey(serverKeyId);
+    let signingKey: jose.CryptoKey;
+    let kid: string;
+
+    if (await this.useEnvKeys()) {
+      const envKey = await getSigningKey();
+      signingKey = envKey.key;
+      kid = envKey.kid;
+    } else {
+      const activeKey = await this.keyManager.getActiveKey(serverKeyId);
+      signingKey = activeKey.privateKey;
+      kid = activeKey.id;
+    }
 
     // 1. Sign (JWS)
     const jws = await new jose.SignJWT(payload)
       .setProtectedHeader({ alg: this.algorithm, kid })
       .setIssuedAt()
-      .sign(privateKey);
+      .sign(signingKey);
 
     // 2. Encrypt (JWE)
     const encryptionAlg = (clientPublicKey.alg as string) || 'ECDH-ES+A256KW';
@@ -96,7 +127,18 @@ export class JoseCryptoService implements CryptoService {
 
 
   async generateDPoPNonce(clientId: string): Promise<string> {
-    const { id: kid, privateKey } = await this.keyManager.getActiveKey();
+    let signingKey: jose.CryptoKey;
+    let kid: string;
+
+    if (await this.useEnvKeys()) {
+      const envKey = await getSigningKey();
+      signingKey = envKey.key;
+      kid = envKey.kid;
+    } else {
+      const activeKey = await this.keyManager.getActiveKey();
+      signingKey = activeKey.privateKey;
+      kid = activeKey.id;
+    }
     
     // Production grade: include more context in the nonce if needed, 
     // but typically a signed JWT with clientId and short expiry is standard for DPoP.
@@ -104,11 +146,11 @@ export class JoseCryptoService implements CryptoService {
       .setProtectedHeader({ alg: this.algorithm, kid })
       .setIssuedAt()
       .setExpirationTime('15m')
-      .sign(privateKey);
+      .sign(signingKey);
   }
 
   async validateDPoPNonce(nonce: string, clientId: string): Promise<boolean> {
-    const { keys } = await this.keyManager.getPublicJWKS();
+    const { keys } = await this.getPublicJWKS();
     
     for (const jwk of keys) {
       try {
@@ -121,10 +163,24 @@ export class JoseCryptoService implements CryptoService {
   }
 
   // Delegated methods
-  async getPublicJWKS() { return this.keyManager.getPublicJWKS(); }
-  async ensureActiveKey() { return this.keyManager.ensureActiveKey(); }
-  async rotateKeys() { return this.keyManager.rotateKeys(); }
-  async getActiveKey(keyId?: string) { return this.keyManager.getActiveKey(keyId); }
+  async getPublicJWKS() { 
+    if (await this.useEnvKeys()) {
+      const jwk = await getPublicJWK();
+      return { keys: [jwk] };
+    }
+    return this.keyManager.getPublicJWKS(); 
+  }
+  async ensureActiveKey() { if (!(await this.useEnvKeys())) return this.keyManager.ensureActiveKey(); }
+  async rotateKeys() { if (!(await this.useEnvKeys())) return this.keyManager.rotateKeys(); }
+  
+  async getActiveKey(keyId?: string) { 
+    if (await this.useEnvKeys()) {
+      const { key, kid } = await getSigningKey();
+      const jwk = await getPublicJWK();
+      return { id: kid, privateKey: key as jose.CryptoKey, publicKey: jwk };
+    }
+    return this.keyManager.getActiveKey(keyId); 
+  }
   
   async calculateThumbprint(jwk: JWK): Promise<string> {
     return await jose.calculateJwkThumbprint(jwk);

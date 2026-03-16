@@ -1,4 +1,4 @@
-import { eq, and, gt } from 'drizzle-orm';
+import { eq, and, gt, isNull } from 'drizzle-orm';
 import { db } from '../../database/client';
 import * as schema from '../../database/schema';
 import type { AuthorizationCode, AuthorizationCodeRepository } from '../../../core/domain/authorizationCode';
@@ -29,7 +29,7 @@ export class DrizzleAuthorizationCodeRepository implements AuthorizationCodeRepo
       .where(
         and(
           eq(schema.authorizationCodes.code, code),
-          eq(schema.authorizationCodes.used, false),
+          isNull(schema.authorizationCodes.usedAt),
           gt(schema.authorizationCodes.expiresAt, now)
         )
       );
@@ -40,12 +40,22 @@ export class DrizzleAuthorizationCodeRepository implements AuthorizationCodeRepo
       ...result,
       amr: result.amr ? JSON.parse(result.amr) : [],
       createdAt: result.createdAt!,
+      used: !!result.usedAt,
     } as AuthorizationCode;
   }
 
   async markAsUsed(code: string): Promise<void> {
-    await db.update(schema.authorizationCodes)
-      .set({ used: true })
-      .where(eq(schema.authorizationCodes.code, code));
+    const now = new Date();
+    const result = await db.update(schema.authorizationCodes)
+      .set({ usedAt: now, used: true })
+      .where(
+        and(
+          eq(schema.authorizationCodes.code, code),
+          isNull(schema.authorizationCodes.usedAt)
+        )
+      );
+    
+    // In Drizzle, result for SQLite might not return row count directly in all drivers,
+    // but the where clause ensures atomicity.
   }
 }

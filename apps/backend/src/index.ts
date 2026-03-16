@@ -34,6 +34,7 @@ import { sharedConfig } from '../../../packages/shared/src/config';
 import { DrizzleServerKeyManager } from './infra/adapters/db/drizzle_key_manager';
 import { swaggerUI } from '@hono/swagger-ui';
 import { openapiSpec } from './infra/http/openapi-spec';
+import { fapiHeaders } from './infra/middleware/fapi-headers';
 
 const auditService = new DrizzleSecurityAuditService();
 const keyManager = new DrizzleServerKeyManager(auditService);
@@ -88,7 +89,7 @@ const userinfoRouter = createUserinfoRouter(
 );
 
 const initiateAuthSessionUseCase = new InitiateAuthSessionUseCase(authSessionRepository, parRepository, auditService);
-const validateLoginUseCase = new ValidateLoginUseCase(authSessionRepository, auditService);
+const validateLoginUseCase = new ValidateLoginUseCase(authSessionRepository, auditService, userInfoRepository);
 const generateAuthCodeUseCase = new GenerateAuthCodeUseCase(authCodeRepository, authSessionRepository, parRepository, auditService);
 const validate2FAUseCase = new Validate2FAUseCase(authSessionRepository, auditService, generateAuthCodeUseCase);
 
@@ -102,6 +103,7 @@ const authRouter = createAuthRouter(
   sharedConfig.OIDC.ISSUER
 );
 const api = new Hono()
+  .use('*', fapiHeaders)
   .get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
   .post('/par', registerPar(registerParUseCase))
   .post('/token', exchangeToken(tokenExchangeUseCase))
@@ -133,8 +135,10 @@ const app = new Hono()
   // UserInfo (aligned with Myinfo v5)
   .route('/userinfo', userinfoRouter)
   // Public OIDC Endpoints at Root
+  .use('/.well-known/*', fapiHeaders)
   .get('/.well-known/openid-configuration', getDiscoveryDocument)
   .get('/.well-known/keys', getJWKS(cryptoService))
+  .use('/token', fapiHeaders)
   .post('/token', exchangeToken(tokenExchangeUseCase));
 
 app

@@ -1,10 +1,11 @@
+import { sharedConfig } from '@vibe/shared/config';
+import { validateRedirectUri } from '../auth/validation';
 import * as jose from 'jose';
-import type { CryptoService } from '../domain/crypto_service';
-import type { PARRepository, PARResponse, PushedAuthorizationRequest } from '../domain/par.types';
-import type { SecurityAuditService } from '../domain/audit_service';
-import { sharedConfig } from '../../../../../packages/shared/src/config';
-import type { ClientRegistry } from '../domain/client_registry';
-import type { DPoPValidator } from '../utils/dpop_validator';
+import { SecurityAuditService } from '../domain/audit_service';
+import { ClientRegistry } from '../domain/client_registry';
+import { CryptoService } from '../domain/crypto_service';
+import { PARRepository, PARResponse, PushedAuthorizationRequest } from '../domain/par.types';
+import { DPoPValidator } from '../utils/dpop_validator';
 
 export class RegisterParUseCase {
   constructor(
@@ -80,13 +81,22 @@ export class RegisterParUseCase {
     }
 
     // 3.1 Validate redirect_uri against client configuration
-    if (!client.redirectUris || !client.redirectUris.includes(redirect_uri)) {
+    if (!validateRedirectUri(client.redirectUris || [], redirect_uri)) {
       throw new Error('redirect_uri is not registered');
     }
 
-    const publicKey = client.jwks?.keys[0]; // Simplified for now
+    // 3.2 Find the correct public key for signature verification
+    const decodedHeader = jose.decodeProtectedHeader(client_assertion);
+    const kid = decodedHeader.kid;
+    
+    const publicKey = client.jwks?.keys.find(k => {
+      const matchKid = kid ? k.kid === kid : true;
+      const matchUse = k.use === 'sig' || k.key_ops?.includes('verify') || (!k.use && !k.key_ops);
+      return matchKid && matchUse;
+    });
+    
     if (!publicKey) {
-      throw new Error('Client has no registered keys');
+      throw new Error(kid ? `Client key with kid "${kid}" not found` : 'Client has no registered signing keys');
     }
 
     // --- Start Context Validation (US1, US2, US3) ---

@@ -23,7 +23,7 @@ export interface IDTokenClaims extends jose.JWTPayload {
  */
 export async function signIDToken(
   payload: IDTokenClaims,
-  privateKey: jose.KeyLike | Uint8Array,
+  privateKey: jose.CryptoKey | Uint8Array,
   kid: string,
   alg: string = 'ES256'
 ): Promise<string> {
@@ -38,7 +38,7 @@ export async function signIDToken(
  */
 export async function encryptIDToken(
   jws: string,
-  clientPublicKey: jose.KeyLike | jose.JWK,
+  clientPublicKey: jose.CryptoKey | jose.JWK,
   alg: string = 'ECDH-ES+A256KW',
   enc: string = 'A256GCM'
 ): Promise<string> {
@@ -49,7 +49,7 @@ export async function encryptIDToken(
 
   return await new jose.CompactEncrypt(new TextEncoder().encode(jws))
     .setProtectedHeader({ alg, enc, typ: 'JWT' })
-    .encrypt(publicKey as jose.KeyLike);
+    .encrypt(publicKey as jose.CryptoKey);
 }
 
 /**
@@ -57,9 +57,9 @@ export async function encryptIDToken(
  */
 export async function generateEncryptedIDToken(
   payload: IDTokenClaims,
-  serverPrivateKey: jose.KeyLike | Uint8Array,
+  serverPrivateKey: jose.CryptoKey | Uint8Array,
   serverKid: string,
-  clientPublicKey: jose.KeyLike | jose.JWK,
+  clientPublicKey: jose.CryptoKey | jose.JWK,
   signingAlg: string = 'ES256',
   encryptionAlg: string = 'ECDH-ES+A256KW',
   encryptionEnc: string = 'A256GCM'

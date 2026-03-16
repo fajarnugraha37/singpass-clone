@@ -113,10 +113,12 @@ export const authorizationCodes = sqliteTable('authorization_codes', {
   dpopJkt: text('dpop_jkt').notNull(),
   scope: text('scope').notNull(),
   nonce: text('nonce'),
+  state: text('state'),
   loa: integer('loa').default(0).notNull(),
   amr: text('amr'), // Stringified JSON array
   redirectUri: text('redirect_uri').notNull(),
   expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
   used: integer('used', { mode: 'boolean' }).default(false).notNull(),
+  usedAt: integer('used_at', { mode: 'timestamp' }),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 });

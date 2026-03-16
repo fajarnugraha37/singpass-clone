@@ -1,14 +1,13 @@
-import type { ClientRegistry, ClientConfig } from '../../core/domain/client_registry';
+import type { ClientConfig } from '../../../src/core/domain/client_registry';
 
 /**
- * Hardened Client Registry.
- * In a full production system, this would query a database table 'clients'.
- * For this implementation, it uses a configured list of allowed clients.
+ * Mock registry for testing purposes only.
+ * This should NOT be used in production.
  */
-export const HARDENED_CLIENT_REGISTRY: Record<string, ClientConfig> = {
+export const MOCK_CLIENT_REGISTRY: Record<string, ClientConfig> = {
   'mock-client-id': {
     clientId: 'mock-client-id',
-    clientName: 'Hardened Client Application',
+    clientName: 'Mock Client Application',
     appType: 'Login',
     redirectUris: ['http://localhost:3000/callback'],
     jwks: {
@@ -36,7 +35,7 @@ export const HARDENED_CLIENT_REGISTRY: Record<string, ClientConfig> = {
   },
   'test-client': {
     clientId: 'test-client',
-    clientName: 'Production Test Client',
+    clientName: 'Test Client',
     appType: 'Myinfo',
     redirectUris: ['http://localhost:3000/cb'],
     jwks: {
@@ -63,10 +62,3 @@ export const HARDENED_CLIENT_REGISTRY: Record<string, ClientConfig> = {
     },
   },
 };
-
-export class DrizzleClientRegistry implements ClientRegistry {
-  async getClientConfig(clientId: string): Promise<ClientConfig | null> {
-    return HARDENED_CLIENT_REGISTRY[clientId] || null;
-  }
-}
-

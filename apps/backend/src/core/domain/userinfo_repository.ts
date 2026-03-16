@@ -28,4 +28,9 @@ export interface UserInfoRepository {
    * Retrieves full Myinfo profile for the user.
    */
   getMyinfoProfile(userId: string): Promise<MyinfoPerson | null>;
+
+  /**
+   * Retrieves user by NRIC.
+   */
+  getUserByNric(nric: string): Promise<UserData | null>;
 }

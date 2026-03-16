@@ -5,6 +5,7 @@ import { JWKSCacheService } from '../../infra/adapters/jwks_cache';
 import { ClientRegistry } from '../domain/client_registry';
 import { SecurityAuditService } from '../domain/audit_service';
 import { mapMyinfoProfile } from '../../application/mappers/myinfo-mapper';
+import { filterPersonByScopes } from '../myinfo/scope_mapper';
 
 export interface GetUserInfoRequest {
   accessToken: string;
@@ -57,10 +58,14 @@ export class GetUserInfoUseCase {
         throw new Error('invalid_token');
       }
 
-      // 5. Map Myinfo domain entity to the person_info format
-      const personInfo = mapMyinfoProfile(person);
+      // 5. Data Minimization: Filter by authorized scopes
+      const scopes = tokenData?.scope?.split(' ') || [];
+      const filteredPerson = filterPersonByScopes(person, scopes);
 
-      // 6. Construct the OIDC Userinfo claims payload
+      // 6. Map filtered domain entity to the person_info format
+      const personInfo = mapMyinfoProfile(filteredPerson as any);
+
+      // 7. Construct the OIDC Userinfo claims payload
       const claims = {
         sub: person.userId,
         iss: issuer,

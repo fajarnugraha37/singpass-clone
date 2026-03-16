@@ -28,6 +28,7 @@ export interface UserData {
   name: string;
   email: string;
   mobileno: string | null;
+  passwordHash?: string;
 }
 
 /**

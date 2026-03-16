@@ -1,5 +1,6 @@
 import type { AuthSessionRepository } from '../domain/session';
 import type { SecurityAuditService } from '../domain/audit_service';
+import type { UserInfoRepository } from '../domain/userinfo_repository';
 import { sharedConfig } from '@vibe/shared/config';
 
 export interface ValidateLoginInput {
@@ -18,7 +19,8 @@ export interface ValidateLoginOutput {
 export class ValidateLoginUseCase {
   constructor(
     private authSessionRepository: AuthSessionRepository,
-    private auditService: SecurityAuditService
+    private auditService: SecurityAuditService,
+    private userRepository: UserInfoRepository
   ) {}
 
   async execute(input: ValidateLoginInput): Promise<ValidateLoginOutput> {
@@ -41,9 +43,13 @@ export class ValidateLoginUseCase {
       return { success: false, error: 'Authentication failed permanently', status: 'FAILED' };
     }
 
-    // 2. Validate credentials (Mock for MVP)
-    // In a real app, this would use a UserRepository and PasswordHasher
-    const isValid = username === 'S1234567A' && password === 'password123';
+    // 2. Validate credentials against Database
+    const user = await this?.userRepository?.getUserByNric(username);
+    let isValid = false;
+
+    if (user && user.passwordHash) {
+      isValid = await Bun.password.verify(password, user.passwordHash);
+    }
 
     if (!isValid) {
       session.retryCount++;

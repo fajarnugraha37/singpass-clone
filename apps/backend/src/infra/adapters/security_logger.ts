@@ -3,27 +3,9 @@ import { db } from '../database/client';
 import { securityAuditLog } from '../database/schema';
 import { eq } from 'drizzle-orm';
 
-export class DrizzleSecurityAuditService implements SecurityAuditService {
-  /**
-   * Masks sensitive information in event details.
-   */
-  private maskSecrets(details?: Record<string, any>): Record<string, any> | undefined {
-    if (!details) return details;
-    
-    const masked = { ...details };
-    const secretKeys = ['client_assertion', 'code', 'token', 'access_token', 'refresh_token', 'password', 'client_secret'];
-    
-    for (const key of Object.keys(masked)) {
-      if (secretKeys.includes(key.toLowerCase()) && typeof masked[key] === 'string') {
-        masked[key] = '***MASKED***';
-      } else if (typeof masked[key] === 'object' && masked[key] !== null) {
-        masked[key] = this.maskSecrets(masked[key]);
-      }
-    }
-    
-    return masked;
-  }
+import { mask } from '../../utils/logger';
 
+export class DrizzleSecurityAuditService implements SecurityAuditService {
   /**
    * Records a security event to both persistent storage (SQLite) and application logs (console).
    */
@@ -35,7 +17,7 @@ export class DrizzleSecurityAuditService implements SecurityAuditService {
     ipAddress?: string;
   }): Promise<void> {
     const timestamp = new Date();
-    const maskedDetails = this.maskSecrets(event.details);
+    const maskedDetails = mask(event.details);
     
     // 1. Structured Application Log (Console)
     const logOutput = {

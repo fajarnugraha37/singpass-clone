@@ -24,7 +24,7 @@
         "@hono/swagger-ui": "^0.6.1",
         "@hono/zod-openapi": "^1.2.2",
         "@hono/zod-validator": "latest",
-        "@libsql/client": "latest",
+        "@libsql/client": "^0.17.0",
         "@vibe/shared": "^3.1.0",
         "croner": "^10.0.1",
         "drizzle-orm": "latest",

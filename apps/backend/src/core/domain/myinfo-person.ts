@@ -1,4 +1,4 @@
-import { MyinfoPerson as SharedMyinfoPerson } from '@vibe/shared';
+import { MyinfoPerson as SharedMyinfoPerson } from '@vibe/shared/index';
 
 /**
  * Domain entity for Myinfo Person data.

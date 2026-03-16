@@ -66,4 +66,26 @@ export class DrizzleUserInfoRepository implements UserInfoRepository {
 
     return result.data as MyinfoPerson;
   }
+
+  /**
+   * Retrieves user by NRIC.
+   */
+  async getUserByNric(nric: string): Promise<UserData | null> {
+    const [result] = await db
+      .select()
+      .from(users)
+      .where(eq(users.nric, nric))
+      .limit(1);
+
+    if (!result) return null;
+
+    return {
+      id: result.id,
+      nric: result.nric || '',
+      name: result.name,
+      email: result.email || '',
+      mobileno: result.mobileno,
+      passwordHash: result.passwordHash || undefined,
+    };
+  }
 }
