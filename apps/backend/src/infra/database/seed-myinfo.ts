@@ -1,106 +1,137 @@
 import { db } from './client';
 import { users, myinfoProfiles } from './schema';
 import { createEmptyMyinfoPerson } from '../../core/domain/myinfo-person';
+import { faker } from '@faker-js/faker';
+import NRIC from 'singapore-nric';
+import { MyinfoChildBirthRecord } from '@vibe/shared/index';
+import { eq } from 'drizzle-orm';
 
 async function seed() {
   console.log('🌱 Seeding Myinfo mock users...');
 
-  // 1. Create a mock user
-  const nric = 'S1234567A';
+  // Configuration for seeding
+  const SEED_COUNT = 10;
   const passwordHash = await Bun.password.hash('test1234');
 
-  // Check if user exists
-  const existingUser = await db.query.users.findFirst({
-    where: (users, { eq }) => eq(users.nric, nric),
-  });
+  for (let i = 0; i < SEED_COUNT; i++) {
+    // 1. Generate random identity
+    const isMale = faker.datatype.boolean();
+    const firstName = faker.person.firstName(isMale ? 'male' : 'female');
+    const lastName = faker.person.lastName();
+    const fullName = `${firstName} ${lastName} TAN`.toUpperCase();
+    const nric = NRIC.Generate().toString();
+    const email = faker.internet.email({ firstName, lastName }).toLowerCase();
 
-  let userId: string;
-
-  if (existingUser) {
-    console.log(`User ${nric} already exists. Updating password.`);
-    await db.update(users).set({ passwordHash }).where((u, { eq }) => eq(u.id, existingUser.id));
-    userId = existingUser.id;
-  } else {
-    const [user] = await db.insert(users).values({
-      nric,
-      name: 'JOHN DOE TAN',
-      email: 'john.doe@example.com',
-      mobileno: '+6591234567',
-      passwordHash,
-    }).returning();
-    userId = user.id;
-    console.log(`✅ Created user: ${user.name} (${user.nric})`);
-  }
-
-  // 2. Create Myinfo profile for the user
-  const person = createEmptyMyinfoPerson(userId);
-  
-  // Personal Data
-  person.uinfin.value = nric;
-  person.name.value = 'JOHN DOE TAN';
-  person.sex.value = 'M';
-  person.race.value = 'CH';
-  person.dob.value = '1990-01-01';
-  person.residentialstatus.value = 'C';
-  person.nationality.value = 'SG';
-  person.birthcountry.value = 'SG';
-  person.email.value = 'john.doe@example.com';
-  person.mobileno = {
-    prefix: { value: '+' },
-    areacode: { value: '65' },
-    nbr: { value: '91234567' },
-  };
-  person.regadd = {
-    type: { value: 'SG' },
-    block: { value: '123' },
-    building: { value: 'MYINFO TOWERS' },
-    floor: { value: '10' },
-    unit: { value: '101' },
-    street: { value: 'SINGAPORE STREET' },
-    postal: { value: '123456' },
-    country: { value: 'SG' },
-  };
-
-  // Finance Data
-  if (person.finance) {
-    person.finance['cpfbalances.oa'].value = 50000.50;
-    person.finance['cpfbalances.ma'].value = 30000.25;
-    person.finance['cpfbalances.ra'].value = 0;
-    person.finance['cpfbalances.sa'].value = 20000.75;
-    person.finance.cpfcontributions = [
-      { date: { value: '2024-02-01' }, amount: { value: 1200.50 } as any, employer: { value: 'MOCK CORP' } },
-      { date: { value: '2024-01-01' }, amount: { value: 1200.50 } as any, employer: { value: 'MOCK CORP' } },
-    ] as any;
-    person.finance['noa-basic'] = {
-      amount: { value: 80000 } as any,
-      yearofassessment: { value: '2023' },
-    };
-    person.finance.ownerprivate.value = 'N';
-  }
-
-  // Family Data
-  if (person.family) {
-    person.family.marital.value = '2'; // Married
-    person.family.marriagedate.value = '2015-05-20';
-    person.family.childrenbirthrecords = [
-      { birthcertno: { value: 'T1234567A' }, name: { value: 'BABY DOE' }, dob: { value: '2020-01-01' }, sex: { value: 'M' }, lifestatus: { value: '1' } }
-    ];
-  }
-
-  // Check if profile exists
-  const existingProfile = await db.query.myinfoProfiles.findFirst({
-    where: (profiles, { eq }) => eq(profiles.userId, userId),
-  });
-
-  if (existingProfile) {
-    console.log(`Profile for ${nric} already exists. Updating data.`);
-    await db.update(myinfoProfiles).set({ data: person }).where((p, { eq }) => eq(p.userId, userId));
-  } else {
-    await db.insert(myinfoProfiles).values({
-      userId,
-      data: person,
+    // Check if user exists
+    const existingUser = await db.query.users.findFirst({
+      where: (users, { eq }) => eq(users.nric, nric),
     });
-    console.log(`✅ Created Myinfo profile for ${nric}`);
+
+    let userId: string;
+
+    if (existingUser) {
+      console.log(`User ${nric} already exists. Skipping user creation.`);
+      userId = existingUser.id;
+    } else {
+      const [user] = await db.insert(users).values({
+        nric,
+        name: fullName,
+        email,
+        mobileno: `+65${faker.string.numeric(8)}`,
+        passwordHash,
+      }).returning();
+      userId = user.id;
+      console.log(`✅ [${i + 1}/${SEED_COUNT}] Created user: ${fullName} (${nric})`);
+    }
+
+    // 2. Create Myinfo profile for the user
+    const person = createEmptyMyinfoPerson(userId);
+    
+    // Personal Data
+    person.uinfin.value = nric;
+    person.name.value = fullName;
+    person.sex.value = isMale ? 'M' : 'F';
+    person.race.value = faker.helpers.arrayElement(['CH', 'ML', 'IN', 'OT']);
+    person.dob.value = faker.date.birthdate({ min: 18, max: 65, mode: 'age' }).toISOString().split('T')[0];
+    person.residentialstatus.value = faker.helpers.arrayElement(['C', 'P', 'F']);
+    person.nationality.value = 'SG';
+    person.birthcountry.value = 'SG';
+    person.email.value = email;
+    person.mobileno = {
+      prefix: { value: '+' },
+      areacode: { value: '65' },
+      nbr: { value: faker.string.numeric(8) },
+    };
+    
+    const block = faker.location.buildingNumber();
+    const street = faker.location.street().toUpperCase();
+    const building = faker.company.name().toUpperCase() + ' BUIDLING';
+    const postal = faker.location.zipCode('######');
+
+    person.regadd = {
+      type: { value: 'SG' },
+      block: { value: block },
+      building: { value: building },
+      floor: { value: faker.string.numeric(2) },
+      unit: { value: faker.string.numeric(3) },
+      street: { value: street },
+      postal: { value: postal },
+      country: { value: 'SG' },
+    };
+
+    // Finance Data
+    if (person.finance) {
+      person.finance['cpfbalances.oa'].value = parseFloat(faker.finance.amount({ min: 10000, max: 100000 }));
+      person.finance['cpfbalances.ma'].value = parseFloat(faker.finance.amount({ min: 5000, max: 50000 }));
+      person.finance['cpfbalances.ra'].value = 0;
+      person.finance['cpfbalances.sa'].value = parseFloat(faker.finance.amount({ min: 5000, max: 60000 }));
+      
+      person.finance.cpfcontributions = Array.from({ length: 3 }).map(() => ({
+        date: { value: faker.date.recent().toISOString().split('T')[0] },
+        amount: { value: parseFloat(faker.finance.amount({ min: 500, max: 3000 })) },
+        employer: { value: faker.company.name().toUpperCase() },
+      }));
+
+      person.finance['noa-basic'] = {
+        amount: { value: parseFloat(faker.finance.amount({ min: 30000, max: 150000 })) },
+        yearofassessment: { value: '2023' },
+      };
+      person.finance.ownerprivate.value = faker.helpers.arrayElement(['Y', 'N']);
+    }
+
+    // Family Data
+    if (person.family) {
+      const isMarried = faker.datatype.boolean();
+      person.family.marital.value = isMarried ? '2' : '1';
+      person.family.marriagedate.value = isMarried ? faker.date.past({ years: 10 }).toISOString().split('T')[0] : null;
+      
+      if (isMarried && faker.datatype.boolean()) {
+        person.family.childrenbirthrecords = Array.from({ length: faker.number.int({ min: 1, max: 3 }) }).map(() => ({
+          birthcertno: { value: NRIC.Generate().toString() },
+          name: { value: `${faker.person.firstName().toUpperCase()} ${lastName} TAN` },
+          dob: { value: faker.date.past({ years: 15 }).toISOString().split('T')[0] },
+          sex: { value: faker.helpers.arrayElement(['M', 'F']) },
+          lifestatus: { value: '1' }
+        } satisfies MyinfoChildBirthRecord));
+      }
+    }
+
+    // Check if profile exists
+    const existingProfile = await db.query.myinfoProfiles.findFirst({
+      where: (profiles, { eq }) => eq(profiles.userId, userId),
+    });
+
+    if (existingProfile) {
+      await db.update(myinfoProfiles)
+        .set({ data: person, updatedAt: new Date() })
+        // .where((p, { eq }) => eq(p.userId, userId))
+        .where(eq(myinfoProfiles.id, userId));
+    } else {
+      await db.insert(myinfoProfiles).values({
+        userId,
+        data: person,
+      });
+    }
   }
 
   console.log('✨ Seeding complete!');

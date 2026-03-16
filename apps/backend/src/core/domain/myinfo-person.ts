@@ -1,11 +1,28 @@
-import { MyinfoPerson as SharedMyinfoPerson } from '@vibe/shared/index';
+import { 
+  MyinfoPersonal,
+  MyinfoFinance,
+  MyinfoEducation,
+  MyinfoFamily,
+  MyinfoVehicle,
+  MyinfoDrivingLicence,
+  MyinfoProperty,
+  MyinfoGovernmentScheme
+} from '@vibe/shared/index';
 
 /**
  * Domain entity for Myinfo Person data.
- * Extends the shared MyinfoPerson interface.
+ * This entity groups catalogs into nested objects to align with internal 
+ * logical grouping before being flattened by the mapper.
  */
-export interface MyinfoPerson extends SharedMyinfoPerson {
+export interface MyinfoPerson extends MyinfoPersonal {
   userId: string;
+  finance: MyinfoFinance;
+  education: MyinfoEducation;
+  family: MyinfoFamily;
+  vehicle: MyinfoVehicle;
+  drivingLicence: MyinfoDrivingLicence;
+  property: MyinfoProperty;
+  governmentScheme: MyinfoGovernmentScheme;
 }
 
 /**
