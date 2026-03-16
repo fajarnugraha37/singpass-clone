@@ -13,6 +13,7 @@ describe('UserInfo Integration', () => {
   let serverKeyPair: jose.GenerateKeyPairResult;
 
   beforeAll(async () => {
+    process.env.OIDC_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgnR+Nq5tCtTsK4JKkRkE0pEz5m/g4wGPFKnmTyXQdDYmhRANCAARhPRVqIx49NaukvjDCoqLkMmINj4BaHrFh5gZVJtbhWNTCJjR3EBVQg7MwYUEVs9vLKcyDIIxgVjaPxB39o/FY\n-----END PRIVATE KEY-----';
     clientKeyPair = await jose.generateKeyPair('ES256');
     clientEncKeyPair = await jose.generateKeyPair('ECDH-ES+A256KW');
     serverKeyPair = await jose.generateKeyPair('ES256');

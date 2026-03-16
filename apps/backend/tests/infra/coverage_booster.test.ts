@@ -14,6 +14,9 @@ describe('Coverage Booster', () => {
     let mockClientRegistry: any;
 
     beforeEach(async () => {
+      // Set a non-placeholder value to avoid getSigningKey throwing
+      process.env.OIDC_PRIVATE_KEY = '-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgnR+Nq5tCtTsK4JKkRkE0pEz5m/g4wGPFKnmTyXQdDYmhRANCAARhPRVqIx49NaukvjDCoqLkMmINj4BaHrFh5gZVJtbhWNTCJjR3EBVQg7MwYUEVs9vLKcyDIIxgVjaPxB39o/FY\n-----END PRIVATE KEY-----'; 
+
       const { publicKey, privateKey } = await jose.generateKeyPair('ES256', { extractable: true });
       mockClientRegistry = {
         getClientConfig: async (clientId: string) => ({
@@ -27,13 +30,15 @@ describe('Coverage Booster', () => {
         generateKeyPair: mock(async () => ({ id: 'test-id', publicKey: await jose.exportJWK(publicKey) })),
         getActiveKey: mock(async () => ({ id: 'test-id', privateKey, publicKey: await jose.exportJWK(publicKey) })),
         getPublicJWKS: mock(async () => ({ keys: [await jose.exportJWK(publicKey)] })),
+        ensureActiveKey: mock(async () => {}),
+        rotateKeys: mock(async () => {}),
       };
       cryptoService = new JoseCryptoService(mockKeyManager, mockClientRegistry);
     });
 
     it('should generate key pair', async () => {
       const result = await cryptoService.generateKeyPair();
-      expect(result.id).toBe('test-id');
+      expect(result.id).toBe('server-v1');
       expect(result.privateKey).toBeDefined();
     });
 
@@ -54,9 +59,15 @@ describe('Coverage Booster', () => {
     });
 
     it('should delegate simple methods', async () => {
-      await cryptoService.getPublicJWKS();
-      await cryptoService.getActiveKey();
-      expect(mockKeyManager.getPublicJWKS).toHaveBeenCalled();
+      const original = process.env.OIDC_PRIVATE_KEY;
+      delete process.env.OIDC_PRIVATE_KEY;
+      try {
+        await cryptoService.getPublicJWKS();
+        await cryptoService.getActiveKey();
+        expect(mockKeyManager.getPublicJWKS).toHaveBeenCalled();
+      } finally {
+        process.env.OIDC_PRIVATE_KEY = original;
+      }
     });
   });
 
