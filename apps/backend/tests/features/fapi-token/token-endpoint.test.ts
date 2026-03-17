@@ -7,7 +7,7 @@ import { exchangeToken } from '../../../src/infra/http/controllers/token.control
 import { FapiErrors, FapiError } from '../../../src/infra/middleware/fapi-error';
 
 // Mock dependencies and use case
-const mockTokenExchangeUseCase = new TokenExchangeUseCase(null as any, null as any, null as any, null as any, null as any, null as any, null as any);
+const mockTokenExchangeUseCase = new TokenExchangeUseCase(null as any, null as any, null as any, null as any, null as any, null as any, null as any, null as any);
 
 // Mock Hono app and context
 const app = new Hono();

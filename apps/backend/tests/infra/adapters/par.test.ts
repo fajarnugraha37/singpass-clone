@@ -18,8 +18,8 @@ describe("DrizzleAuthDataService - PAR Lifecycle", () => {
     client_id: 'mock-client-id',
     redirect_uri: 'http://localhost:3000/callback',
     scope: 'openid profile',
-    state: 'random-state',
-    nonce: 'random-nonce',
+    state: 'a'.repeat(30),
+    nonce: 'b'.repeat(30),
     code_challenge: 'challenge',
     code_challenge_method: 'S256',
     client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
@@ -30,7 +30,7 @@ describe("DrizzleAuthDataService - PAR Lifecycle", () => {
     const result = await authDataService.createPAR(validPARPayload);
     
     expect(result.request_uri).toMatch(/^urn:ietf:params:oauth:request_uri:\d+$/);
-    expect(result.expires_in).toBe(300);
+    expect(result.expires_in).toBe(60);
 
     const retrieved = await authDataService.getPAR(result.request_uri);
     expect(retrieved).toBeDefined();

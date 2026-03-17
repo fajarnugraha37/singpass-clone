@@ -11,6 +11,7 @@ export interface PushedAuthorizationRequest {
 export interface PARResponse {
   request_uri: string;
   expires_in: number;
+  dpop_nonce?: string;
 }
 
 export interface ConsumedJti {

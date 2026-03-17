@@ -12,6 +12,7 @@ export interface UserAttributes {
   name: string;
   email?: string;
   mobileno?: string;
+  account_type?: string;
 }
 
 export function mapLoaToAcr(loa: number): string {
@@ -36,7 +37,7 @@ export function buildSubAttributes(user: UserAttributes, scopes: string[]): SubA
       subAttributes.identity_number = user.nric;
     }
     subAttributes.identity_coi = 'SG';
-    subAttributes.account_type = 'standard';
+    subAttributes.account_type = user.account_type || 'standard';
     hasAttributes = true;
   }
 

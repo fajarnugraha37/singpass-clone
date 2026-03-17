@@ -23,6 +23,8 @@ describe('RegisterParUseCase', () => {
     mockCryptoService = {
       validateClientAssertion: async () => true,
       calculateThumbprint: async () => 'test-jkt',
+      generateDPoPNonce: async () => 'test-nonce',
+      validateDPoPNonce: async () => true,
     } as any;
 
     mockPARRepository = {
@@ -68,8 +70,8 @@ describe('RegisterParUseCase', () => {
       redirect_uri: 'https://client.example.com/cb',
       code_challenge: 'challenge',
       code_challenge_method: 'S256',
-      state: 'state',
-      nonce: 'nonce',
+      state: 'a'.repeat(30),
+      nonce: 'b'.repeat(30),
       authentication_context_type: 'APP_AUTHENTICATION_DEFAULT',
     } as any;
 
@@ -77,7 +79,7 @@ describe('RegisterParUseCase', () => {
     
     expect(result).toHaveProperty('request_uri');
     expect(result.request_uri).toMatch(/^urn:ietf:params:oauth:request_uri:/);
-    expect(result).toHaveProperty('expires_in', 300);
+    expect(result).toHaveProperty('expires_in', 60);
   });
 
   test('should fail if client_assertion validation fails', async () => {
@@ -186,8 +188,8 @@ describe('RegisterParUseCase', () => {
       redirect_uri: 'https://client.example.com/cb',
       code_challenge: 'challenge',
       code_challenge_method: 'S256',
-      state: 'state',
-      nonce: 'nonce',
+      state: 'a'.repeat(30),
+      nonce: 'b'.repeat(30),
       authentication_context_type: 'APP_AUTHENTICATION_DEFAULT',
     };
   }

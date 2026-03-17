@@ -26,6 +26,11 @@ export const registerPar = (useCase: RegisterParUseCase) => {
         dpop_header: dpop,
       });
 
+      if (result.dpop_nonce) {
+        c.header('DPoP-Nonce', result.dpop_nonce);
+        delete result.dpop_nonce;
+      }
+
       return c.json(result, 201);
     } catch (error: any) {
       console.error('[PAR] Error:', error);

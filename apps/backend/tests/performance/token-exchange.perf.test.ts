@@ -18,6 +18,8 @@ const mockCryptoService: any = {
     return { id: 'test-kid', privateKey, publicKey: await jose.exportJWK(publicKey) };
   },
   calculateThumbprint: async () => 'test-jkt',
+  generateDPoPNonce: async () => 'mock-nonce',
+  validateDPoPNonce: async () => true,
 };
 
 const mockAuthCodeRepo: any = {
@@ -84,6 +86,7 @@ describe('Token Exchange Performance', () => {
       mockTokenRepo,
       dpopValidator,
       mockUserInfoRepo,
+      mockCryptoService,
       'https://issuer.example.com'
     );
 
@@ -107,6 +110,7 @@ describe('Token Exchange Performance', () => {
       htm: 'POST',
       htu: 'http://localhost/token',
       jti: 'jti-1',
+      nonce: 'mock-nonce',
     })
       .setProtectedHeader({ alg: 'ES256', typ: 'dpop+jwt', jwk })
       .setIssuedAt()

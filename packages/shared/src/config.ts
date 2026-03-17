@@ -5,7 +5,7 @@ export const sharedConfig = {
   API_PREFIX: '/api',
   SECURITY: {
     DPOP_TTL_SECONDS: 60,
-    PAR_TTL_SECONDS: 300,
+    PAR_TTL_SECONDS: 60,
     SESSION_TTL_SECONDS: 3600,
     AUTH_CODE_TTL_SECONDS: 60,
     SERVER_KEY_MIN_SIZE: 2048,
@@ -42,8 +42,8 @@ export const parRequestSchema = z.object({
   scope: z.string().min(1).refine((s) => s.includes('openid'), {
     message: 'scope must include openid',
   }),
-  state: z.string().min(1),
-  nonce: z.string().min(1),
+  state: z.string().min(30),
+  nonce: z.string().min(30),
   code_challenge: z.string().min(1),
   code_challenge_method: z.literal('S256'),
   client_assertion_type: z.literal('urn:ietf:params:oauth:client-assertion-type:jwt-bearer'),
@@ -51,6 +51,8 @@ export const parRequestSchema = z.object({
   dpop_jkt: z.string().optional(),
   authentication_context_type: z.nativeEnum(AuthenticationContextType).optional(),
   authentication_context_message: z.string().max(100).regex(/^[A-Za-z0-9 .,\-@'!()]*$/).optional(),
+  redirect_uri_https_type: z.string().optional(),
+  app_launch_url: z.string().url().optional(),
 });
 
 export type PARRequest = z.infer<typeof parRequestSchema>;

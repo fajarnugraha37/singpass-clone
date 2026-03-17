@@ -26,10 +26,10 @@ describe('Auth Endpoints', () => {
           requestUri: uri,
           dpopJkt: 'test-jkt',
           payload: { 
-            state: 'test-state', 
+            state: 'a'.repeat(30), 
             code_challenge: 'test-challenge', 
             redirect_uri: 'https://client.example.com/cb',
-            nonce: 'test-nonce'
+            nonce: 'b'.repeat(30)
           },
           expiresAt: new Date(Date.now() + 300000),
         };
@@ -159,7 +159,7 @@ describe('Auth Endpoints', () => {
       const location = res.headers.get('Location');
       expect(location).toContain('https://client.example.com/cb');
       expect(location).toContain('error=login_required');
-      expect(location).toContain('state=test-state');
+      expect(location).toContain(`state=${'a'.repeat(30)}`);
     });
 
     test('should return 400 for invalid request body', async () => {
@@ -269,7 +269,7 @@ describe('Auth Endpoints', () => {
       const location = res.headers.get('Location');
       expect(location).toContain('https://client.example.com/cb');
       expect(location).toContain('error=login_required');
-      expect(location).toContain('state=test-state');
+      expect(location).toContain(`state=${'a'.repeat(30)}`);
     });
   });
 });

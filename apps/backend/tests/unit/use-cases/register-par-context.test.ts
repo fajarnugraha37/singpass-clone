@@ -22,6 +22,8 @@ describe('RegisterParUseCase - Context Validation', () => {
 
     mockCryptoService = {
       validateClientAssertion: async () => true,
+      generateDPoPNonce: async () => 'test-nonce',
+      validateDPoPNonce: async () => true,
     } as any;
 
     mockPARRepository = {
@@ -67,8 +69,8 @@ describe('RegisterParUseCase - Context Validation', () => {
     redirect_uri: 'https://client.example.com/cb',
     code_challenge: 'challenge',
     code_challenge_method: 'S256',
-    state: 'state',
-    nonce: 'nonce',
+    state: 'a'.repeat(30),
+    nonce: 'b'.repeat(30),
   });
 
   // US1: Mandatory context type for Login apps

@@ -8,6 +8,8 @@ import { FapiErrors } from '../../infra/middleware/fapi-error';
 import type { TokenResponse } from '../../../../../packages/shared/src/tokens';
 import type { UserInfoRepository } from '../domain/userinfo_repository';
 
+import { CryptoService } from '../domain/crypto_service';
+
 export interface TokenExchangeRequest {
   grantType: string;
   code: string;
@@ -28,6 +30,7 @@ export class TokenExchangeUseCase {
     private tokenRepository: DrizzleTokenRepository,
     private dpopValidator: DPoPValidator,
     private userinfoRepository: UserInfoRepository,
+    private cryptoService: CryptoService,
     private issuer: string
   ) {}
 
@@ -60,7 +63,19 @@ export class TokenExchangeUseCase {
     });
 
     if (!dpopResult.isValid) {
+      if (dpopResult.error === 'use_dpop_nonce') {
+        const freshNonce = await this.cryptoService.generateDPoPNonce(clientId);
+        throw FapiErrors.useDpopNonce(freshNonce, 'DPoP nonce mismatch');
+      }
       throw FapiErrors.invalidDpopProof(dpopResult.error);
+    }
+
+    // FAPI 2.0 / Singpass v5: Enforce DPoP nonce freshness
+    const nonce = dpopResult.payload?.nonce as string;
+    const isNonceValid = await this.cryptoService.validateDPoPNonce(nonce, clientId);
+    if (!isNonceValid) {
+      const freshNonce = await this.cryptoService.generateDPoPNonce(clientId);
+      throw FapiErrors.useDpopNonce(freshNonce, 'Missing or invalid DPoP nonce');
     }
 
     // 4. Resolve Authorization Code
@@ -138,6 +153,11 @@ export class TokenExchangeUseCase {
       });
     }
 
-    return tokens;
+    const dpopNonce = await this.cryptoService.generateDPoPNonce(clientId);
+
+    return {
+      ...tokens,
+      dpop_nonce: dpopNonce,
+    };
   }
 }

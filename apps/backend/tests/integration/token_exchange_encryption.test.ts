@@ -54,6 +54,8 @@ describe('Token Exchange Encryption Integration (mock-client-id)', () => {
 
     // 0b. Mocks
     spyOn(JoseCryptoService.prototype, 'validateClientAssertion').mockImplementation(async () => true);
+    spyOn(JoseCryptoService.prototype, 'validateDPoPNonce').mockImplementation(async () => true);
+    spyOn(JoseCryptoService.prototype, 'generateDPoPNonce').mockImplementation(async () => 'mock-nonce');
     spyOn(JoseCryptoService.prototype, 'getActiveKey').mockImplementation(async () => ({
       id: 'server-kid',
       privateKey: serverKeyPair.privateKey,
@@ -74,7 +76,7 @@ describe('Token Exchange Encryption Integration (mock-client-id)', () => {
           expiresAt: new Date(Date.now() + 300000),
           used: false,
           createdAt: new Date(),
-          nonce: 'test-nonce',
+          nonce: 'b'.repeat(30),
           scope: 'openid profile'
         };
       }
@@ -100,6 +102,7 @@ describe('Token Exchange Encryption Integration (mock-client-id)', () => {
       htm: 'POST',
       htu: 'http://localhost/token',
       jti: crypto.randomUUID(),
+      nonce: 'mock-nonce',
     })
       .setProtectedHeader({ 
         alg: 'ES256', 
@@ -182,7 +185,7 @@ describe('Token Exchange Encryption Integration (mock-client-id)', () => {
     // 10. Assert ID Token claims
     expect(idTokenPayload.sub).toBe('user-123');
     expect(idTokenPayload.aud).toBe('mock-client-id');
-    expect(idTokenPayload.nonce).toBe('test-nonce');
+    expect(idTokenPayload.nonce).toBe('b'.repeat(30));
     expect(idTokenPayload.acr).toBeDefined();
     expect(idTokenPayload.amr).toEqual(['pwd', 'otp-sms']);
     expect(idTokenPayload.iss).toBeDefined();

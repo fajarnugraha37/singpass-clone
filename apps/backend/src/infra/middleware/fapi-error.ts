@@ -5,7 +5,8 @@ export class FapiError extends Error {
   constructor(
     public error: TokenErrorResponse['error'],
     public description?: string,
-    public status: number = 400
+    public status: number = 400,
+    public headers?: Record<string, string>
   ) {
     super(description || error);
     this.name = 'FapiError';
@@ -26,6 +27,12 @@ export async function fapiErrorHandler(c: Context, next: Next) {
         error: err.error,
         error_description: err.description,
       };
+
+      if (err.headers) {
+        Object.entries(err.headers).forEach(([key, value]) => {
+          c.header(key, value);
+        });
+      }
 
       return c.json(response, err.status as any);
     }
@@ -56,5 +63,9 @@ export const FapiErrors = {
   invalidToken: (description?: string) => new FapiError('invalid_token', description, 400), // Added for Singpass compliance
   serverError: (description?: string) => new FapiError('server_error', description, 500), // Added for Singpass compliance
   temporarilyUnavailable: (description?: string) => new FapiError('temporarily_unavailable', description, 503), // Added for Singpass compliance
+  useDpopNonce: (nonce: string, description?: string) => new FapiError('use_dpop_nonce', description, 401, {
+    'WWW-Authenticate': 'DPoP error="use_dpop_nonce"',
+    'DPoP-Nonce': nonce,
+  }),
 };
 

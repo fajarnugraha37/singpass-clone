@@ -25,6 +25,8 @@ describe('Token Expiry Issuance Integration', () => {
 
     // Mocks
     spyOn(JoseCryptoService.prototype, 'validateClientAssertion').mockImplementation(async () => true);
+    spyOn(JoseCryptoService.prototype, 'validateDPoPNonce').mockImplementation(async () => true);
+    spyOn(JoseCryptoService.prototype, 'generateDPoPNonce').mockImplementation(async () => 'mock-nonce');
     spyOn(JoseCryptoService.prototype, 'getActiveKey').mockImplementation(async () => ({
       id: 'server-kid',
       privateKey: serverKeyPair.privateKey,
@@ -55,6 +57,7 @@ describe('Token Expiry Issuance Integration', () => {
       htm: 'POST',
       htu: 'http://localhost/token',
       jti: crypto.randomUUID(),
+      nonce: 'mock-nonce',
     })
       .setProtectedHeader({ alg: 'ES256', typ: 'dpop+jwt', jwk })
       .setIssuedAt()

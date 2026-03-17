@@ -65,6 +65,7 @@ const tokenExchangeUseCase = new TokenExchangeUseCase(
   tokenRepository,
   dpopValidator,
   userInfoRepository,
+  cryptoService,
   sharedConfig.OIDC.ISSUER
 );
 const getUserInfoUseCase = new GetUserInfoUseCase(
@@ -116,6 +117,13 @@ const app = new Hono()
     if (err.name === 'FapiError') {
       const fapiErr = err as any;
       console.warn(`[FAPI Error] ${fapiErr.error}: ${fapiErr.description || 'No description'}`);
+      
+      if (fapiErr.headers) {
+        Object.entries(fapiErr.headers).forEach(([key, value]) => {
+          c.header(key, value as string);
+        });
+      }
+
       return c.json({
         error: fapiErr.error,
         error_description: fapiErr.description,

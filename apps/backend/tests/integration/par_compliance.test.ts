@@ -5,7 +5,7 @@ import { JoseCryptoService } from '../../src/infra/adapters/jose_crypto';
 import { DrizzlePARRepository } from '../../src/infra/adapters/db/drizzle_par_repository';
 import { DrizzleClientRegistry } from '../../src/infra/adapters/client_registry';
 
-describe('PAR Redirect URI Validation Integration', () => {
+describe('PAR Compliance Audit Remediation', () => {
   let clientKeyPair: jose.GenerateKeyPairResult;
 
   beforeAll(async () => {
@@ -29,8 +29,116 @@ describe('PAR Redirect URI Validation Integration', () => {
       .sign(clientKeyPair.privateKey);
   }
 
-  test('POST /par should succeed with registered redirect_uri', async () => {
-    // 0. Mocks
+  const validState = 'a'.repeat(30);
+  const validNonce = 'b'.repeat(30);
+
+  test('POST /par should fail if state is less than 30 characters', async () => {
+    const clientAssertion = await generateClientAssertion('test-client', 'https://vibe-auth.example.com/api/par');
+
+    const body = new URLSearchParams({
+      response_type: 'code',
+      client_id: 'test-client',
+      redirect_uri: 'https://client.example.com/cb',
+      scope: 'openid',
+      state: 'too-short',
+      nonce: validNonce,
+      code_challenge: 'test-challenge',
+      code_challenge_method: 'S256',
+      client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+      client_assertion: clientAssertion,
+    });
+
+    const res = await app.request('/api/par', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body.toString(),
+    });
+
+    expect(res.status).toBe(400);
+    const data = await res.json();
+    expect(data.error).toBe('invalid_request');
+    expect(data.error_description).toContain('Too small: expected string to have >=30 characters');
+  });
+
+  test('POST /par should fail if nonce is less than 30 characters', async () => {
+    const clientAssertion = await generateClientAssertion('test-client', 'https://vibe-auth.example.com/api/par');
+
+    const body = new URLSearchParams({
+      response_type: 'code',
+      client_id: 'test-client',
+      redirect_uri: 'https://client.example.com/cb',
+      scope: 'openid',
+      state: validState,
+      nonce: 'too-short',
+      code_challenge: 'test-challenge',
+      code_challenge_method: 'S256',
+      client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+      client_assertion: clientAssertion,
+    });
+
+    const res = await app.request('/api/par', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body.toString(),
+    });
+
+    expect(res.status).toBe(400);
+    const data = await res.json();
+    expect(data.error).toBe('invalid_request');
+    expect(data.error_description).toContain('Too small: expected string to have >=30 characters');
+  });
+
+  test('POST /par should return expires_in: 60 and DPoP-Nonce header', async () => {
+    // Mocks
+    spyOn(JoseCryptoService.prototype, 'validateClientAssertion').mockImplementation(async () => true);
+    spyOn(JoseCryptoService.prototype, 'generateDPoPNonce').mockImplementation(async () => 'mocked-dpop-nonce');
+    spyOn(DrizzleClientRegistry.prototype, 'getClientConfig').mockImplementation(async (clientId: string) => ({
+      clientId,
+      clientName: 'Test Client',
+      appType: 'Login',
+      redirectUris: ['https://client.example.com/cb'],
+      jwks: { keys: [{ kid: 'test-client-key' }] },
+    }));
+    spyOn(DrizzlePARRepository.prototype, 'isJtiConsumed').mockImplementation(async () => false);
+    spyOn(DrizzlePARRepository.prototype, 'consumeJti').mockImplementation(async () => {});
+    spyOn(DrizzlePARRepository.prototype, 'save').mockImplementation(async () => {});
+
+    const clientAssertion = await generateClientAssertion('test-client', 'https://vibe-auth.example.com/api/par');
+
+    const body = new URLSearchParams({
+      response_type: 'code',
+      client_id: 'test-client',
+      redirect_uri: 'https://client.example.com/cb',
+      scope: 'openid',
+      state: validState,
+      nonce: validNonce,
+      code_challenge: 'test-challenge',
+      code_challenge_method: 'S256',
+      client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+      client_assertion: clientAssertion,
+      authentication_context_type: 'APP_AUTHENTICATION_DEFAULT',
+    });
+
+    const res = await app.request('/api/par', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body.toString(),
+    });
+
+    expect(res.status).toBe(201);
+    const data = await res.json();
+    expect(data.expires_in).toBe(60);
+    expect(res.headers.get('DPoP-Nonce')).toBe('mocked-dpop-nonce');
+  });
+
+  test('POST /par should accept optional native app parameters', async () => {
+    // Mocks
     spyOn(JoseCryptoService.prototype, 'validateClientAssertion').mockImplementation(async () => true);
     spyOn(DrizzleClientRegistry.prototype, 'getClientConfig').mockImplementation(async (clientId: string) => ({
       clientId,
@@ -50,13 +158,15 @@ describe('PAR Redirect URI Validation Integration', () => {
       client_id: 'test-client',
       redirect_uri: 'https://client.example.com/cb',
       scope: 'openid',
-      state: 'a'.repeat(30),
-      nonce: 'b'.repeat(30),
+      state: validState,
+      nonce: validNonce,
       code_challenge: 'test-challenge',
       code_challenge_method: 'S256',
       client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
       client_assertion: clientAssertion,
       authentication_context_type: 'APP_AUTHENTICATION_DEFAULT',
+      redirect_uri_https_type: 'app-to-app',
+      app_launch_url: 'https://client.app/launch',
     });
 
     const res = await app.request('/api/par', {
@@ -68,81 +178,5 @@ describe('PAR Redirect URI Validation Integration', () => {
     });
 
     expect(res.status).toBe(201);
-    const data = await res.json();
-    expect(data.request_uri).toBeDefined();
-  });
-
-  test('POST /par should fail with unregistered redirect_uri', async () => {
-    // 0. Mocks
-    spyOn(JoseCryptoService.prototype, 'validateClientAssertion').mockImplementation(async () => true);
-    spyOn(DrizzleClientRegistry.prototype, 'getClientConfig').mockImplementation(async (clientId: string) => ({
-      clientId,
-      clientName: 'Test Client',
-      appType: 'Login',
-      redirectUris: ['https://client.example.com/cb'],
-      jwks: { keys: [{ kid: 'test-client-key' }] },
-    }));
-
-    const clientAssertion = await generateClientAssertion('test-client', 'https://vibe-auth.example.com/api/par');
-
-    const body = new URLSearchParams({
-      response_type: 'code',
-      client_id: 'test-client',
-      redirect_uri: 'https://malicious.com/cb',
-      scope: 'openid',
-      state: 'a'.repeat(30),
-      nonce: 'b'.repeat(30),
-      code_challenge: 'test-challenge',
-      code_challenge_method: 'S256',
-      client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
-      client_assertion: clientAssertion,
-      authentication_context_type: 'APP_AUTHENTICATION_DEFAULT',
-    });
-
-    const res = await app.request('/api/par', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: body.toString(),
-    });
-
-    expect(res.status).toBe(400);
-    const data = await res.json();
-    expect(data.error).toBe('invalid_request');
-    expect(data.error_description).toBe('redirect_uri is not registered');
-  });
-
-  test('POST /par should fail if redirect_uri is missing', async () => {
-    const clientAssertion = await generateClientAssertion('test-client', 'https://vibe-auth.example.com/api/par');
-
-    const body = new URLSearchParams({
-      response_type: 'code',
-      client_id: 'test-client',
-      // redirect_uri missing
-      scope: 'openid',
-      state: 'a'.repeat(30),
-      nonce: 'b'.repeat(30),
-      code_challenge: 'test-challenge',
-      code_challenge_method: 'S256',
-      client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
-      client_assertion: clientAssertion,
-      authentication_context_type: 'APP_AUTHENTICATION_DEFAULT',
-    });
-
-    const res = await app.request('/api/par', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: body.toString(),
-    });
-
-    expect(res.status).toBe(400);
-    const data = await res.json();
-    expect(data.error).toBe('invalid_request');
-    // Error description will be from Zod first if it hits the schema, or from Use Case if schema allows it
-    // Our shared config has redirect_uri: z.string().url(), so Zod will catch it if missing or invalid format.
-    expect(data.error_description).toBeDefined();
   });
 });

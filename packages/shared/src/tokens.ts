@@ -10,6 +10,7 @@ export const tokenResponseSchema = z.object({
   token_type: z.literal('DPoP').describe('DPoP token type as per RFC 9449'),
   expires_in: z.number().describe('Token lifetime in seconds'),
   refresh_token: z.string().optional().describe('Optional refresh token'),
+  dpop_nonce: z.string().optional().describe('DPoP nonce for subsequent requests'),
 });
 
 /**
@@ -26,7 +27,8 @@ export const tokenErrorResponseSchema = z.object({
     'invalid_dpop_proof',
     'invalid_token',
     'server_error',
-    'temporarily_unavailable'
+    'temporarily_unavailable',
+    'use_dpop_nonce'
   ]),
   error_description: z.string().optional(),
   error_uri: z.string().url().optional(),

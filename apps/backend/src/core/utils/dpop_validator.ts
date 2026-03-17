@@ -105,8 +105,13 @@ export class DPoPValidator {
       }
 
       // nonce check
-      if (expectedNonce && payload.nonce !== expectedNonce) {
-        return { isValid: false, jkt: '', error: 'invalid_nonce' };
+      if (expectedNonce) {
+        if (!payload.nonce) {
+          return { isValid: false, jkt: '', error: 'use_dpop_nonce' };
+        }
+        if (payload.nonce !== expectedNonce) {
+          return { isValid: false, jkt: '', error: 'use_dpop_nonce' };
+        }
       }
 
       // jkt binding check

@@ -56,6 +56,12 @@ export const exchangeToken = (useCase: TokenExchangeUseCase) => async (c: Contex
       method: c.req.method,
       url: c.req.url,
     });
+
+    if (result.dpop_nonce) {
+      c.header('DPoP-Nonce', result.dpop_nonce);
+      delete result.dpop_nonce;
+    }
+
     return c.json(result);
   } catch (err: any) {
     // If the error is already a FapiError, re-throw it directly

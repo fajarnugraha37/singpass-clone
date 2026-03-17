@@ -179,9 +179,12 @@ export class RegisterParUseCase {
       details: { requestUri },
     });
 
+    const dpopNonce = await this.cryptoService.generateDPoPNonce(client_id);
+
     return {
       request_uri: requestUri,
       expires_in: sharedConfig.SECURITY.PAR_TTL_SECONDS,
+      dpop_nonce: dpopNonce,
     };
   }
 }

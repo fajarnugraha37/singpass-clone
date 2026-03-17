@@ -21,8 +21,8 @@ describe('PAR Security Validation', () => {
       response_type: 'code',
       scope: 'openid',
       redirect_uri: 'https://client.example.com/cb',
-      state: 'test-state',
-      nonce: 'test-nonce',
+      state: 'a'.repeat(30),
+      nonce: 'b'.repeat(30),
       // missing code_challenge
       code_challenge_method: 'S256',
     });
@@ -48,8 +48,8 @@ describe('PAR Security Validation', () => {
       response_type: 'code',
       scope: 'openid',
       redirect_uri: 'https://client.example.com/cb',
-      state: 'test-state',
-      nonce: 'test-nonce',
+      state: 'a'.repeat(30),
+      nonce: 'b'.repeat(30),
       code_challenge: 'test-challenge',
       code_challenge_method: 'plain', // FAPI 2.0 requires S256
     });
@@ -75,8 +75,8 @@ describe('PAR Security Validation', () => {
       response_type: 'code',
       scope: 'profile email', // missing openid
       redirect_uri: 'https://client.example.com/cb',
-      state: 'test-state',
-      nonce: 'test-nonce',
+      state: 'a'.repeat(30),
+      nonce: 'b'.repeat(30),
       code_challenge: 'test-challenge',
       code_challenge_method: 'S256',
     });
