@@ -23,19 +23,26 @@ Accepts a `application/x-www-form-urlencoded` payload from the client.
    - The request must either contain a `DPoP` header (and validate the DPoP proof) OR include `dpop_jkt` in the body.
 5. **Singpass Specific**:
    - `authentication_context_type`: Mandatory for Login apps.
+   - `purpose`: Mandatory for all requests. A string describing the business intent for data access.
+
+### DPoP Nonce Requirement (FAPI 2.0)
+The server MUST provide a `DPoP-Nonce` header in the response. If the client's DPoP proof is missing a nonce or uses an invalid/expired one, the server MUST return a `401 Unauthorized` with the `use_dpop_nonce` error code and a fresh `DPoP-Nonce` header.
 
 ### Processing & Storage
 - Store the entire valid request payload in a secure database (e.g., SQLite `PushedAuthorizationRequests` table) linked to a newly generated `request_uri`.
+- The `purpose` must be stored and displayed to the user on the consent page.
 - Set an expiration time (typically 60 seconds).
 
 ### Response
-Return a `201 Created` JSON response:
+Return a `201 Created` JSON response with a `DPoP-Nonce` header:
 ```json
 {
   "request_uri": "urn:ietf:params:oauth:request_uri:1234567890",
   "expires_in": 60
 }
 ```
+Header: `DPoP-Nonce: <signed-jwt-nonce>`
+
 
 ### Error Handling
 Return standard OIDC error formats (e.g., `invalid_request`, `invalid_client`, `invalid_scope`, `invalid_dpop_proof`) with HTTP 400 or 401 if validation fails.

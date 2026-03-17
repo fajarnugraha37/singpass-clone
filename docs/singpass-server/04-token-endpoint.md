@@ -23,18 +23,19 @@ Accepts an `application/x-www-form-urlencoded` payload.
    - Validate the `DPoP` header proof.
    - Extract the JWK Thumbprint (`jkt`) from the DPoP header.
    - Verify that this `jkt` matches the `dpop_jkt` stored with the authorization code.
+   - **Nonce Check**: The DPoP proof MUST contain a `nonce` that matches the expected server-signed nonce. If missing or invalid, return `401 Unauthorized` with `use_dpop_nonce` error and a fresh `DPoP-Nonce` header.
 
 ### Token Generation
 Upon successful validation:
 1. **Access Token**: Generate a secure `access_token` bound to the client's DPoP key. (Set lifetime, e.g., 30 minutes).
 2. **ID Token (JWE/JWS)**: Generate an `id_token`.
-   - **Claims**: Include `sub`, `aud` (client_id), `iss`, `iat`, `exp`, `nonce` (from PAR), `acr` (e.g., `urn:singpass:authentication:loa:2`), `amr` (e.g., `["pwd", "otp-sms"]`), and conditionally `sub_attributes` (if specific scopes like `name` or `user.identity` were requested).
+   - **Claims**: Include `sub` (**MUST be a persistent UUID**, not NRIC), `aud` (client_id), `iss`, `iat`, `exp`, `nonce` (from PAR), `acr` (e.g., `urn:singpass:authentication:loa:2`), `amr` (e.g., `["pwd", "otp-sms"]`), and conditionally `sub_attributes` (if specific scopes like `name` or `user.identity` were requested).
    - **Signing (JWS)**: Sign the ID token payload using the server's `ES256` private key using the `jose` library.
    - **Encryption (JWE)**: Mandatorily encrypt the signed JWS using the Client's public encryption key.
    - **Algorithms**: `ECDH-ES+A256KW` for key wrap and `A256GCM` for content encryption.
 
 ### Response
-Return a `200 OK` JSON response with `application/json` content type:
+Return a `200 OK` JSON response with `application/json` content type and a fresh `DPoP-Nonce` header:
 ```json
 {
   "access_token": "string (opaque)",
@@ -44,6 +45,8 @@ Return a `200 OK` JSON response with `application/json` content type:
   "refresh_token": "string (optional)"
 }
 ```
+Header: `DPoP-Nonce: <signed-jwt-nonce>`
+
 
 ### Error Handling
 Return structured JSON errors (e.g., `invalid_grant`, `invalid_client`, `invalid_dpop_proof`) mapped to HTTP 400 or 401.

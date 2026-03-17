@@ -46,7 +46,7 @@ async function seed() {
 
     // 2. Create Myinfo profile for the user
     const person = createEmptyMyinfoPerson(userId);
-    
+
     // Personal Data
     person.uinfin.value = nric;
     person.name.value = fullName;
@@ -57,27 +57,28 @@ async function seed() {
     person.nationality.value = 'SG';
     person.birthcountry.value = 'SG';
     person.email.value = email;
-    person.mobileno = {
-      prefix: { value: '+' },
-      areacode: { value: '65' },
-      nbr: { value: faker.string.numeric(8) },
-    };
-    
+
+    if (person.mobileno) {
+      person.mobileno.prefix.value = '+';
+      person.mobileno.areacode.value = '65';
+      person.mobileno.nbr.value = faker.string.numeric(8);
+    }
+
     const block = faker.location.buildingNumber();
     const street = faker.location.street().toUpperCase();
     const building = faker.company.name().toUpperCase() + ' BUIDLING';
     const postal = faker.location.zipCode('######');
 
-    person.regadd = {
-      type: { value: 'SG' },
-      block: { value: block },
-      building: { value: building },
-      floor: { value: faker.string.numeric(2) },
-      unit: { value: faker.string.numeric(3) },
-      street: { value: street },
-      postal: { value: postal },
-      country: { value: 'SG' },
-    };
+    if (person.regadd) {
+      person.regadd.type.value = 'SG';
+      person.regadd.block.value = block;
+      person.regadd.building.value = building;
+      person.regadd.floor.value = faker.string.numeric(2);
+      person.regadd.unit.value = faker.string.numeric(3);
+      person.regadd.street.value = street;
+      person.regadd.postal.value = postal;
+      person.regadd.country.value = 'SG';
+    }
 
     // Finance Data
     if (person.finance) {
@@ -85,17 +86,15 @@ async function seed() {
       person.finance['cpfbalances.ma'].value = parseFloat(faker.finance.amount({ min: 5000, max: 50000 }));
       person.finance['cpfbalances.ra'].value = 0;
       person.finance['cpfbalances.sa'].value = parseFloat(faker.finance.amount({ min: 5000, max: 60000 }));
-      
+
       person.finance.cpfcontributions = Array.from({ length: 3 }).map(() => ({
-        date: { value: faker.date.recent().toISOString().split('T')[0] },
-        amount: { value: parseFloat(faker.finance.amount({ min: 500, max: 3000 })) },
-        employer: { value: faker.company.name().toUpperCase() },
+        date: { value: faker.date.recent().toISOString().split('T')[0], source: '1', classification: 'C', lastupdated: '2024-03-18' },
+        amount: { value: parseFloat(faker.finance.amount({ min: 500, max: 3000 })), source: '1', classification: 'C', lastupdated: '2024-03-18' },
+        employer: { value: faker.company.name().toUpperCase(), source: '1', classification: 'C', lastupdated: '2024-03-18' },
       }));
 
-      person.finance['noa-basic'] = {
-        amount: { value: parseFloat(faker.finance.amount({ min: 30000, max: 150000 })) },
-        yearofassessment: { value: '2023' },
-      };
+      person.finance['noa-basic'].amount.value = parseFloat(faker.finance.amount({ min: 30000, max: 150000 }));
+      person.finance['noa-basic'].yearofassessment.value = '2023';
       person.finance.ownerprivate.value = faker.helpers.arrayElement(['Y', 'N']);
     }
 
@@ -104,18 +103,17 @@ async function seed() {
       const isMarried = faker.datatype.boolean();
       person.family.marital.value = isMarried ? '2' : '1';
       person.family.marriagedate.value = isMarried ? faker.date.past({ years: 10 }).toISOString().split('T')[0] : null;
-      
+
       if (isMarried && faker.datatype.boolean()) {
         person.family.childrenbirthrecords = Array.from({ length: faker.number.int({ min: 1, max: 3 }) }).map(() => ({
-          birthcertno: { value: NRIC.Generate().toString() },
-          name: { value: `${faker.person.firstName().toUpperCase()} ${lastName} TAN` },
-          dob: { value: faker.date.past({ years: 15 }).toISOString().split('T')[0] },
-          sex: { value: faker.helpers.arrayElement(['M', 'F']) },
-          lifestatus: { value: '1' }
+          birthcertno: { value: NRIC.Generate().toString(), source: '1', classification: 'C', lastupdated: '2024-03-18' },
+          name: { value: `${faker.person.firstName().toUpperCase()} ${lastName} TAN`, source: '1', classification: 'C', lastupdated: '2024-03-18' },
+          dob: { value: faker.date.past({ years: 15 }).toISOString().split('T')[0], source: '1', classification: 'C', lastupdated: '2024-03-18' },
+          sex: { value: faker.helpers.arrayElement(['M', 'F']), source: '1', classification: 'C', lastupdated: '2024-03-18' },
+          lifestatus: { value: '1', source: '1', classification: 'C', lastupdated: '2024-03-18' }
         } satisfies MyinfoChildBirthRecord));
       }
     }
-
     // Check if profile exists
     const existingProfile = await db.query.myinfoProfiles.findFirst({
       where: (profiles, { eq }) => eq(profiles.userId, userId),

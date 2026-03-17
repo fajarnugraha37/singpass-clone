@@ -21,7 +21,7 @@ The UserInfo endpoint provides additional identity and profile information about
 Determine the user's data to return based on the `sub` associated with the access token and the authorized `scopes`.
 
 1. Construct the `person_info` object (or just the flat claims, depending on the exact OIDC mapping desired).
-2. Create a JWT payload containing standard claims: `sub`, `iss`, `aud` (client_id), `iat`.
+2. Create a JWT payload containing standard claims: `sub` (**MUST be a persistent UUID**, not NRIC), `iss`, `aud` (client_id), `iat`.
 3. Include the `person_info` in the payload.
 
 ### Signing & Encryption (JWS/JWE)
@@ -32,14 +32,34 @@ Like the `id_token`, Singpass wraps the Userinfo response in strict cryptography
    - **enc**: `A256GCM`
 
 ### person_info Structure
-The `person_info` claim follows the Myinfo standard where each field is an object containing a `value`:
+The `person_info` claim follows the Myinfo standard where each field is an object containing a `value` and mandatory metadata:
 ```json
 "person_info": {
-  "uinfin": { "value": "S1234567A" },
-  "name": { "value": "JOHN DOE" },
-  "email": { "value": "john@example.com" }
+  "uinfin": { 
+    "value": "S1234567A",
+    "source": "1",
+    "classification": "C",
+    "lastupdated": "2024-03-18"
+  },
+  "name": { 
+    "value": "JOHN DOE",
+    "source": "1",
+    "classification": "C",
+    "lastupdated": "2024-03-18"
+  },
+  "email": { 
+    "value": "john@example.com",
+    "source": "4",
+    "classification": "C",
+    "lastupdated": "2024-03-18"
+  }
 }
 ```
+Metadata fields:
+- `source`: "1" for Government-verified, "4" for User-provided.
+- `classification`: "C" for Confidential.
+- `lastupdated`: Date of last update in YYYY-MM-DD format.
+
 
 ### Response
 Return a `200 OK` response with `Content-Type: application/jwt`. The body is a compact JWE string.

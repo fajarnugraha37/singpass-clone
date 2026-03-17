@@ -75,6 +75,13 @@ describe('RegisterParUseCase - Context Validation', () => {
   });
 
   // US1: Mandatory context type for Login apps
+  test('should fail if purpose is missing', async () => {
+    const input = getBaseInput();
+    delete (input as any).purpose;
+
+    expect(useCase.execute(input)).rejects.toThrow('purpose is required');
+  });
+
   test('should fail if Login app misses authentication_context_type', async () => {
     const input = getBaseInput();
     
