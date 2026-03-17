@@ -6,6 +6,9 @@ import { ClientRegistry } from '../domain/client_registry';
 import { SecurityAuditService } from '../domain/audit_service';
 import { mapMyinfoProfile } from '../../application/mappers/myinfo-mapper';
 import { filterPersonByScopes } from '../myinfo/scope_mapper';
+import * as jose from 'jose';
+
+import { FapiErrors } from '../../infra/middleware/fapi-error';
 
 export interface GetUserInfoRequest {
   accessToken: string;
@@ -41,14 +44,33 @@ export class GetUserInfoUseCase {
       }
 
       // 3. Validate DPoP Proof and binding
+      const decodedProof = jose.decodeJwt(dpopProof);
+      const proofNonce = decodedProof.nonce as string;
+
+      if (!proofNonce) {
+        const freshNonce = await this.cryptoService.generateDPoPNonce(tokenData.clientId);
+        throw FapiErrors.useDpopNonce(freshNonce, 'Missing or invalid DPoP nonce');
+      }
+
+      const isNonceValid = await this.cryptoService.validateDPoPNonce(proofNonce, tokenData.clientId);
+      if (!isNonceValid) {
+        const freshNonce = await this.cryptoService.generateDPoPNonce(tokenData.clientId);
+        throw FapiErrors.useDpopNonce(freshNonce, 'Missing or invalid DPoP nonce');
+      }
+
       const dpopResult = await this.dpopValidator.validate(tokenData.clientId, {
         proof: dpopProof,
         method,
         url,
         expectedJkt: tokenData.dpopJkt,
+        expectedNonce: proofNonce,
       });
 
       if (!dpopResult.isValid) {
+        if (dpopResult.error === 'use_dpop_nonce') {
+          const freshNonce = await this.cryptoService.generateDPoPNonce(tokenData.clientId);
+          throw FapiErrors.useDpopNonce(freshNonce, 'Missing or invalid DPoP nonce');
+        }
         throw new Error(`invalid_dpop_proof: ${dpopResult.error}`);
       }
 

@@ -76,7 +76,7 @@ const getUserInfoUseCase = new GetUserInfoUseCase(
   clientRegistry,
   auditService
 );
-const validateUserInfoRequestUseCase = new ValidateUserInfoRequestUseCase(userInfoRepository, dpopValidator);
+const validateUserInfoRequestUseCase = new ValidateUserInfoRequestUseCase(userInfoRepository, dpopValidator, cryptoService);
 const generateUserInfoPayloadUseCase = new GenerateUserInfoPayloadUseCase(cryptoService);
 
 const userinfoRouter = createUserinfoRouter(

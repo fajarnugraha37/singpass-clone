@@ -90,6 +90,7 @@ describe('UserInfo Integration', () => {
       htm: 'GET',
       htu: 'http://localhost/userinfo',
       jti: crypto.randomUUID(),
+      nonce: 'server-nonce',
     })
       .setProtectedHeader({ 
         alg: 'ES256', 
@@ -99,6 +100,9 @@ describe('UserInfo Integration', () => {
       .setIssuedAt()
       .setExpirationTime('120s')
       .sign(clientKeyPair.privateKey);
+
+    // 0.1 Mock nonce validation
+    spyOn(JoseCryptoService.prototype, 'validateDPoPNonce').mockImplementation(async (nonce) => nonce === 'server-nonce');
 
     // 2. Send request
     const res = await app.request('/userinfo', {

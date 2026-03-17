@@ -5,6 +5,7 @@ export interface AuthSession {
   parRequestUri: string;
   clientId: string;
   userId?: string | null;
+  purpose?: string | null;
   status: AuthSessionStatus;
   otpCode?: string | null;
   retryCount: number;

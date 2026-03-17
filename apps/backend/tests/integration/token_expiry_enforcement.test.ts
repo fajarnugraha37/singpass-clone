@@ -40,18 +40,23 @@ describe('Token Expiry Enforcement Integration', () => {
       return null;
     });
 
-    // DPoP proof for /userinfo
+    // 1. Generate DPoP proof for /userinfo
     const dpopProof = await new jose.SignJWT({
       htm: 'GET',
       htu: 'http://localhost/userinfo',
       jti: crypto.randomUUID(),
+      nonce: 'server-nonce',
     })
       .setProtectedHeader({ alg: 'ES256', typ: 'dpop+jwt', jwk: clientJwk })
       .setIssuedAt()
       .setExpirationTime('120s')
       .sign(clientKeyPair.privateKey);
 
-    // Send request with expired token
+    // Mock nonce validation
+    spyOn(require('../../src/infra/adapters/jose_crypto').JoseCryptoService.prototype, 'validateDPoPNonce').mockImplementation(async (nonce: string) => nonce === 'server-nonce');
+    spyOn(jose, 'decodeJwt').mockReturnValue({ nonce: 'server-nonce' } as any);
+
+    // 2. Send request with EXPIRED token
     const res = await app.request('/userinfo', {
       method: 'GET',
       headers: {
@@ -109,11 +114,16 @@ describe('Token Expiry Enforcement Integration', () => {
        htm: 'GET',
        htu: 'http://localhost/userinfo',
        jti: crypto.randomUUID(),
+       nonce: 'server-nonce',
      })
        .setProtectedHeader({ alg: 'ES256', typ: 'dpop+jwt', jwk: clientJwk })
        .setIssuedAt()
        .setExpirationTime('120s')
        .sign(clientKeyPair.privateKey);
+
+     // Mock nonce validation
+     spyOn(require('../../src/infra/adapters/jose_crypto').JoseCryptoService.prototype, 'validateDPoPNonce').mockImplementation(async (nonce: string) => nonce === 'server-nonce');
+     spyOn(jose, 'decodeJwt').mockReturnValue({ nonce: 'server-nonce' } as any);
 
      const res = await app.request('/userinfo', {
        method: 'GET',

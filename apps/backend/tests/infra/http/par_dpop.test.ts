@@ -13,6 +13,8 @@ describe('PAR DPoP Integration', () => {
       .setProtectedHeader({ alg: 'HS256' })
       .sign(secret);
     
+    spyOn(jose, 'decodeJwt').mockReturnValue({ nonce: 'valid-nonce' } as any);
+    spyOn(JoseCryptoService.prototype, 'validateDPoPNonce').mockImplementation(async () => true);
     spyOn(JoseCryptoService.prototype, 'validateClientAssertion').mockImplementation(async () => true);
   });
 
@@ -38,6 +40,7 @@ describe('PAR DPoP Integration', () => {
       nonce: 'b'.repeat(30),
       code_challenge: 'test-challenge',
       code_challenge_method: 'S256',
+      purpose: 'test',
       authentication_context_type: 'APP_AUTHENTICATION_DEFAULT',
     });
 
@@ -73,6 +76,7 @@ describe('PAR DPoP Integration', () => {
       nonce: 'b'.repeat(30),
       code_challenge: 'test-challenge',
       code_challenge_method: 'S256',
+      purpose: 'test',
       authentication_context_type: 'APP_AUTHENTICATION_DEFAULT',
     });
 

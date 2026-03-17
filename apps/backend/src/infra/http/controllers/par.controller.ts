@@ -24,6 +24,7 @@ export const registerPar = (useCase: RegisterParUseCase) => {
       const result = await useCase.execute({
         ...validated.data,
         dpop_header: dpop,
+        url: c.req.url,
       });
 
       if (result.dpop_nonce) {
@@ -33,6 +34,9 @@ export const registerPar = (useCase: RegisterParUseCase) => {
 
       return c.json(result, 201);
     } catch (error: any) {
+      if (error.name === 'FapiError') {
+        throw error;
+      }
       console.error('[PAR] Error:', error);
       return c.json({
         error: 'invalid_request',

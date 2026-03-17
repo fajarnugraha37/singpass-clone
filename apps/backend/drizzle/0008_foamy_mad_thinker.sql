@@ -1,0 +1,1 @@
+ALTER TABLE `par_requests` ADD `purpose` text DEFAULT 'General Authentication' NOT NULL;

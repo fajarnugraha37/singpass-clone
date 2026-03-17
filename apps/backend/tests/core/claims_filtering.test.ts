@@ -21,33 +21,68 @@ describe('mapUserInfoClaims', () => {
     const userWithMobile: UserData = { ...user, mobileno: '91234567' };
     const claims = mapUserInfoClaims(userWithMobile, 'client-1', 'https://issuer.com', ['openid', 'uinfin', 'mobileno'], 2, ['pwd', 'otp-sms']);
 
-    expect(claims.person_info?.uinfin).toEqual({ value: user.nric });
-    expect(claims.person_info?.mobileno).toEqual({ value: '91234567' });
+    expect(claims.person_info?.uinfin).toEqual({ 
+      value: user.nric,
+      source: '1',
+      classification: 'C',
+      lastupdated: '2024-03-18'
+    });
+    expect(claims.person_info?.mobileno).toEqual({ 
+      value: '91234567',
+      source: '4',
+      classification: 'C',
+      lastupdated: '2024-03-18'
+    });
     expect(claims.person_info?.name).toBeUndefined();
   });
 
   it('should include all requested scopes in person_info', () => {
     const claims = mapUserInfoClaims(user, 'client-1', 'https://issuer.com', ['openid', 'uinfin', 'name', 'email'], 2, ['pwd', 'otp-sms']);
 
-    expect(claims.person_info?.uinfin).toEqual({ value: user.nric });
-    expect(claims.person_info?.name).toEqual({ value: user.name });
-    expect(claims.person_info?.email).toEqual({ value: user.email });
+    expect(claims.person_info?.uinfin).toEqual({ 
+      value: user.nric,
+      source: '1',
+      classification: 'C',
+      lastupdated: '2024-03-18'
+    });
+    expect(claims.person_info?.name).toEqual({ 
+      value: user.name,
+      source: '1',
+      classification: 'C',
+      lastupdated: '2024-03-18'
+    });
+    expect(claims.person_info?.email).toEqual({ 
+      value: user.email,
+      source: '4',
+      classification: 'C',
+      lastupdated: '2024-03-18'
+    });
   });
 
   it('should handle multiple spaces or different order in scopes array', () => {
     const claims = mapUserInfoClaims(user, 'client-1', 'https://issuer.com', ['name', 'openid'], 2, ['pwd', 'otp-sms']);
 
-    expect(claims.person_info?.name).toEqual({ value: user.name });
+    expect(claims.person_info?.name).toEqual({ 
+      value: user.name,
+      source: '1',
+      classification: 'C',
+      lastupdated: '2024-03-18'
+    });
     expect(claims.person_info?.uinfin).toBeUndefined();
   });
 
-  it('should omit fields from person_info when user data is missing even if scope is granted', () => {
+    it('should omit fields from person_info when user data is missing even if scope is granted', () => {
     const incompleteUser: UserData = { ...user, email: '' };
     const claims = mapUserInfoClaims(incompleteUser, 'client-1', 'https://issuer.com', ['openid', 'email', 'name'], 2, ['pwd', 'otp-sms']);
 
-    expect(claims.person_info?.name).toEqual({ value: user.name });
+    expect(claims.person_info?.name).toEqual({ 
+      value: user.name,
+      source: '1',
+      classification: 'C',
+      lastupdated: '2024-03-18'
+    });
     expect(claims.person_info?.email).toBeUndefined();
-  });
+    });
 
   it('should ensure person_info is present but empty when no identity scopes are granted', () => {
     const claims = mapUserInfoClaims(user, 'client-1', 'https://issuer.com', ['openid'], 2, ['pwd', 'otp-sms']);

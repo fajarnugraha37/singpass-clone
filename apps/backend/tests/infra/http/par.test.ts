@@ -37,6 +37,7 @@ describe('PAR Endpoint', () => {
       nonce: 'b'.repeat(30),
       code_challenge: 'test-challenge',
       code_challenge_method: 'S256',
+      purpose: 'Authentication for mock service',
       authentication_context_type: 'APP_AUTHENTICATION_DEFAULT',
     });
 

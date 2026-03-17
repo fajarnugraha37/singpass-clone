@@ -48,6 +48,9 @@ export const createAuthRouter = (
       authController.initiateAuth(initiateAuthUseCase)
     )
 
+    // RPC API: Get Current Session Info (mounted at /api/auth/session)
+    .get('/session', authController.getSession(sessionRepository))
+
     // RPC API: Primary Login (mounted at /api/auth/login)
     .post('/login', zValidator('json', loginRequestSchema), authController.login(validateLoginUseCase, sessionRepository, parRepository))
 

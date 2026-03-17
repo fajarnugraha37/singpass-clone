@@ -71,6 +71,7 @@ describe('RegisterParUseCase - Context Validation', () => {
     code_challenge_method: 'S256',
     state: 'a'.repeat(30),
     nonce: 'b'.repeat(30),
+    purpose: 'For testing only',
   });
 
   // US1: Mandatory context type for Login apps

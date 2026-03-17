@@ -51,6 +51,7 @@ export class InitiateAuthSessionUseCase {
       id: sessionId,
       parRequestUri: requestUri,
       clientId: clientId,
+      purpose: parRequest.purpose,
       status: 'INITIATED',
       retryCount: 0,
       loa: 1,

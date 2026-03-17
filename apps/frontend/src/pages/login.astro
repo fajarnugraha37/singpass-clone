@@ -9,6 +9,13 @@ import TwoFactorForm from '../components/TwoFactorForm.svelte';
 <BaseLayout title="Log In - Singpass">
   <div class="container mx-auto px-4 py-12 flex-grow flex flex-col items-center justify-center">
     <div class="w-full max-w-md bg-white p-8 border border-gray-200 shadow-sm" id="auth-container">
+      
+      <!-- Authorization Purpose Info -->
+      <div id="auth-purpose" class="hidden mb-6 p-4 bg-gray-50 border-l-4 border-red-600">
+        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Purpose of Data Access</p>
+        <p id="purpose-text" class="text-sm text-gray-700 italic"></p>
+      </div>
+
       <div id="login-section">
         <h1 class="text-2xl font-bold text-gray-900 mb-6">Log in</h1>
         <LoginForm client:load onSuccess={() => {
@@ -26,5 +33,27 @@ import TwoFactorForm from '../components/TwoFactorForm.svelte';
 </BaseLayout>
 
 <script>
+  import { client } from '../lib/rpc';
+
+  async function updatePurpose() {
+    try {
+      const res = await client.api.auth.session.$get();
+      if (res.ok) {
+        const data = await res.json();
+        const purposeEl = document.getElementById('auth-purpose');
+        const purposeTextEl = document.getElementById('purpose-text');
+        if (purposeEl && purposeTextEl && data.purpose) {
+          purposeTextEl.textContent = data.purpose;
+          purposeEl.classList.remove('hidden');
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch session purpose:', e);
+    }
+  }
+
+  // Run on mount
+  updatePurpose();
+
   // Optional: Handle back button or page refreshes if needed
 </script>

@@ -57,6 +57,20 @@
       "when": 1773764632772,
       "tag": "0007_eager_serpent_society",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1773774806408,
+      "tag": "0008_foamy_mad_thinker",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1773775312762,
+      "tag": "0009_brainy_the_captain",
+      "breakpoints": true
     }
   ]
 }

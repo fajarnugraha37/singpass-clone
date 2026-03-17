@@ -83,7 +83,7 @@ export class ValidateLoginUseCase {
 
     // 4. Update session
     session.status = 'PRIMARY_AUTH_SUCCESS';
-    session.userId = username; // For now using username as userId
+    session.userId = user!.id || (user as any).userId; // Use UUID from database
     session.otpCode = otpCode;
     session.retryCount = 0; // Reset on success? Requirement doesn't specify, but good practice.
     session.loa = 1;

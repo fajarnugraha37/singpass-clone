@@ -8,6 +8,7 @@ export class DrizzlePARRepository implements PARRepository {
     await db.insert(schema.parRequests).values({
       requestUri: request.requestUri,
       clientId: request.clientId,
+      purpose: request.purpose,
       dpopJkt: request.dpopJkt,
       payload: request.payload,
       expiresAt: request.expiresAt,
@@ -31,6 +32,7 @@ export class DrizzlePARRepository implements PARRepository {
       id: result.id,
       requestUri: result.requestUri,
       clientId: result.clientId,
+      purpose: result.purpose,
       dpopJkt: result.dpopJkt,
       payload: result.payload as Record<string, any>,
       expiresAt: result.expiresAt,

@@ -1,7 +1,10 @@
 import { mapLoaToAcr } from './claims';
 
 export interface PersonInfoField {
-  value: string;
+  value: string | null;
+  source: string;
+  classification: string;
+  lastupdated: string;
 }
 
 export interface PersonInfo {
@@ -46,16 +49,36 @@ export function mapUserInfoClaims(
   const person_info: PersonInfo = {};
 
   if (scopeSet.has('uinfin') && user.nric) {
-    person_info.uinfin = { value: user.nric };
+    person_info.uinfin = { 
+      value: user.nric,
+      source: '1',
+      classification: 'C',
+      lastupdated: '2024-03-18'
+    };
   }
   if (scopeSet.has('name') && user.name) {
-    person_info.name = { value: user.name };
+    person_info.name = { 
+      value: user.name,
+      source: '1',
+      classification: 'C',
+      lastupdated: '2024-03-18'
+    };
   }
   if (scopeSet.has('email') && user.email) {
-    person_info.email = { value: user.email };
+    person_info.email = { 
+      value: user.email,
+      source: '4',
+      classification: 'C',
+      lastupdated: '2024-03-18'
+    };
   }
   if (scopeSet.has('mobileno') && user.mobileno) {
-    person_info.mobileno = { value: user.mobileno };
+    person_info.mobileno = { 
+      value: user.mobileno,
+      source: '4',
+      classification: 'C',
+      lastupdated: '2024-03-18'
+    };
   }
 
   return {

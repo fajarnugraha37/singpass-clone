@@ -2,6 +2,7 @@ export interface PushedAuthorizationRequest {
   id?: string | number;
   requestUri: string;
   clientId: string;
+  purpose: string;
   dpopJkt?: string | null;
   payload: Record<string, any>;
   expiresAt: Date;

@@ -7,6 +7,8 @@ import { CryptoService } from '../domain/crypto_service';
 import { PARRepository, PARResponse, PushedAuthorizationRequest } from '../domain/par.types';
 import { DPoPValidator } from '../utils/dpop_validator';
 
+import { FapiErrors } from '../../infra/middleware/fapi-error';
+
 export class RegisterParUseCase {
   constructor(
     private cryptoService: CryptoService,
@@ -31,23 +33,48 @@ export class RegisterParUseCase {
     }
 
     // 1.1 Redirect URI check
-    const { redirect_uri } = payload;
+    const { redirect_uri, purpose } = payload;
     if (!redirect_uri) {
       throw new Error('redirect_uri is required');
+    }
+
+    if (!purpose) {
+      throw new Error('purpose is required');
     }
 
     // 2. DPoP binding (FAPI 2.0 / PAR requirement)
     let finalDpopJkt = dpop_jkt;
     if (dpop_header) {
       try {
-        // Validate DPoP proof
+        // 2.1 First, validate the nonce if provided in the header
+        // For FAPI 2.0, nonces are mandatory for protected endpoints.
+        const decodedProof = jose.decodeJwt(dpop_header);
+        const proofNonce = decodedProof.nonce as string;
+
+        if (!proofNonce) {
+          const freshNonce = await this.cryptoService.generateDPoPNonce(client_id);
+          throw FapiErrors.useDpopNonce(freshNonce, 'Missing or invalid DPoP nonce');
+        }
+
+        const isNonceValid = await this.cryptoService.validateDPoPNonce(proofNonce, client_id);
+        if (!isNonceValid) {
+          const freshNonce = await this.cryptoService.generateDPoPNonce(client_id);
+          throw FapiErrors.useDpopNonce(freshNonce, 'Missing or invalid DPoP nonce');
+        }
+
+        // 2.2 Validate DPoP proof signature and claims
         const dpopResult = await this.dpopValidator.validate(client_id, {
           proof: dpop_header,
           method: 'POST',
-          url: '/api/par',
+          url: input.url || '/api/par',
+          expectedNonce: proofNonce, // Validator will check it matches
         });
         
         if (!dpopResult.isValid) {
+          if (dpopResult.error === 'use_dpop_nonce') {
+            const freshNonce = await this.cryptoService.generateDPoPNonce(client_id);
+            throw FapiErrors.useDpopNonce(freshNonce, 'Missing or invalid DPoP nonce');
+          }
           throw new Error(`DPoP validation failed: ${dpopResult.error}`);
         }
 
@@ -165,6 +192,7 @@ export class RegisterParUseCase {
     const parRequest: PushedAuthorizationRequest = {
       requestUri,
       clientId: client_id,
+      purpose,
       dpopJkt: finalDpopJkt,
       payload,
       expiresAt,

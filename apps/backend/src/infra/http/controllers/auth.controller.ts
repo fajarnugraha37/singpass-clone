@@ -56,6 +56,27 @@ const handleTerminalFailure = async (c: Context, sessionId: string, sessionRepos
   return c.json({ success: false, error: 'Max retries exceeded' }, 401);
 };
 
+export const getSession = (sessionRepository: AuthSessionRepository) => {
+  return async (c: Context) => {
+    const sessionId = getCookie(c, 'vibe_auth_session');
+    if (!sessionId) {
+      return c.json({ error: 'Session not found' }, 401);
+    }
+
+    const session = await sessionRepository.getById(sessionId);
+    if (!session) {
+      return c.json({ error: 'Session not found' }, 401);
+    }
+
+    return c.json({
+      clientId: session.clientId,
+      purpose: session.purpose,
+      status: session.status,
+      expiresAt: session.expiresAt,
+    });
+  };
+};
+
 export const login = (useCase: ValidateLoginUseCase, sessionRepository: AuthSessionRepository, parRepository: PARRepository) => {
   return async (c: Context) => {
     try {

@@ -1,5 +1,8 @@
 export interface MyinfoValue<T> {
   value: T | null;
+  source?: string;
+  classification?: string;
+  lastupdated?: string;
 }
 
 export interface MyinfoAddress {

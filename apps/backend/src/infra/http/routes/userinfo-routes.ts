@@ -5,6 +5,7 @@ import { UserInfoRepository } from '../../../core/domain/userinfo_repository';
 import { ClientRegistry } from '../../../core/domain/client_registry';
 import { JWKSCacheService } from '../../adapters/jwks_cache';
 import { SecurityAuditService } from '../../../core/domain/audit_service';
+import { FapiError } from '../../middleware/fapi-error';
 
 /**
  * Router for the OIDC Userinfo endpoint, aligned with Myinfo v5 specs.
@@ -84,6 +85,9 @@ export const createUserinfoRouter = (
       c.header('Content-Type', 'application/jwt');
       return c.text(result);
     } catch (error: any) {
+      if (error instanceof FapiError || error.name === 'FapiError') {
+        throw error;
+      }
       console.error('[UserInfo Error]', error.message);
       
       if (error.message.startsWith('invalid_dpop_proof')) {

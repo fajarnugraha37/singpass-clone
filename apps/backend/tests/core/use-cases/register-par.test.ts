@@ -72,6 +72,7 @@ describe('RegisterParUseCase', () => {
       code_challenge_method: 'S256',
       state: 'a'.repeat(30),
       nonce: 'b'.repeat(30),
+      purpose: 'For testing only',
       authentication_context_type: 'APP_AUTHENTICATION_DEFAULT',
     } as any;
 
@@ -80,6 +81,16 @@ describe('RegisterParUseCase', () => {
     expect(result).toHaveProperty('request_uri');
     expect(result.request_uri).toMatch(/^urn:ietf:params:oauth:request_uri:/);
     expect(result).toHaveProperty('expires_in', 60);
+  });
+
+  test('should fail if purpose is missing', async () => {
+    const { purpose, ...inputWithoutPurpose } = {
+      ...getBaseInputForTest(),
+      client_assertion: validJwt,
+      client_id: 'mock-client-id',
+    } as any;
+
+    expect(useCase.execute(inputWithoutPurpose)).rejects.toThrow('purpose is required');
   });
 
   test('should fail if client_assertion validation fails', async () => {
@@ -190,6 +201,7 @@ describe('RegisterParUseCase', () => {
       code_challenge_method: 'S256',
       state: 'a'.repeat(30),
       nonce: 'b'.repeat(30),
+      purpose: 'For testing',
       authentication_context_type: 'APP_AUTHENTICATION_DEFAULT',
     };
   }

@@ -52,6 +52,24 @@ describe('ValidateLoginUseCase', () => {
     );
   });
 
+  test('should successfully validate login and update session with user UUID', async () => {
+    let updatedSession: any;
+    mockAuthSessionRepository.update = async (session) => {
+      updatedSession = session;
+    };
+
+    const result = await useCase.execute({
+      sessionId: 'valid-session-id',
+      username: 'S1234567A',
+      password: 'password123',
+    });
+
+    expect(result).toHaveProperty('success', true);
+    expect(updatedSession).toBeDefined();
+    expect(updatedSession.userId).toBe('user-1'); // Should be the UUID from mockUserRepository
+    expect(updatedSession.userId).not.toBe('S1234567A');
+  });
+
   test('should successfully validate login and update session with OTP', async () => {
     const result = await useCase.execute({
       sessionId: 'valid-session-id',

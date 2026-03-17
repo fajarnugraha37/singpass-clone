@@ -50,6 +50,9 @@ export const getUserInfo = (useCase: GetUserInfoUseCase, issuer: string) => asyn
     c.header('Content-Type', 'application/jwt');
     return c.text(result);
   } catch (error: any) {
+    if (error.name === 'FapiError') {
+      throw error;
+    }
     console.error('[UserInfo Error]', error.message);
     
     if (error.message.startsWith('invalid_dpop_proof')) {

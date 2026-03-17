@@ -26,6 +26,7 @@ export class DrizzleAuthDataService implements AuthDataService {
     const [inserted] = await db.insert(parRequests).values({
       requestUri: 'PENDING',
       clientId: validated.client_id,
+      purpose: validated.purpose,
       payload: validated,
       expiresAt,
     }).returning({ id: parRequests.id });

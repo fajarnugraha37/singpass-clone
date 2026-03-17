@@ -1,5 +1,6 @@
-import { describe, it, expect, mock, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect, mock, beforeEach, afterEach, spyOn } from 'bun:test';
 import { GetUserInfoUseCase } from '../../../src/core/use-cases/get-userinfo';
+import * as jose from 'jose';
 
 describe('GetUserInfoUseCase', () => {
   const mockRepository: any = {
@@ -8,6 +9,8 @@ describe('GetUserInfoUseCase', () => {
   };
   const mockCryptoService: any = {
     signAndEncrypt: mock(),
+    validateDPoPNonce: mock(async () => true),
+    generateDPoPNonce: mock(async () => 'fresh-nonce'),
   };
   const mockDpopValidator: any = {
     validate: mock(),
@@ -38,6 +41,10 @@ describe('GetUserInfoUseCase', () => {
     url: 'https://api.vibe.com/userinfo',
     issuer: 'https://issuer.com',
   };
+
+  beforeEach(() => {
+    spyOn(jose, 'decodeJwt').mockReturnValue({ nonce: 'valid-nonce' } as any);
+  });
 
   afterEach(() => {
     mock.restore();

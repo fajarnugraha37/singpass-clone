@@ -48,6 +48,7 @@ export const parRequestSchema = z.object({
   code_challenge_method: z.literal('S256'),
   client_assertion_type: z.literal('urn:ietf:params:oauth:client-assertion-type:jwt-bearer'),
   client_assertion: z.string().min(1),
+  purpose: z.string().min(1),
   dpop_jkt: z.string().optional(),
   authentication_context_type: z.nativeEnum(AuthenticationContextType).optional(),
   authentication_context_message: z.string().max(100).regex(/^[A-Za-z0-9 .,\-@'!()]*$/).optional(),

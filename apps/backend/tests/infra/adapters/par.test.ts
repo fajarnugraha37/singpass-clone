@@ -22,6 +22,7 @@ describe("DrizzleAuthDataService - PAR Lifecycle", () => {
     nonce: 'b'.repeat(30),
     code_challenge: 'challenge',
     code_challenge_method: 'S256',
+    purpose: 'testing',
     client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
     client_assertion: 'eyJhbGci...',
   };

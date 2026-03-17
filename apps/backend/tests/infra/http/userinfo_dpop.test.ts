@@ -2,10 +2,14 @@ import { expect, test, describe, beforeEach, spyOn, afterEach, mock } from 'bun:
 import app from '../../../src/index'
 import { DPoPValidator } from '../../../src/core/utils/dpop_validator'
 import { DrizzleUserInfoRepository } from '../../../src/infra/adapters/db/drizzle_userinfo_repository'
+import { JoseCryptoService } from '../../../src/infra/adapters/jose_crypto'
 import * as jose from 'jose'
 
 describe('UserInfo Endpoint DPoP Integration', () => {
   beforeEach(async () => {
+    spyOn(jose, 'decodeJwt').mockReturnValue({ nonce: 'valid-nonce' } as any);
+    spyOn(JoseCryptoService.prototype, 'validateDPoPNonce').mockImplementation(async () => true);
+    
     spyOn(DrizzleUserInfoRepository.prototype, 'getAccessToken').mockImplementation(async () => ({
       token: 'valid-token',
       userId: 'user-1',
