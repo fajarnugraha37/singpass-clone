@@ -77,9 +77,9 @@ A quickstart guide has been created to provide clear, step-by-step instructions 
 ### Step 3: Stricter Client Assertion Validation
 - **Files**: `apps/backend/src/infra/adapters/jose_crypto.ts`, `apps/backend/src/core/application/services/client-auth.service.ts`
 - **Action**:
-  1. In `jose_crypto.ts`, update `validateClientAssertion` to add explicit checks for `iss === sub` and `exp - iat <= 120`.
-  2. Inject the `PARRepository` (or a similar JTI-tracking mechanism) into `ClientAuthenticationService`.
-  3. In `ClientAuthenticationService`, call the repository to check and consume the `jti` from the client assertion to prevent replays.
+  1. In `jose_crypto.ts`, update `validateClientAssertion` to add explicit checks for `iss === sub`, `exp - iat <= 120`, and that the `aud` claim matches the configured Singpass issuer identifier (`sharedConfig.OIDC.ISSUER`).
+  2. Inject the generic `JtiStore` interface (used by DPoP) into `ClientAuthenticationService` to track assertions.
+  3. In `ClientAuthenticationService`, call the `jtiStore` to check and consume the `jti` from the client assertion to prevent replays.
 - **Test**: Add unit tests in `jose_crypto.test.ts` and `client-auth.service.test.ts` for the new validation logic.
 
 ### Step 4: Add PKCE Constraints

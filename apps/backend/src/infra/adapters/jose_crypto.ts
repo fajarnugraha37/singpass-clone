@@ -5,6 +5,7 @@ import type { ClientRegistry } from '../../core/domain/client_registry';
 import type { SecurityAuditService } from '../../core/domain/audit_service';
 import type { ServerKeyManager } from '../../core/domain/key_manager';
 import { getSigningKey, getPublicJWK } from '../../core/security/jwt_utils';
+import { sharedConfig } from '../../../../../packages/shared/src/config';
 
 /**
  * Production-grade implementation of CryptoService using jose and ServerKeyManager.
@@ -113,6 +114,11 @@ export class JoseCryptoService implements CryptoService {
       // Hardening: exp - iat must be <= 120 seconds
       if (payload.exp && payload.iat && payload.exp - payload.iat > 120) {
         throw new Error('client_assertion duration too long (max 120s)');
+      }
+
+      // Hardening: aud must match issuer
+      if (payload.aud !== sharedConfig.OIDC.ISSUER) {
+        throw new Error(`client_assertion aud must be ${sharedConfig.OIDC.ISSUER}`);
       }
 
       const publicKey = await jose.importJWK(clientPublicKey, this.algorithm);

@@ -31,10 +31,10 @@ No foundational tasks are required for this feature as all changes are enhanceme
 - **Goal**: Enforce stricter validation rules for client assertions.
 - **Independent Test Criteria**: The system must reject client assertions with non-compliant `iss`/`sub`, `aud`, `exp`, or a replayed `jti`.
 
-- [X] T009 `[P]` [US1] Update `JoseCryptoService.validateClientAssertion` to add explicit checks for `iss === sub` and `exp - iat <= 120` in `apps/backend/src/infra/adapters/jose_crypto.ts`.
-- [X] T010 `[US1]` Inject the `PARRepository` into `ClientAuthenticationService` in `apps/backend/src/core/application/services/client-auth.service.ts`.
-- [X] T011 `[US1]` In `ClientAuthenticationService`, call the repository to check and consume the `jti` from the client assertion to prevent replays in `apps/backend/src/core/application/services/client-auth.service.ts`.
-- [X] T012 `[US1]` Add unit tests for the new validation logic in new test files `apps/backend/tests/infra/adapters/jose_crypto.test.ts` and `apps/backend/tests/core/application/services/client-auth.service.test.ts`.
+- [X] T009 `[P]` [US1] Update `JoseCryptoService.validateClientAssertion` to add explicit checks for `iss === sub`, `exp - iat <= 120`, and `aud === sharedConfig.OIDC.ISSUER` in `apps/backend/src/infra/adapters/jose_crypto.ts`.
+- [X] T010 `[US1]` Inject the generic `JtiStore` interface into `ClientAuthenticationService` in `apps/backend/src/core/application/services/client-auth.service.ts`.
+- [X] T011 `[US1]` In `ClientAuthenticationService`, call the `jtiStore` to check and consume the `jti` from the client assertion to prevent replays in `apps/backend/src/core/application/services/client-auth.service.ts`.
+- [X] T012 `[US1]` Add unit tests for the new validation logic in new test files `apps/backend/tests/infra/adapters/crypto_auth.test.ts` and `apps/backend/tests/unit/application/services/client-auth.service.test.ts`.
 
 ### Phase 5: PKCE Constraints
 - **Goal**: Enforce length and character constraints on the PKCE `code_verifier`.

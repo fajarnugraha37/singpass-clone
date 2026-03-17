@@ -22,7 +22,7 @@ describe("JoseCryptoService - Client Authentication", () => {
     const assertion = await new jose.SignJWT({
       iss: "mock-client-id",
       sub: "mock-client-id",
-      aud: "http://localhost:3000/par",
+      aud: "https://vibe-auth.example.com",
     })
       .setProtectedHeader({ alg: "ES256" })
       .setIssuedAt()
@@ -106,6 +106,7 @@ describe("JoseCryptoService - Client Authentication", () => {
     const assertion = await new jose.SignJWT({
       iss: "client-id",
       sub: "client-id",
+      aud: "https://vibe-auth.example.com",
       iat: now,
       exp: now + 120,
     })
