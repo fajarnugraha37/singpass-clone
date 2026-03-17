@@ -54,7 +54,7 @@ const userInfoRepository = new DrizzleUserInfoRepository();
 const jtiStore = new DrizzleJtiStore();
 const dpopValidator = new DPoPValidator(jtiStore);
 
-const clientAuthService = new ClientAuthenticationService(cryptoService, clientRegistry);
+const clientAuthService = new ClientAuthenticationService(cryptoService, clientRegistry, jtiStore);
 const tokenService = new TokenService(cryptoService, clientRegistry);
 
 const registerParUseCase = new RegisterParUseCase(cryptoService, parRepository, clientRegistry, dpopValidator, auditService);

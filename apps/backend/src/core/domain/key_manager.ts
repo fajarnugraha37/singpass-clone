@@ -13,7 +13,7 @@ export interface ServerKeyManager {
   /**
    * Generates and persists a new server key pair.
    */
-  generateKeyPair(): Promise<{ id: string; publicKey: JWK }>;
+  generateKeyPair(use?: 'sig' | 'enc'): Promise<{ id: string; publicKey: JWK }>;
 
   /**
    * Returns all active public keys in JWKS format.

@@ -13,7 +13,7 @@ export class DrizzleServerKeyManager implements ServerKeyManager {
 
   constructor(private auditService?: SecurityAuditService) {}
 
-  async generateKeyPair(): Promise<{ id: string; publicKey: JWK }> {
+  async generateKeyPair(use: 'sig' | 'enc' = 'sig'): Promise<{ id: string; publicKey: JWK }> {
     const { publicKey, privateKey } = await jose.generateKeyPair(this.algorithm, { extractable: true });
     
     const privateKeyExported = await jose.exportPKCS8(privateKey);
@@ -21,7 +21,7 @@ export class DrizzleServerKeyManager implements ServerKeyManager {
     const kid = crypto.randomUUID();
     
     publicKeyJWK.kid = kid;
-    publicKeyJWK.use = 'sig';
+    publicKeyJWK.use = use;
     publicKeyJWK.alg = this.algorithm;
 
     const encrypted = encryptKey(Buffer.from(privateKeyExported));
@@ -31,6 +31,7 @@ export class DrizzleServerKeyManager implements ServerKeyManager {
       encryptedKey: encrypted.encryptedKey,
       iv: encrypted.iv,
       authTag: encrypted.authTag,
+      use: use,
       isActive: true,
     });
 
@@ -56,7 +57,7 @@ export class DrizzleServerKeyManager implements ServerKeyManager {
         keys.push({
           ...publicKey,
           kid: k.id,
-          use: 'sig',
+          use: k.use as 'sig' | 'enc',
           alg: this.algorithm,
         } as JWK);
       } catch (error: any) {
@@ -70,7 +71,7 @@ export class DrizzleServerKeyManager implements ServerKeyManager {
   async getActiveKey(keyId?: string): Promise<{ id: string; privateKey: CryptoKey; publicKey: JWK }> {
     const query = keyId
       ? db.select().from(serverKeys).where(eq(serverKeys.id, keyId))
-      : db.select().from(serverKeys).where(eq(serverKeys.isActive, true)).orderBy(desc(serverKeys.createdAt));
+      : db.select().from(serverKeys).where(and(eq(serverKeys.isActive, true), eq(serverKeys.use, 'sig'))).orderBy(desc(serverKeys.createdAt));
 
     const records = await query;
     if (records.length === 0) {
@@ -94,7 +95,7 @@ export class DrizzleServerKeyManager implements ServerKeyManager {
           publicKey: {
             ...publicKeyJWK,
             kid: keyRecord.id,
-            use: 'sig',
+            use: keyRecord.use as 'sig' | 'enc',
             alg: this.algorithm,
           } as JWK,
         };
@@ -108,17 +109,36 @@ export class DrizzleServerKeyManager implements ServerKeyManager {
   }
 
   async ensureActiveKey(): Promise<void> {
-    const activeKeys = await db.select().from(serverKeys).where(eq(serverKeys.isActive, true));
+    const activeSigningKeys = await db.select().from(serverKeys).where(and(eq(serverKeys.isActive, true), eq(serverKeys.use, 'sig')));
     
-    for (const k of activeKeys) {
+    let hasSigning = false;
+    for (const k of activeSigningKeys) {
       try {
         decryptKey({ encryptedKey: k.encryptedKey, iv: k.iv, authTag: k.authTag });
-        return; // Found one!
+        hasSigning = true;
+        break;
       } catch (e) {}
     }
 
-    console.info('[KeyManager] No decryptable keys found. Provisioning...');
-    await this.generateKeyPair();
+    if (!hasSigning) {
+      console.info('[KeyManager] No decryptable signing keys found. Provisioning...');
+      await this.generateKeyPair('sig');
+    }
+
+    const activeEncryptionKeys = await db.select().from(serverKeys).where(and(eq(serverKeys.isActive, true), eq(serverKeys.use, 'enc')));
+    let hasEncryption = false;
+    for (const k of activeEncryptionKeys) {
+      try {
+        decryptKey({ encryptedKey: k.encryptedKey, iv: k.iv, authTag: k.authTag });
+        hasEncryption = true;
+        break;
+      } catch (e) {}
+    }
+
+    if (!hasEncryption) {
+      console.info('[KeyManager] No decryptable encryption keys found. Provisioning...');
+      await this.generateKeyPair('enc');
+    }
   }
 
   async rotateKeys(): Promise<void> {

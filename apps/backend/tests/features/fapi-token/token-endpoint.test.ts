@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach, vi, spyOn, type Mock } from 'bun:test';
+import { describe, it, expect, beforeEach, vi, spyOn, type Mock, beforeAll } from 'bun:test';
 import { Hono } from 'hono';
 import type { Context } from 'hono';
+import * as jose from 'jose';
 import { TokenExchangeUseCase } from '../../../src/core/use-cases/token-exchange';
 import { exchangeToken } from '../../../src/infra/http/controllers/token.controller';
 import { FapiErrors, FapiError } from '../../../src/infra/middleware/fapi-error';
@@ -11,6 +12,11 @@ const mockTokenExchangeUseCase = new TokenExchangeUseCase(null as any, null as a
 // Mock Hono app and context
 const app = new Hono();
 let c: Context;
+
+// Common test data
+const VALID_CODE_VERIFIER = 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk';
+let testKeyPair: jose.GenerateKeyPairResult;
+let testDpopProof: string;
 
 // Helper to create a mock Hono Context for middleware testing
 const createMockContext = async (request: Request): Promise<Context> => {
@@ -58,6 +64,20 @@ const createMockContext = async (request: Request): Promise<Context> => {
 };
 
 describe('Token Controller - Integration Tests', () => {
+  beforeAll(async () => {
+    testKeyPair = await jose.generateKeyPair('ES256');
+    const jwk = await jose.exportJWK(testKeyPair.publicKey);
+    testDpopProof = await new jose.SignJWT({
+      htm: 'POST',
+      htu: 'http://localhost:3000/token',
+      jti: 'test-jti',
+    })
+      .setProtectedHeader({ alg: 'ES256', typ: 'dpop+jwt', jwk })
+      .setIssuedAt()
+      .setExpirationTime('120s')
+      .sign(testKeyPair.privateKey);
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -74,7 +94,7 @@ describe('Token Controller - Integration Tests', () => {
         grant_type: 'authorization_code',
         code: 'valid_code',
         redirect_uri: 'http://localhost:3000/callback',
-        code_verifier: 'some_verifier',
+        code_verifier: VALID_CODE_VERIFIER,
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
         client_assertion: 'dummy_assertion',
       }).toString(),
@@ -103,9 +123,9 @@ describe('Token Controller - Integration Tests', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'DPoP': 'dummy-dpop-header',
+        'DPoP': testDpopProof,
       },
-      body: 'grant_type=authorization_code&code=valid_code&redirect_uri=http://localhost:3000/callback&code_verifier=some_verifier&client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer&client_assertion=dummy_assertion&invalid_param=extra', // Malformed body
+      body: 'grant_type=authorization_code&code=valid_code&redirect_uri=http://localhost:3000/callback&code_verifier=' + VALID_CODE_VERIFIER + '&client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer&client_assertion=dummy_assertion&invalid_param=extra', // Malformed body
     }).clone();
 
     c = await createMockContext(request);
@@ -132,13 +152,13 @@ describe('Token Controller - Integration Tests', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'DPoP': 'dummy-dpop-header',
+        'DPoP': testDpopProof,
       },
       body: new URLSearchParams({
         grant_type: 'authorization_code',
         code: 'valid_code',
         redirect_uri: 'http://localhost:3000/callback',
-        code_verifier: 'some_verifier',
+        code_verifier: VALID_CODE_VERIFIER,
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
         client_assertion: 'dummy_assertion',
       }).toString(),
@@ -168,13 +188,13 @@ describe('Token Controller - Integration Tests', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'DPoP': 'dummy-dpop-header',
+        'DPoP': testDpopProof,
       },
       body: new URLSearchParams({
         grant_type: 'authorization_code',
         code: 'valid_code',
         redirect_uri: 'http://localhost:3000/callback',
-        code_verifier: 'some_verifier',
+        code_verifier: VALID_CODE_VERIFIER,
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
         client_assertion: 'dummy_assertion',
       }).toString(),

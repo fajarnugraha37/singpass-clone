@@ -21,6 +21,7 @@ describe('Core Utilities', () => {
       })
         .setProtectedHeader({ alg: 'ES256', typ: 'dpop+jwt', jwk })
         .setIssuedAt()
+        .setExpirationTime('120s')
         .sign(keyPair.privateKey);
 
       const result = await validator.validate('test-client', {
@@ -44,6 +45,7 @@ describe('Core Utilities', () => {
       })
         .setProtectedHeader({ alg: 'ES256', typ: 'dpop+jwt', jwk })
         .setIssuedAt()
+        .setExpirationTime('120s')
         .sign(keyPair.privateKey);
 
       const result = await validator.validate('test-client', {
@@ -67,6 +69,7 @@ describe('Core Utilities', () => {
       })
         .setProtectedHeader({ alg: 'ES256', typ: 'dpop+jwt', jwk })
         .setIssuedAt()
+        .setExpirationTime('120s')
         .sign(keyPair.privateKey);
 
       const result = await validator.validate('test-client', {

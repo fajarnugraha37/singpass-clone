@@ -18,5 +18,9 @@ export const getDiscoveryDocument = (c: Context) => {
     subject_types_supported: ['public'],
     id_token_signing_alg_values_supported: ['ES256'],
     dpop_signing_alg_values_supported: ['ES256'],
+    id_token_encryption_alg_values_supported: ['ECDH-ES+A256KW'],
+    id_token_encryption_enc_values_supported: ['A256GCM'],
+    userinfo_encryption_alg_values_supported: ['ECDH-ES+A256KW'],
+    userinfo_encryption_enc_values_supported: ['A256GCM'],
   });
 };

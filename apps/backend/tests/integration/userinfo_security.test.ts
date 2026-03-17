@@ -53,6 +53,7 @@ describe('UserInfo Security Integration', () => {
         jwk: otherJwk 
       })
       .setIssuedAt()
+      .setExpirationTime('120s')
       .sign(otherKeyPair.privateKey);
 
     // 2. Send request

@@ -21,5 +21,9 @@ describe('Discovery Controller', () => {
     expect(data.grant_types_supported).toContain('authorization_code');
     expect(data.token_endpoint_auth_methods_supported).toContain('private_key_jwt');
     expect(data.code_challenge_methods_supported).toContain('S256');
+    expect(data.id_token_encryption_alg_values_supported).toContain('ECDH-ES+A256KW');
+    expect(data.id_token_encryption_enc_values_supported).toContain('A256GCM');
+    expect(data.userinfo_encryption_alg_values_supported).toContain('ECDH-ES+A256KW');
+    expect(data.userinfo_encryption_enc_values_supported).toContain('A256GCM');
   });
 });

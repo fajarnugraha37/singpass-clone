@@ -1,0 +1,1 @@
+ALTER TABLE `server_keys` ADD `use` text DEFAULT 'sig' NOT NULL;

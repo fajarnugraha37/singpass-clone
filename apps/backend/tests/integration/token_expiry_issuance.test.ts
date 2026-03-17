@@ -58,6 +58,7 @@ describe('Token Expiry Issuance Integration', () => {
     })
       .setProtectedHeader({ alg: 'ES256', typ: 'dpop+jwt', jwk })
       .setIssuedAt()
+      .setExpirationTime('120s')
       .sign(clientKeyPair.privateKey);
 
     // Client Assertion

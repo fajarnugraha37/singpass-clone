@@ -1,6 +1,7 @@
 import * as jose from 'jose';
 import type { CryptoService } from '../../domain/crypto_service';
 import type { ClientRegistry } from '../../domain/client_registry';
+import type { JtiStore } from '../../utils/dpop_validator';
 import { FapiErrors } from '../../../infra/middleware/fapi-error';
 
 export interface ClientAuthenticationResult {
@@ -11,6 +12,7 @@ export class ClientAuthenticationService {
   constructor(
     private cryptoService: CryptoService,
     private clientRegistry: ClientRegistry,
+    private jtiStore?: JtiStore,
   ) {}
 
   /**
@@ -53,6 +55,16 @@ export class ClientAuthenticationService {
       const isValid = await this.cryptoService.validateClientAssertion(assertion, clientKey);
       if (!isValid) {
         throw FapiErrors.invalidClient('Client assertion signature validation failed');
+      }
+
+      // 4.1 JTI replay check
+      if (this.jtiStore && payload.jti) {
+        const isUsed = await this.jtiStore.isUsed(payload.jti as string, clientId);
+        if (isUsed) {
+          throw FapiErrors.invalidClient('jti has already been used');
+        }
+        const exp = (payload.exp as number) || (Math.floor(Date.now() / 1000) + 120);
+        await this.jtiStore.markUsed(payload.jti as string, clientId, new Date(exp * 1000));
       }
 
       // 5. Additional FAPI 2.0 checks (aud, exp, etc. are typically handled by cryptoService.validateClientAssertion)

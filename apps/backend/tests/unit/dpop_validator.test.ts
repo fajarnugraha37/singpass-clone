@@ -19,11 +19,22 @@ describe('DPoPValidator', () => {
   });
 
   async function createProof(payload: any, headerOverrides = {}) {
-    const jwt = new jose.SignJWT(payload)
+    const { exp, ...restPayload } = payload;
+    const jwt = new jose.SignJWT(restPayload)
       .setProtectedHeader({ alg: 'ES256', typ: 'dpop+jwt', jwk, ...headerOverrides });
     
     if (payload.iat === undefined) {
       jwt.setIssuedAt();
+    }
+
+    if (exp !== null) {
+      if (exp !== undefined) {
+        jwt.setExpirationTime(exp);
+      } else if (payload.iat === undefined) {
+        jwt.setExpirationTime('2m');
+      } else {
+        jwt.setExpirationTime(payload.iat + 120);
+      }
     }
     
     return await jwt.sign(keyPair.privateKey);
@@ -199,6 +210,7 @@ describe('DPoPValidator', () => {
         htu: 'https://server.example.com/token',
         jti: 'old-jti',
         iat: now - 300, // 5 minutes ago
+        exp: now + 300, // 5 minutes in future
       });
 
       const result = await validator.validate('client-1', {
@@ -228,6 +240,133 @@ describe('DPoPValidator', () => {
 
       expect(result.isValid).toBe(false);
       expect(result.error).toBe('invalid_iat');
+    });
+  });
+
+  describe('EXP (Expiration Time) Validation', () => {
+    test('should fail if exp is missing', async () => {
+      const proof = await createProof({
+        htm: 'GET',
+        htu: 'https://server.example.com/userinfo',
+        jti: 'test-jti',
+        exp: null,
+      });
+
+      const result = await validator.validate('client-1', {
+        proof,
+        method: 'GET',
+        url: 'https://server.example.com/userinfo',
+      });
+
+      expect(result.isValid).toBe(false);
+      expect(result.error).toBe('missing_exp');
+    });
+
+    test('should fail if exp - iat > 120 seconds', async () => {
+      const now = Math.floor(Date.now() / 1000);
+      const proof = await createProof({
+        htm: 'GET',
+        htu: 'https://server.example.com/userinfo',
+        jti: 'test-jti',
+        iat: now,
+        exp: now + 121,
+      });
+
+      const result = await validator.validate('client-1', {
+        proof,
+        method: 'GET',
+        url: 'https://server.example.com/userinfo',
+      });
+
+      expect(result.isValid).toBe(false);
+      expect(result.error).toBe('invalid_exp');
+    });
+
+    test('should pass if exp - iat <= 120 seconds', async () => {
+      const now = Math.floor(Date.now() / 1000);
+      const proof = await createProof({
+        htm: 'GET',
+        htu: 'https://server.example.com/userinfo',
+        jti: 'test-jti',
+        iat: now,
+        exp: now + 120,
+      });
+
+      const result = await validator.validate('client-1', {
+        proof,
+        method: 'GET',
+        url: 'https://server.example.com/userinfo',
+      });
+
+      expect(result.isValid).toBe(true);
+    });
+  });
+
+  describe('ATH (Access Token Hash) Validation', () => {
+    test('should fail if accessToken is provided but ath is missing', async () => {
+      const proof = await createProof({
+        htm: 'GET',
+        htu: 'https://server.example.com/userinfo',
+        jti: 'test-jti',
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + 60,
+      });
+
+      const result = await validator.validate('client-1', {
+        proof,
+        method: 'GET',
+        url: 'https://server.example.com/userinfo',
+        accessToken: 'some-access-token',
+      } as any);
+
+      expect(result.isValid).toBe(false);
+      expect(result.error).toBe('missing_ath');
+    });
+
+    test('should fail if ath does not match the access token hash', async () => {
+      const proof = await createProof({
+        htm: 'GET',
+        htu: 'https://server.example.com/userinfo',
+        jti: 'test-jti',
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + 60,
+        ath: 'wrong-hash',
+      });
+
+      const result = await validator.validate('client-1', {
+        proof,
+        method: 'GET',
+        url: 'https://server.example.com/userinfo',
+        accessToken: 'some-access-token',
+      } as any);
+
+      expect(result.isValid).toBe(false);
+      expect(result.error).toBe('invalid_ath');
+    });
+
+    test('should pass if ath matches the access token hash', async () => {
+      const accessToken = 'some-access-token';
+      const hash = await jose.base64url.encode(
+        new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(accessToken)))
+      );
+
+      const proof = await createProof({
+        htm: 'GET',
+        htu: 'https://server.example.com/userinfo',
+        jti: 'test-jti',
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + 60,
+        ath: hash,
+      });
+
+      const result = await validator.validate('client-1', {
+        proof,
+        method: 'GET',
+        url: 'https://server.example.com/userinfo',
+        accessToken: accessToken,
+      } as any);
+
+      expect(result.isValid).toBe(true);
     });
   });
 });

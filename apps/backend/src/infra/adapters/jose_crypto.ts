@@ -105,6 +105,16 @@ export class JoseCryptoService implements CryptoService {
     const clientId = payload.iss || 'unknown';
 
     try {
+      // Hardening: iss must match sub
+      if (payload.iss !== payload.sub) {
+        throw new Error('iss must match sub in client_assertion');
+      }
+
+      // Hardening: exp - iat must be <= 120 seconds
+      if (payload.exp && payload.iat && payload.exp - payload.iat > 120) {
+        throw new Error('client_assertion duration too long (max 120s)');
+      }
+
       const publicKey = await jose.importJWK(clientPublicKey, this.algorithm);
       await jose.jwtVerify(assertion, publicKey, {
         algorithms: [this.algorithm],

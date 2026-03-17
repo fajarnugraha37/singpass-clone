@@ -97,6 +97,7 @@ describe('UserInfo Integration', () => {
         jwk: clientJwk 
       })
       .setIssuedAt()
+      .setExpirationTime('120s')
       .sign(clientKeyPair.privateKey);
 
     // 2. Send request

@@ -26,7 +26,7 @@ describe("JoseCryptoService - Client Authentication", () => {
     })
       .setProtectedHeader({ alg: "ES256" })
       .setIssuedAt()
-      .setExpirationTime("5m")
+      .setExpirationTime("2m")
       .setJti(crypto.randomUUID())
       .sign(privateKey);
 
@@ -61,5 +61,58 @@ describe("JoseCryptoService - Client Authentication", () => {
 
     const isValid = await cryptoService.validateClientAssertion(assertion, clientPublicKeyJWK);
     expect(isValid).toBe(false);
+  });
+
+  test("should reject assertion if iss !== sub", async () => {
+    const { publicKey, privateKey } = await jose.generateKeyPair("ES256");
+    const clientPublicKeyJWK = await jose.exportJWK(publicKey);
+    
+    const assertion = await new jose.SignJWT({
+      iss: "client-id",
+      sub: "different-id",
+    })
+      .setProtectedHeader({ alg: "ES256" })
+      .setIssuedAt()
+      .setExpirationTime("5m")
+      .sign(privateKey);
+
+    const isValid = await cryptoService.validateClientAssertion(assertion, clientPublicKeyJWK);
+    expect(isValid).toBe(false);
+  });
+
+  test("should reject assertion if duration is longer than 120 seconds", async () => {
+    const { publicKey, privateKey } = await jose.generateKeyPair("ES256");
+    const clientPublicKeyJWK = await jose.exportJWK(publicKey);
+    
+    const now = Math.floor(Date.now() / 1000);
+    const assertion = await new jose.SignJWT({
+      iss: "client-id",
+      sub: "client-id",
+      iat: now,
+      exp: now + 121,
+    })
+      .setProtectedHeader({ alg: "ES256" })
+      .sign(privateKey);
+
+    const isValid = await cryptoService.validateClientAssertion(assertion, clientPublicKeyJWK);
+    expect(isValid).toBe(false);
+  });
+
+  test("should accept assertion if duration is exactly 120 seconds", async () => {
+    const { publicKey, privateKey } = await jose.generateKeyPair("ES256");
+    const clientPublicKeyJWK = await jose.exportJWK(publicKey);
+    
+    const now = Math.floor(Date.now() / 1000);
+    const assertion = await new jose.SignJWT({
+      iss: "client-id",
+      sub: "client-id",
+      iat: now,
+      exp: now + 120,
+    })
+      .setProtectedHeader({ alg: "ES256" })
+      .sign(privateKey);
+
+    const isValid = await cryptoService.validateClientAssertion(assertion, clientPublicKeyJWK);
+    expect(isValid).toBe(true);
   });
 });

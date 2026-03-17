@@ -110,6 +110,7 @@ describe('Token Exchange Performance', () => {
     })
       .setProtectedHeader({ alg: 'ES256', typ: 'dpop+jwt', jwk })
       .setIssuedAt()
+      .setExpirationTime('120s')
       .sign(clientKeyPair.privateKey);
 
     clientAssertion = await new jose.SignJWT({ iss: 'test-client' })

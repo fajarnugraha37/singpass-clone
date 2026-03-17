@@ -48,6 +48,7 @@ describe('Token Expiry Enforcement Integration', () => {
     })
       .setProtectedHeader({ alg: 'ES256', typ: 'dpop+jwt', jwk: clientJwk })
       .setIssuedAt()
+      .setExpirationTime('120s')
       .sign(clientKeyPair.privateKey);
 
     // Send request with expired token
@@ -111,6 +112,7 @@ describe('Token Expiry Enforcement Integration', () => {
      })
        .setProtectedHeader({ alg: 'ES256', typ: 'dpop+jwt', jwk: clientJwk })
        .setIssuedAt()
+       .setExpirationTime('120s')
        .sign(clientKeyPair.privateKey);
 
      const res = await app.request('/userinfo', {

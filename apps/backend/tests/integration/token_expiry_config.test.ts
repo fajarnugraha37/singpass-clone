@@ -78,6 +78,7 @@ describe('Token Expiry Configuration Integration', () => {
     })
       .setProtectedHeader({ alg: 'ES256', typ: 'dpop+jwt', jwk })
       .setIssuedAt()
+      .setExpirationTime('120s')
       .sign(keyPair.privateKey);
 
     const clientAssertion = await new jose.SignJWT({

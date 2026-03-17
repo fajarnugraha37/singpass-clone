@@ -43,6 +43,7 @@ export const serverKeys = sqliteTable('server_keys', {
   encryptedKey: text('encrypted_key').notNull(),
   iv: text('iv').notNull(),
   authTag: text('auth_tag').notNull(),
+  use: text('use').notNull().default('sig'),
   isActive: integer('is_active', { mode: 'boolean' }).default(true).notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 });

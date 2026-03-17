@@ -13,8 +13,17 @@ describe('JWKS Controller', () => {
             crv: 'P-256',
             x: '...',
             y: '...',
-            kid: 'test-kid',
+            kid: 'test-sig-kid',
             use: 'sig',
+            alg: 'ES256',
+          },
+          {
+            kty: 'EC',
+            crv: 'P-256',
+            x: '...',
+            y: '...',
+            kid: 'test-enc-kid',
+            use: 'enc',
             alg: 'ES256',
           },
         ],
@@ -28,7 +37,8 @@ describe('JWKS Controller', () => {
     expect(res.status).toBe(200);
 
     const data = await res.json();
-    expect(data.keys).toHaveLength(1);
-    expect(data.keys[0].kid).toBe('test-kid');
+    expect(data.keys).toHaveLength(2);
+    expect(data.keys.find((k: any) => k.use === 'sig')).toBeDefined();
+    expect(data.keys.find((k: any) => k.use === 'enc')).toBeDefined();
   });
 });

@@ -11,7 +11,7 @@ export const tokenRequestSchema = z.object({
   grant_type: z.literal('authorization_code'),
   code: z.string(),
   redirect_uri: z.string(),
-  code_verifier: z.string(),
+  code_verifier: z.string().min(43).max(128).regex(/^[A-Za-z0-9\-\._~]+$/),
   client_assertion_type: z.literal('urn:ietf:params:oauth:client-assertion-type:jwt-bearer'),
   client_assertion: z.string(),
 });

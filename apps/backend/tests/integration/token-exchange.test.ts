@@ -87,6 +87,7 @@ describe('Token Exchange Integration', () => {
         jwk 
       })
       .setIssuedAt()
+      .setExpirationTime('120s')
       .sign(clientKeyPair.privateKey);
 
     // 2. Generate Client Assertion (private_key_jwt)

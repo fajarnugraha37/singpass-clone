@@ -28,7 +28,7 @@ describe('Token Endpoint DPoP Integration', () => {
       grant_type: 'authorization_code',
       code: 'test-code',
       redirect_uri: 'http://localhost:3000/callback',
-      code_verifier: 'test-verifier',
+      code_verifier: 'test-verifier-that-is-at-least-43-characters-long-and-valid',
       client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
       client_assertion: 'mock-assertion'
     });
@@ -58,7 +58,7 @@ describe('Token Endpoint DPoP Integration', () => {
       grant_type: 'authorization_code',
       code: 'test-code',
       redirect_uri: 'http://localhost:3000/callback',
-      code_verifier: 'test-verifier',
+      code_verifier: 'test-verifier-that-is-at-least-43-characters-long-and-valid',
       client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
       client_assertion: 'mock-assertion'
     });
@@ -75,5 +75,83 @@ describe('Token Endpoint DPoP Integration', () => {
     expect(res.status).toBe(400);
     const body = await res.json();
     expect(body.error_description).toContain('jti_reused');
+  });
+
+  describe('PKCE Constraints', () => {
+    test('should fail if code_verifier is too short', async () => {
+      const params = new URLSearchParams({
+        grant_type: 'authorization_code',
+        code: 'test-code',
+        redirect_uri: 'http://localhost:3000/callback',
+        code_verifier: 'too-short',
+        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+        client_assertion: 'mock-assertion'
+      });
+
+      const res = await app.request('/api/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'DPoP': 'mock-proof'
+        },
+        body: params.toString(),
+      });
+
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body.error).toBe('invalid_request');
+    });
+
+    test('should fail if code_verifier contains invalid characters', async () => {
+      const params = new URLSearchParams({
+        grant_type: 'authorization_code',
+        code: 'test-code',
+        redirect_uri: 'http://localhost:3000/callback',
+        code_verifier: 'invalid-verifier-with-!@#$%^&*()-characters-that-are-not-allowed',
+        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+        client_assertion: 'mock-assertion'
+      });
+
+      const res = await app.request('/api/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'DPoP': 'mock-proof'
+        },
+        body: params.toString(),
+      });
+
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body.error).toBe('invalid_request');
+    });
+
+    test('should pass if code_verifier is valid', async () => {
+      spyOn(TokenExchangeUseCase.prototype, "execute").mockResolvedValueOnce({
+        access_token: 'mock-at',
+        token_type: 'DPoP',
+        expires_in: 3600
+      });
+
+      const params = new URLSearchParams({
+        grant_type: 'authorization_code',
+        code: 'test-code',
+        redirect_uri: 'http://localhost:3000/callback',
+        code_verifier: 'valid-verifier-that-is-at-least-43-characters-long-and-uses-safe-chars_~',
+        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+        client_assertion: 'mock-assertion'
+      });
+
+      const res = await app.request('/api/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'DPoP': 'mock-proof'
+        },
+        body: params.toString(),
+      });
+
+      expect(res.status).toBe(200);
+    });
   });
 });
