@@ -1,6 +1,6 @@
 ﻿# vibe-auth Project Context
 
-**Current Feature**: 009-userinfo-endpoint
+**Current Feature**: 036-sdp-compliance-fixes
 **Tech Stack**:
 - **Language/Version**: TypeScript 5.x / Bun 1.1+
 - **Primary Dependencies**: Astro, Hono, Drizzle ORM, Svelte, TailwindCSS, `jose`, `@vibe-auth/shared`
