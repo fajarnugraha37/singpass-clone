@@ -3,7 +3,8 @@
   import { i18n } from '../lib/i18n.svelte';
   import { client } from '../lib/rpc';
 
-  export let clientName: string | undefined = undefined;
+  let { clientName: initialClientName } = $props<{ clientName?: string }>();
+  let clientName = $state(initialClientName);
 
   onMount(async () => {
     // If not passed as prop, try to fetch from session
@@ -29,7 +30,7 @@
       Log in to {clientName}
     {:else}
       {i18n.t('login.header')}
-    /if}
+    {/if}
   </h1>
   <p class="text-lg text-singpass-gray-500 mb-8 leading-relaxed">
     {i18n.t('login.hero.description')}

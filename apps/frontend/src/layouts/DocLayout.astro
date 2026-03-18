@@ -1,0 +1,28 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+	title: string;
+	description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+	<div class="max-w-7xl mx-auto w-full px-4 flex flex-col md:flex-row gap-8 py-8">
+		<aside class="w-full md:w-64 flex-shrink-0">
+			<nav class="sticky top-8">
+				<h2 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Documentation</h2>
+				<ul class="space-y-2">
+					<li><a href="/docs/singpass" class="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">Singpass Overview</a></li>
+					<li><a href="/docs/singpass-server" class="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">Server Implementation</a></li>
+					<li><a href="/docs/singpass-client" class="text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">Client Integration</a></li>
+				</ul>
+			</nav>
+		</aside>
+		<article class="flex-grow prose prose-blue dark:prose-invert max-w-none">
+			<slot />
+		</article>
+	</div>
+</BaseLayout>

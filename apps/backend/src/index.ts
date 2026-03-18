@@ -1,3 +1,4 @@
+import { cors } from 'hono/cors';
 import { serveStatic } from 'hono/bun';
 import { Hono } from 'hono';
 import { cleanupExpiredRecords } from './infra/database/cleanup';
@@ -116,6 +117,14 @@ const api = new Hono()
   .route('/auth', authRouter);
 
 const app = new Hono()
+  .use('*', cors({
+    origin: (origin) => {
+      // Allow local development ports
+      if (origin?.startsWith('http://localhost:')) return origin;
+      return 'http://localhost:3000'; // Default Astro dev port
+    },
+    credentials: true,
+  }))
   .onError((err, c) => {
     if (err.name === 'FapiError') {
       const fapiErr = err as any;

@@ -1,0 +1,32 @@
+---
+import DocLayout from '../../layouts/DocLayout.astro';
+
+export async function getStaticPaths() {
+  const docs = import.meta.glob('../../../../../docs/**/*.md', { eager: true });
+  
+  return Object.entries(docs).map(([file, doc]: [string, any]) => {
+    // Extract relative path from filename
+    // Example: ../../../../../docs/singpass/introduction.md -> singpass/introduction
+    let path = file.replace('../../../../../docs/', '').replace('.md', '');
+    
+    // Handle index files
+    if (path.endsWith('/index')) {
+      path = path.slice(0, -6);
+    } else if (path === 'index') {
+      path = undefined;
+    }
+
+    return {
+      params: { path },
+      props: { doc },
+    };
+  });
+}
+
+const { doc } = Astro.props;
+const { Content, frontmatter } = doc;
+---
+
+<DocLayout title={frontmatter.title || 'Documentation'}>
+  <Content />
+</DocLayout>

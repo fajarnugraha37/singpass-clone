@@ -28,7 +28,7 @@ export const initiateAuth = (useCase: InitiateAuthSessionUseCase) => {
     } catch (error: any) {
       console.error('[Auth Initiation] Error:', error);
       
-      const frontendUrl = process.env.PUBLIC_FRONTEND_URL || 'http://localhost:4321';
+      const frontendUrl = process.env.PUBLIC_FRONTEND_URL || 'http://localhost:3000';
       const errorUrl = new URL(`${frontendUrl}/error`);
       errorUrl.searchParams.set('error', 'invalid_request');
       errorUrl.searchParams.set('error_description', error.message);
@@ -75,11 +75,11 @@ export const getSession = (sessionRepository: AuthSessionRepository, clientRegis
       clientId: session.clientId,
       clientName: client?.clientName || 'Unknown Application',
       purpose: session.purpose,
-      status: session.status,
+      status: session.status as 'pending' | 'authenticated' | 'expired' | 'failed',
       expiresAt: session.expiresAt,
     });
   };
-};;
+};
 
 export const login = (useCase: ValidateLoginUseCase, sessionRepository: AuthSessionRepository, parRepository: PARRepository) => {
   return async (c: Context) => {

@@ -1,20 +1,7 @@
 import { Context } from 'hono';
-import { z } from 'zod';
 import { TokenExchangeUseCase } from '../../../core/use-cases/token-exchange';
 import { FapiError, FapiErrors } from '../../middleware/fapi-error';
-
-/**
- * Request body schema for the token exchange endpoint.
- * RFC 6749 and RFC 7523 (private_key_jwt).
- */
-export const tokenRequestSchema = z.object({
-  grant_type: z.literal('authorization_code'),
-  code: z.string(),
-  redirect_uri: z.string(),
-  code_verifier: z.string().min(43).max(128).regex(/^[A-Za-z0-9\-\._~]+$/),
-  client_assertion_type: z.literal('urn:ietf:params:oauth:client-assertion-type:jwt-bearer'),
-  client_assertion: z.string(),
-});
+import { tokenRequestSchema } from '@vibe/shared/contracts/auth';
 
 /**
  * Controller for the POST /token endpoint.

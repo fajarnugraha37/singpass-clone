@@ -3,6 +3,7 @@ import '../assets/styles/global.css';
 import Masthead from '../components/Masthead.svelte';
 import Header from '../components/Header.svelte';
 import Footer from '../components/Footer.svelte';
+import SessionInfo from '../components/SessionInfo.svelte';
 import { i18n } from '../lib/i18n.svelte';
 
 interface Props {
@@ -29,6 +30,9 @@ const { title, description = "Singpass - Trusted Digital Identity" } = Astro.pro
 	<body class="min-h-screen flex flex-col">
 		<Masthead client:load />
 		<Header client:load />
+		<div class="max-w-7xl mx-auto w-full px-4 mt-4">
+			<SessionInfo client:load />
+		</div>
 		<main class="flex-grow flex flex-col">
 			<slot />
 		</main>

@@ -46,8 +46,34 @@ export const authSessionResponseSchema = z.object({
   clientId: z.string(),
   clientName: z.string(),
   purpose: z.string().nullable().optional(),
-  status: z.string(),
+  status: z.enum(['pending', 'authenticated', 'expired', 'failed']),
   expiresAt: z.string().or(z.date()),
 });
 
 export type AuthSessionResponse = z.infer<typeof authSessionResponseSchema>;
+
+export const tokenRequestSchema = z.object({
+  grant_type: z.literal('authorization_code'),
+  code: z.string(),
+  redirect_uri: z.string(),
+  code_verifier: z.string().min(43).max(128).regex(/^[A-Za-z0-9\-\._~]+$/),
+  client_assertion_type: z.literal('urn:ietf:params:oauth:client-assertion-type:jwt-bearer'),
+  client_assertion: z.string(),
+});
+
+export const tokenErrorResponseSchema = z.object({
+  error: z.enum([
+    'invalid_request',
+    'invalid_client',
+    'invalid_grant',
+    'unauthorized_client',
+    'unsupported_grant_type',
+    'invalid_scope',
+    'server_error',
+    'temporarily_unavailable',
+    'invalid_token',
+  ]),
+  error_description: z.string().optional(),
+  error_uri: z.string().url().optional(),
+});
+
