@@ -11,6 +11,7 @@ import { Validate2FAUseCase } from '../../core/use-cases/Validate2FA';
 import { GetUserInfoUseCase } from '../../core/use-cases/get-userinfo';
 import type { AuthSessionRepository } from '../../core/domain/session';
 import type { PARRepository } from '../../core/domain/par.types';
+import type { ClientRegistry } from '../../core/domain/client_registry';
 import * as authController from './controllers/auth.controller';
 import * as userinfoController from './controllers/userinfo.controller';
 import { rateLimiter } from '../middleware/rate-limiter';
@@ -25,6 +26,7 @@ export const createAuthRouter = (
   getUserInfoUseCase: GetUserInfoUseCase,
   sessionRepository: AuthSessionRepository,
   parRepository: PARRepository,
+  clientRegistry: ClientRegistry,
   issuer: string
 ) => {
   const authRouter = new Hono();
@@ -49,7 +51,7 @@ export const createAuthRouter = (
     )
 
     // RPC API: Get Current Session Info (mounted at /api/auth/session)
-    .get('/session', authController.getSession(sessionRepository))
+    .get('/session', authController.getSession(sessionRepository, clientRegistry))
 
     // RPC API: Primary Login (mounted at /api/auth/login)
     .post('/login', zValidator('json', loginRequestSchema), authController.login(validateLoginUseCase, sessionRepository, parRepository))

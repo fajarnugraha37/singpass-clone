@@ -41,3 +41,13 @@ export type LoginResponse = z.infer<typeof loginResponseSchema>;
 export type TwoFactorRequest = z.infer<typeof twoFactorRequestSchema>;
 export type TwoFactorResponse = z.infer<typeof twoFactorResponseSchema>;
 export type InitiateAuthRequest = z.infer<typeof initiateAuthRequestSchema>;
+
+export const authSessionResponseSchema = z.object({
+  clientId: z.string(),
+  clientName: z.string(),
+  purpose: z.string().nullable().optional(),
+  status: z.string(),
+  expiresAt: z.string().or(z.date()),
+});
+
+export type AuthSessionResponse = z.infer<typeof authSessionResponseSchema>;

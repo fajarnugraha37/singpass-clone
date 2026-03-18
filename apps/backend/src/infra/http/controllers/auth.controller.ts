@@ -5,6 +5,7 @@ import { ValidateLoginUseCase } from '../../../core/use-cases/ValidateLogin';
 import { Validate2FAUseCase } from '../../../core/use-cases/Validate2FA';
 import type { AuthSessionRepository } from '../../../core/domain/session';
 import type { PARRepository } from '../../../core/domain/par.types';
+import type { ClientRegistry } from '../../../core/domain/client_registry';
 
 export const initiateAuth = (useCase: InitiateAuthSessionUseCase) => {
   return async (c: Context) => {
@@ -56,7 +57,7 @@ const handleTerminalFailure = async (c: Context, sessionId: string, sessionRepos
   return c.json({ success: false, error: 'Max retries exceeded' }, 401);
 };
 
-export const getSession = (sessionRepository: AuthSessionRepository) => {
+export const getSession = (sessionRepository: AuthSessionRepository, clientRegistry: ClientRegistry) => {
   return async (c: Context) => {
     const sessionId = getCookie(c, 'vibe_auth_session');
     if (!sessionId) {
@@ -68,14 +69,17 @@ export const getSession = (sessionRepository: AuthSessionRepository) => {
       return c.json({ error: 'Session not found' }, 401);
     }
 
+    const client = await clientRegistry.getClientConfig(session.clientId);
+
     return c.json({
       clientId: session.clientId,
+      clientName: client?.clientName || 'Unknown Application',
       purpose: session.purpose,
       status: session.status,
       expiresAt: session.expiresAt,
     });
   };
-};
+};;
 
 export const login = (useCase: ValidateLoginUseCase, sessionRepository: AuthSessionRepository, parRepository: PARRepository) => {
   return async (c: Context) => {

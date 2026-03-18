@@ -40,6 +40,10 @@ describe('Singpass Compliance: Scope Enforcement', () => {
       validate: async () => ({ isValid: true, jkt: 'test-jkt' })
     };
 
+    const mockJWKSCacheService = {
+      getClientSigningKey: async () => ({ kid: 'key-1', kty: 'RSA', n: 'test', e: 'AQAB' }),
+    };
+
     mockClientRegistry = {
       getClientConfig: async (clientId: string) => ({
         clientId,
@@ -59,6 +63,7 @@ describe('Singpass Compliance: Scope Enforcement', () => {
       mockPARRepository,
       mockClientRegistry,
       mockDPoPValidator as any,
+      mockJWKSCacheService as any,
       mockAuditService
     );
   });

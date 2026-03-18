@@ -26,10 +26,20 @@ export const clients = sqliteTable('clients', {
   siteUrl: text('site_url'),
   description: text('description'),
   supportEmails: text('support_emails', { mode: 'json' }), // JSON Array
+  environment: text('environment', { enum: ['Staging', 'Production'] }).default('Staging').notNull(),
   agreementAccepted: integer('agreement_accepted', { mode: 'boolean' }).default(false).notNull(),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 });
+
+export const userAccountLinks = sqliteTable('user_account_links', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull(),
+  clientId: text('client_id').notNull(),
+  linkedAt: integer('linked_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`).notNull(),
+}, (table) => ({
+  idx_client_user: sql`unique index idx_client_user on ${table.clientId}, ${table.userId}`,
+}));
 
 export const myinfoProfiles = sqliteTable('myinfo_profiles', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),

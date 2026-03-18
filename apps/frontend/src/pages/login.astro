@@ -17,7 +17,7 @@ import TwoFactorForm from '../components/TwoFactorForm.svelte';
       </div>
 
       <div id="login-section">
-        <h1 class="text-2xl font-bold text-gray-900 mb-6">Log in</h1>
+        <h1 id="login-title" class="text-2xl font-bold text-gray-900 mb-6">Log in</h1>
         <LoginForm client:load onSuccess={() => {
           document.getElementById('login-section')?.classList.add('hidden');
           document.getElementById('2fa-section')?.classList.remove('hidden');
@@ -35,11 +35,19 @@ import TwoFactorForm from '../components/TwoFactorForm.svelte';
 <script>
   import { client } from '../lib/rpc';
 
-  async function updatePurpose() {
+  async function updateAuthInfo() {
     try {
       const res = await client.api.auth.session.$get();
       if (res.ok) {
         const data = await res.json();
+        
+        // Update Title with Application Name
+        const titleEl = document.getElementById('login-title');
+        if (titleEl && data.clientName) {
+          titleEl.textContent = `Log in to ${data.clientName}`;
+        }
+
+        // Update Purpose
         const purposeEl = document.getElementById('auth-purpose');
         const purposeTextEl = document.getElementById('purpose-text');
         if (purposeEl && purposeTextEl && data.purpose) {
@@ -48,12 +56,12 @@ import TwoFactorForm from '../components/TwoFactorForm.svelte';
         }
       }
     } catch (e) {
-      console.error('Failed to fetch session purpose:', e);
+      console.error('Failed to fetch session info:', e);
     }
   }
 
   // Run on mount
-  updatePurpose();
+  updateAuthInfo();
 
   // Optional: Handle back button or page refreshes if needed
 </script>

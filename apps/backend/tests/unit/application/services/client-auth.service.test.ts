@@ -23,6 +23,7 @@ describe('ClientAuthenticationService', () => {
     clientRegistry = {
       getClientConfig: mock(async () => ({
         clientId: 'client-1',
+        isActive: true,
         jwks: {
           keys: [
             {
@@ -41,7 +42,10 @@ describe('ClientAuthenticationService', () => {
       isUsed: mock(async () => false),
       markUsed: mock(async () => {}),
     };
-    service = new ClientAuthenticationService(cryptoService, clientRegistry, jtiStore);
+    const mockJwksCache = {
+      getClientSigningKey: mock(async () => ({})),
+    } as any;
+    service = new ClientAuthenticationService(cryptoService, clientRegistry, mockJwksCache, jtiStore);
   });
 
   async function createAssertion(payload: any, keyId = 'key-1') {
@@ -57,7 +61,7 @@ describe('ClientAuthenticationService', () => {
   });
 
   test('should fail if jti has already been used', async () => {
-    (jtiStore.isUsed as any).mockImplementation(async () => true);
+    (jtiStore.isUsed as any).mockResolvedValue(true);
     const assertion = await createAssertion({ iss: 'client-1', sub: 'client-1', jti: 'reused-jti' });
     
     expect(service.authenticate(assertion, 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'))

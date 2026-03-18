@@ -9,12 +9,16 @@ import { DPoPValidator } from '../utils/dpop_validator';
 
 import { FapiErrors } from '../../infra/middleware/fapi-error';
 
+import { DrizzleClientRegistry } from '../../infra/adapters/client_registry';
+import { JWKSCacheService } from '../../infra/adapters/jwks_cache';
+
 export class RegisterParUseCase {
   constructor(
     private cryptoService: CryptoService,
     private parRepository: PARRepository,
     private clientRegistry: ClientRegistry,
     private dpopValidator: DPoPValidator,
+    private jwksCache: JWKSCacheService,
     private auditService?: SecurityAuditService
   ) {}
 
@@ -138,11 +142,21 @@ export class RegisterParUseCase {
     const decodedHeader = jose.decodeProtectedHeader(client_assertion);
     const kid = decodedHeader.kid;
     
-    const publicKey = client.jwks?.keys.find(k => {
-      const matchKid = kid ? k.kid === kid : true;
-      const matchUse = k.use === 'sig' || k.key_ops?.includes('verify') || (!k.use && !k.key_ops);
-      return matchKid && matchUse;
-    });
+    let publicKey: jose.JWK | undefined;
+    
+    if (client.jwksUri) {
+      try {
+        publicKey = await this.jwksCache.getClientSigningKey(client_id, client.jwksUri, kid);
+      } catch (error: any) {
+        throw new Error(`Failed to fetch signing key from jwks_uri: ${error.message}`);
+      }
+    } else {
+      publicKey = client.jwks?.keys.find(k => {
+        const matchKid = kid ? k.kid === kid : true;
+        const matchUse = k.use === 'sig' || k.key_ops?.includes('verify') || (!k.use && !k.key_ops);
+        return matchKid && matchUse;
+      });
+    }
     
     if (!publicKey) {
       throw new Error(kid ? `Client key with kid "${kid}" not found` : 'Client has no registered signing keys');

@@ -48,4 +48,19 @@ export interface UserInfoRepository {
    * Deletes a user by ID.
    */
   deleteUser(userId: string): Promise<void>;
+
+  /**
+   * Links a user to a client (for test account tracking).
+   */
+  linkUserToClient(userId: string, clientId: string): Promise<void>;
+
+  /**
+   * Counts the number of users linked to a client.
+   */
+  countUsersByClient(clientId: string): Promise<number>;
+
+  /**
+   * Checks if a user is linked to a client.
+   */
+  isUserLinkedToClient(userId: string, clientId: string): Promise<boolean>;
 }

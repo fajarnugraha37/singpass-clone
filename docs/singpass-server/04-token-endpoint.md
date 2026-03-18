@@ -12,7 +12,7 @@ Accepts an `application/x-www-form-urlencoded` payload.
 ### Validation Requirements
 1. **Client Authentication**:
    - `client_assertion_type` must be `urn:ietf:params:oauth:client-assertion-type:jwt-bearer`.
-   - `client_assertion` must be a signed JWT. Verify the signature against the client's public JWK.
+   - `client_assertion` must be a signed JWT. Verify the signature against the client's public JWK (from static `jwks` or fetched from `jwks_uri`).
 2. **Grant Validation**:
    - `grant_type` must be `authorization_code`.
    - `code` must be valid, not expired, and tied to this `client_id`.

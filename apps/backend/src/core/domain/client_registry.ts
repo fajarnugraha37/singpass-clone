@@ -16,6 +16,7 @@ export interface ClientConfig {
   siteUrl?: string;
   appDescription?: string;
   supportEmails?: string[];
+  environment: 'Staging' | 'Production';
   hasAcceptedAgreement: boolean;
 }
 

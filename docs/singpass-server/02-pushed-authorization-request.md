@@ -9,7 +9,7 @@ Accepts a `application/x-www-form-urlencoded` payload from the client.
 ### Validation Requirements:
 1. **Client Authentication**: 
    - Validate `client_assertion_type` is `urn:ietf:params:oauth:client-assertion-type:jwt-bearer`.
-   - Validate `client_assertion` (which is a signed JWT). The server must verify the signature against the client's registered public key (JWKS), and ensure the `aud`, `iss`, `sub`, and `exp` claims are correct.
+   - Validate `client_assertion` (which is a signed JWT). The server must verify the signature against the client's registered public key (JWKS or fetched from `jwks_uri`), and ensure the `aud`, `iss`, `sub`, and `exp` claims are correct.
 2. **OIDC Parameters**:
    - `response_type` must be `code`.
    - `scope` must include `openid`. Requested scopes MUST be pre-authorized for the client (checked against `allowedScopes`).
@@ -28,7 +28,10 @@ Accepts a `application/x-www-form-urlencoded` payload from the client.
 6. **Singpass Specific**:
    - `authentication_context_type`: Mandatory for Login apps (e.g., `APP_AUTHENTICATION_DEFAULT`).
    - `purpose`: Mandatory for all requests. A string describing the business intent for data access.
-   - **Test Account Limit**: Entities (UENs) are limited to a maximum of 5 staging test accounts in production-like environments.
+   - **Test Account Limit**: Entities (UENs) are limited to a maximum of 5 staging test accounts in production-like environments. **Additionally, each client in the 'Staging' environment is limited to a maximum of 100 test accounts.**
+
+### JWKS URI Support (RFC 7517)
+The server supports fetching client public keys from a `jwks_uri` endpoint. Keys fetched from this URI are cached by the server, respecting `Cache-Control: max-age` and `Expires` headers, with a minimum TTL of 60 seconds.
 
 ### DPoP Nonce Requirement (FAPI 2.0)
 The server MUST provide a `DPoP-Nonce` header in the response. If the client's DPoP proof is missing a nonce or uses an invalid/expired one, the server MUST return a `401 Unauthorized` with the `use_dpop_nonce` error code and a fresh `DPoP-Nonce` header.

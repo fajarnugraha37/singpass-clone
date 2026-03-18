@@ -11,6 +11,7 @@ export interface InitiateAuthSessionInput {
 export interface InitiateAuthSessionOutput {
   sessionId: string;
   redirectUri: string;
+  clientName: string;
 }
 
 export class InitiateAuthSessionUseCase {
@@ -85,6 +86,7 @@ export class InitiateAuthSessionUseCase {
     return {
       sessionId,
       redirectUri: '/login',
+      clientName: client.clientName,
     };
   }
 }

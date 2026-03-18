@@ -61,11 +61,16 @@ describe('Singpass Compliance: Client Activation Management', () => {
 
   describe('RegisterParUseCase', () => {
     test('should fail when client is deactivated', async () => {
+      const mockJWKSCacheService = {
+        getClientSigningKey: async () => ({ kid: 'key-1', kty: 'RSA', n: 'test', e: 'AQAB' }),
+      };
+
       const useCase = new RegisterParUseCase(
         mockCryptoService,
         mockPARRepository,
         mockClientRegistry,
         { validate: async () => ({ isValid: true }) } as any,
+        mockJWKSCacheService as any,
         mockAuditService
       );
 

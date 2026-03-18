@@ -20,6 +20,7 @@ export const HARDENED_CLIENT_REGISTRY: Record<string, ClientConfig> = {
     siteUrl: 'https://mock-app.vibe-auth.com',
     appDescription: 'A secure mock application for testing Singpass flows.',
     supportEmails: ['support@mock-app.vibe-auth.com'],
+    environment: 'Staging',
     hasAcceptedAgreement: true,
     jwks: {
       keys: [
@@ -52,6 +53,7 @@ export const HARDENED_CLIENT_REGISTRY: Record<string, ClientConfig> = {
     allowedScopes: ['openid', 'uinfin'],
     isActive: true,
     uen: '199001234M',
+    environment: 'Production',
     hasAcceptedAgreement: true,
     jwks: {
       keys: [
@@ -84,6 +86,7 @@ export const HARDENED_CLIENT_REGISTRY: Record<string, ClientConfig> = {
     allowedScopes: ['openid'],
     isActive: false,
     uen: '202054321K',
+    environment: 'Staging',
     hasAcceptedAgreement: true,
     jwks: {
       keys: [
@@ -126,6 +129,7 @@ export class DrizzleClientRegistry implements ClientRegistry {
         siteUrl: result.siteUrl || undefined,
         appDescription: result.description || undefined,
         supportEmails: (result.supportEmails as string[]) || undefined,
+        environment: result.environment as 'Staging' | 'Production',
         hasAcceptedAgreement: result.agreementAccepted,
       };
     } catch (error) {

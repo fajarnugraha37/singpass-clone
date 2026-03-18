@@ -1,6 +1,6 @@
 import { eq, and, sql } from 'drizzle-orm';
 import { db } from '../../database/client';
-import { users, accessTokens, myinfoProfiles } from '../../database/schema';
+import { users, accessTokens, myinfoProfiles, userAccountLinks } from '../../database/schema';
 import { UserInfoRepository, AccessTokenData } from '../../../core/domain/userinfo_repository';
 import { UserData } from '../../../core/domain/userinfo_claims';
 import { MyinfoPerson } from '../../../core/domain/myinfo-person';
@@ -124,7 +124,7 @@ export class DrizzleUserInfoRepository implements UserInfoRepository {
       .where(eq(users.uen, uen))
       .get();
 
-    return result?.count || 0;
+    return (result?.count as number) || 0;
   }
 
   /**
@@ -132,5 +132,41 @@ export class DrizzleUserInfoRepository implements UserInfoRepository {
    */
   async deleteUser(userId: string): Promise<void> {
     await db.delete(users).where(eq(users.id, userId));
+  }
+
+  /**
+   * Links a user to a client (for test account tracking).
+   */
+  async linkUserToClient(userId: string, clientId: string): Promise<void> {
+    await db.insert(userAccountLinks).values({
+      userId,
+      clientId,
+    });
+  }
+
+  /**
+   * Counts the number of users linked to a client.
+   */
+  async countUsersByClient(clientId: string): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(userAccountLinks)
+      .where(eq(userAccountLinks.clientId, clientId))
+      .get();
+
+    return (result?.count as number) || 0;
+  }
+
+  /**
+   * Checks if a user is linked to a client.
+   */
+  async isUserLinkedToClient(userId: string, clientId: string): Promise<boolean> {
+    const [result] = await db
+      .select()
+      .from(userAccountLinks)
+      .where(and(eq(userAccountLinks.userId, userId), eq(userAccountLinks.clientId, clientId)))
+      .limit(1);
+
+    return !!result;
   }
 }

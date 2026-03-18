@@ -5,6 +5,7 @@ import { Cron } from 'croner';
 import { getDiscoveryDocument } from './infra/http/controllers/discovery.controller';
 import { getJWKS } from './infra/http/controllers/jwks.controller';
 import { registerPar } from './infra/http/controllers/par.controller';
+import { getClient } from './infra/http/controllers/client.controller';
 import { exchangeToken } from './infra/http/controllers/token.controller';
 import { JoseCryptoService } from './infra/adapters/jose_crypto';
 import { DrizzleSecurityAuditService } from './infra/adapters/security_logger';
@@ -54,10 +55,10 @@ const userInfoRepository = new DrizzleUserInfoRepository();
 const jtiStore = new DrizzleJtiStore();
 const dpopValidator = new DPoPValidator(jtiStore);
 
-const clientAuthService = new ClientAuthenticationService(cryptoService, clientRegistry, jtiStore);
-const tokenService = new TokenService(cryptoService, clientRegistry);
+const clientAuthService = new ClientAuthenticationService(cryptoService, clientRegistry, jwksCache, jtiStore);
+const tokenService = new TokenService(cryptoService, clientRegistry, jwksCache);
 
-const registerParUseCase = new RegisterParUseCase(cryptoService, parRepository, clientRegistry, dpopValidator, auditService);
+const registerParUseCase = new RegisterParUseCase(cryptoService, parRepository, clientRegistry, dpopValidator, jwksCache, auditService);
 const tokenExchangeUseCase = new TokenExchangeUseCase(
   clientAuthService,
   tokenService,
@@ -101,6 +102,7 @@ const authRouter = createAuthRouter(
   getUserInfoUseCase,
   authSessionRepository,
   parRepository,
+  clientRegistry,
   sharedConfig.OIDC.ISSUER
 );
 const api = new Hono()
@@ -108,6 +110,7 @@ const api = new Hono()
   .get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
   .post('/par', registerPar(registerParUseCase))
   .post('/token', exchangeToken(tokenExchangeUseCase))
+  .get('/clients/:clientId', getClient(clientRegistry))
   .route('/userinfo', userinfoRouter)
   // API: Auth RPC Endpoints (mounted at /api/auth)
   .route('/auth', authRouter);

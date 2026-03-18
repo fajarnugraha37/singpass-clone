@@ -6,6 +6,7 @@ import { FapiErrors, FapiError } from '../../../infra/middleware/fapi-error';
 import type { TokenResponse } from '../../../../../../packages/shared/src/tokens';
 import { buildSubAttributes, mapLoaToAcr, UserAttributes } from '../../domain/claims';
 import { sharedConfig } from '@vibe/shared/config';
+import { JWKSCacheService } from '../../../infra/adapters/jwks_cache';
 
 export interface TokenGenerationParams {
   userId: string;
@@ -23,6 +24,7 @@ export class TokenService {
   constructor(
     private cryptoService: CryptoService,
     private clientRegistry: ClientRegistry,
+    private jwksCache: JWKSCacheService,
   ) {}
 
   /**
@@ -93,7 +95,17 @@ export class TokenService {
       throw FapiErrors.invalidClient('Client not found');
     }
 
-    const clientEncKey = clientConfig?.jwks?.keys.find(k => k.use === 'enc');
+    let clientEncKey: jose.JWK | undefined;
+    if (clientConfig.jwksUri) {
+      try {
+        clientEncKey = await this.jwksCache.getClientEncryptionKey(clientId, clientConfig.jwksUri);
+      } catch (err: any) {
+        throw FapiErrors.invalidRequest(`Failed to fetch encryption key from jwks_uri: ${err.message}`);
+      }
+    } else {
+      clientEncKey = clientConfig?.jwks?.keys.find(k => k.use === 'enc' || k.key_ops?.includes('encrypt'));
+    }
+
     if (!clientEncKey) {
       // In FAPI 2.0 / Singpass, encryption is often mandatory for PII.
       // If not found, we might fallback or throw based on policy.

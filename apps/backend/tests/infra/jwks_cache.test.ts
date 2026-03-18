@@ -23,6 +23,7 @@ describe('JWKSCacheService', () => {
       return {
         ok: true,
         json: async () => mockJwks,
+        headers: new Headers(),
       } as Response;
     });
 
@@ -54,6 +55,7 @@ describe('JWKSCacheService', () => {
       return {
         ok: true,
         json: async () => ({ keys: [{ kid: 'sig-only', use: 'sig' }] }),
+        headers: new Headers(),
       } as Response;
     });
 
@@ -63,7 +65,7 @@ describe('JWKSCacheService', () => {
 
   it('should invalidate cache', async () => {
     const fetchMock = spyOn(globalThis, 'fetch').mockImplementation(async () => {
-      return { ok: true, json: async () => mockJwks } as Response;
+      return { ok: true, json: async () => mockJwks, headers: new Headers() } as Response;
     });
 
     const jwksUri = 'https://example.com/jwks-invalidate-test';
@@ -72,5 +74,45 @@ describe('JWKSCacheService', () => {
     await cacheService.getClientEncryptionKey('client-invalidate', jwksUri);
 
     expect(fetchMock.mock.calls.filter(c => c[0] === jwksUri).length).toBe(2);
+  });
+
+  it('should respect Cache-Control: max-age header', async () => {
+    spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      return {
+        ok: true,
+        json: async () => mockJwks,
+        headers: new Headers({ 'Cache-Control': 'max-age=120' }),
+      } as any;
+    });
+
+    const keys = await cacheService.getClientKeys('client-cc', 'https://example.com/cc-test');
+    expect(keys.length).toBe(2);
+  });
+
+  it('should enforce minimum TTL of 60 seconds', async () => {
+    spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      return {
+        ok: true,
+        json: async () => mockJwks,
+        headers: new Headers({ 'Cache-Control': 'max-age=10' }),
+      } as any;
+    });
+
+    const keys = await cacheService.getClientKeys('client-min-ttl', 'https://example.com/min-ttl-test');
+    expect(keys.length).toBe(2);
+  });
+
+  it('should fetch signing key', async () => {
+    spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      return {
+        ok: true,
+        json: async () => mockJwks,
+        headers: new Headers(),
+      } as any;
+    });
+
+    const key = await cacheService.getClientSigningKey('client-sig', 'https://example.com/sig-test');
+    expect(key.kid).toBe('key-2');
+    expect(key.use).toBe('sig');
   });
 });

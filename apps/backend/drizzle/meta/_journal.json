@@ -71,6 +71,13 @@
       "when": 1773775312762,
       "tag": "0009_brainy_the_captain",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1773841292809,
+      "tag": "0010_flippant_satana",
+      "breakpoints": true
     }
   ]
 }

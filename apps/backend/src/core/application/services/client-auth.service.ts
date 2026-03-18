@@ -3,6 +3,7 @@ import type { CryptoService } from '../../domain/crypto_service';
 import type { ClientRegistry } from '../../domain/client_registry';
 import type { JtiStore } from '../../utils/dpop_validator';
 import { FapiErrors } from '../../../infra/middleware/fapi-error';
+import { JWKSCacheService } from '../../../infra/adapters/jwks_cache';
 
 export interface ClientAuthenticationResult {
   clientId: string;
@@ -12,6 +13,7 @@ export class ClientAuthenticationService {
   constructor(
     private cryptoService: CryptoService,
     private clientRegistry: ClientRegistry,
+    private jwksCache: JWKSCacheService,
     private jtiStore?: JtiStore,
   ) {}
 
@@ -50,7 +52,17 @@ export class ClientAuthenticationService {
 
       // 3. Find matching signature key
       const kid = header.kid;
-      const clientKey = clientConfig?.jwks?.keys.find(k => k.use === 'sig' && (!kid || k.kid === kid));
+      let clientKey: jose.JWK | undefined;
+      
+      if (clientConfig.jwksUri) {
+        try {
+          clientKey = await this.jwksCache.getClientSigningKey(clientId, clientConfig.jwksUri, kid);
+        } catch (err: any) {
+          throw FapiErrors.invalidClient(`Failed to fetch signing key from jwks_uri: ${err.message}`);
+        }
+      } else {
+        clientKey = clientConfig?.jwks?.keys.find(k => (k.use === 'sig' || k.key_ops?.includes('verify')) && (!kid || k.kid === kid));
+      }
       
       if (!clientKey) {
         throw FapiErrors.invalidClient('No valid public key found for client');

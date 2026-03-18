@@ -35,6 +35,20 @@ export enum AuthenticationContextType {
 
 export const VALID_AUTH_CONTEXT_TYPES = Object.values(AuthenticationContextType);
 
+const urlNoIp = z.string().url().refine((url) => {
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname;
+    // FR-004: Prohibit IP addresses (IPv4 and simple IPv6 check)
+    const isIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname) || hostname.includes(':');
+    return !isIp || hostname === 'localhost';
+  } catch {
+    return false;
+  }
+}, {
+  message: 'URL cannot contain an IP address (localhost allowed)',
+});
+
 export const clientConfigSchema = z.object({
   clientId: z.string().min(1),
   clientName: z.string().min(1),
@@ -42,10 +56,12 @@ export const clientConfigSchema = z.object({
   uen: z.string().min(1),
   isActive: z.boolean().default(true),
   allowedScopes: z.array(z.string()),
-  redirectUris: z.array(z.string().url()),
-  siteUrl: z.string().url().optional(),
+  redirectUris: z.array(urlNoIp),
+  jwksUri: urlNoIp.optional(),
+  siteUrl: urlNoIp.optional(),
   appDescription: z.string().optional(),
   supportEmails: z.array(z.string().email()).optional(),
+  environment: z.enum(['Staging', 'Production']).default('Staging'),
   hasAcceptedAgreement: z.boolean().default(false),
 });
 
