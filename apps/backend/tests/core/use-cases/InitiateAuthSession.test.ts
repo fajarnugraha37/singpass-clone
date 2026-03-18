@@ -3,11 +3,13 @@ import { InitiateAuthSessionUseCase } from '../../../src/core/use-cases/Initiate
 import type { AuthSessionRepository } from '../../../src/core/domain/session'
 import type { PARRepository } from '../../../src/core/domain/par.types'
 import type { SecurityAuditService } from '../../../src/core/domain/audit_service'
+import type { ClientRegistry } from '../../../src/core/domain/client_registry'
 
 describe('InitiateAuthSessionUseCase', () => {
   let mockAuthSessionRepository: AuthSessionRepository;
   let mockPARRepository: PARRepository;
   let mockAuditService: SecurityAuditService;
+  let mockClientRegistry: ClientRegistry;
   let useCase: InitiateAuthSessionUseCase;
 
   beforeEach(() => {
@@ -36,10 +38,24 @@ describe('InitiateAuthSessionUseCase', () => {
       logEvent: async () => {},
     } as any;
 
+    mockClientRegistry = {
+      getClientConfig: async (clientId: string) => ({
+        clientId,
+        clientName: 'Test Client',
+        appType: 'Login',
+        isActive: true,
+        allowedScopes: ['openid'],
+        redirectUris: ['https://example.com/cb'],
+        uen: 'UEN123',
+        hasAcceptedAgreement: true,
+      }),
+    } as any;
+
     useCase = new InitiateAuthSessionUseCase(
       mockAuthSessionRepository,
       mockPARRepository,
-      mockAuditService
+      mockAuditService,
+      mockClientRegistry
     );
   });
 

@@ -1,6 +1,7 @@
 import type { AuthSessionRepository, AuthSession } from '../domain/session';
 import type { PARRepository } from '../domain/par.types';
 import type { SecurityAuditService } from '../domain/audit_service';
+import type { ClientRegistry } from '../domain/client_registry';
 
 export interface InitiateAuthSessionInput {
   clientId: string;
@@ -16,7 +17,8 @@ export class InitiateAuthSessionUseCase {
   constructor(
     private authSessionRepository: AuthSessionRepository,
     private parRepository: PARRepository,
-    private auditService: SecurityAuditService
+    private auditService: SecurityAuditService,
+    private clientRegistry: ClientRegistry
   ) {}
 
   async execute(input: InitiateAuthSessionInput): Promise<InitiateAuthSessionOutput> {
@@ -41,6 +43,17 @@ export class InitiateAuthSessionUseCase {
         details: { reason: 'client_id mismatch', requestUri, clientId, parClientId: parRequest.clientId },
       });
       throw new Error('client_id mismatch');
+    }
+
+    // 2.1 Check if client is active (US3 Compliance)
+    const client = await this.clientRegistry.getClientConfig(clientId);
+    if (!client || client.isActive === false) {
+      await this.auditService.logEvent({
+        type: 'AUTH_INITIATION_FAILURE',
+        severity: 'WARN',
+        details: { reason: 'Client is deactivated', clientId },
+      });
+      throw new Error('unauthorized_client');
     }
 
     // 3. Create a new Auth Session

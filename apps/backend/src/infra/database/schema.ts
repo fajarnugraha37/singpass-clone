@@ -7,9 +7,28 @@ export const users = sqliteTable('users', {
   name: text('name').notNull(),
   email: text('email').unique(),
   mobileno: text('mobileno'),
+  uen: text('uen'), // Associated Business Entity (US4 Compliance)
   accountType: text('account_type').default('standard'),
   passwordHash: text('password_hash'),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+});
+
+export const clients = sqliteTable('clients', {
+  id: text('id').primaryKey(), // Using client_id
+  name: text('name').notNull(),
+  appType: text('app_type').notNull(), // 'Login' or 'Myinfo'
+  uen: text('uen').notNull(),
+  isActive: integer('is_active', { mode: 'boolean' }).default(true).notNull(),
+  allowedScopes: text('allowed_scopes', { mode: 'json' }).notNull(), // JSON Array
+  redirectUris: text('redirect_uris', { mode: 'json' }).notNull(), // JSON Array
+  jwks: text('jwks', { mode: 'json' }), // JSON Object
+  jwksUri: text('jwks_uri'),
+  siteUrl: text('site_url'),
+  description: text('description'),
+  supportEmails: text('support_emails', { mode: 'json' }), // JSON Array
+  agreementAccepted: integer('agreement_accepted', { mode: 'boolean' }).default(false).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 });
 
 export const myinfoProfiles = sqliteTable('myinfo_profiles', {

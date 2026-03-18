@@ -1,5 +1,5 @@
 import { sharedConfig } from '@vibe/shared/config';
-import { validateRedirectUri } from '../auth/validation';
+import { validateRedirectUri, validateScopes, validateUrlSafe } from '../auth/validation';
 import * as jose from 'jose';
 import { SecurityAuditService } from '../domain/audit_service';
 import { ClientRegistry } from '../domain/client_registry';
@@ -19,12 +19,12 @@ export class RegisterParUseCase {
   ) {}
 
   async execute(input: any): Promise<PARResponse> {
-    const { 
-      client_assertion, 
-      client_id, 
+    const {
+      client_assertion,
+      client_id,
       dpop_jkt,
       dpop_header,
-      ...payload 
+      ...payload
     } = input;
 
     // 1. Basic check
@@ -33,13 +33,19 @@ export class RegisterParUseCase {
     }
 
     // 1.1 Redirect URI check
-    const { redirect_uri, purpose } = payload;
+    const { redirect_uri, purpose, scope } = payload;
     if (!redirect_uri) {
       throw new Error('redirect_uri is required');
     }
 
     if (!purpose) {
       throw new Error('purpose is required');
+    }
+
+    // 1.2 URL Safety check (US2 Compliance)
+    const isDev = process.env.NODE_ENV !== 'production';
+    if (!validateUrlSafe(redirect_uri, isDev)) {
+      throw new Error('redirect_uri is insecure or contains an IP address');
     }
 
     // 2. DPoP binding (FAPI 2.0 / PAR requirement)
@@ -69,7 +75,7 @@ export class RegisterParUseCase {
           url: input.url || '/api/par',
           expectedNonce: proofNonce, // Validator will check it matches
         });
-        
+
         if (!dpopResult.isValid) {
           if (dpopResult.error === 'use_dpop_nonce') {
             const freshNonce = await this.cryptoService.generateDPoPNonce(client_id);
@@ -79,7 +85,7 @@ export class RegisterParUseCase {
         }
 
         const jkt = dpopResult.jkt;
-        
+
         if (dpop_jkt && dpop_jkt !== jkt) {
           throw new Error('dpop_jkt mismatch with DPoP header');
         }
@@ -107,9 +113,25 @@ export class RegisterParUseCase {
       throw new Error('Client not found');
     }
 
+    // 3.0 Check Client Activation Status (US3 Compliance)
+    if (client.isActive === false) {
+      await this.auditService?.logEvent({
+        type: 'CLIENT_AUTH_FAIL',
+        severity: 'WARN',
+        clientId: client_id,
+        details: { reason: 'Client is deactivated' },
+      });
+      throw new Error('unauthorized_client');
+    }
+
     // 3.1 Validate redirect_uri against client configuration
     if (!validateRedirectUri(client.redirectUris || [], redirect_uri)) {
       throw new Error('redirect_uri is not registered');
+    }
+
+    // 3.1.1 Validate scope against client configuration (US1 Compliance)
+    if (scope && !validateScopes(client.allowedScopes || [], scope)) {
+      throw new Error('invalid_scope');
     }
 
     // 3.2 Find the correct public key for signature verification

@@ -4,9 +4,23 @@ import { DrizzlePARRepository } from '../../../src/infra/adapters/db/drizzle_par
 import { DrizzleAuthSessionRepository } from '../../../src/infra/adapters/db/drizzle_session_repository'
 import { DrizzleAuthorizationCodeRepository } from '../../../src/infra/adapters/db/drizzle_authorization_code_repository'
 import { DrizzleUserInfoRepository } from '../../../src/infra/adapters/db/drizzle_userinfo_repository'
+import { DrizzleClientRegistry } from '../../../src/infra/adapters/client_registry'
 
 describe('Auth Endpoints', () => {
   beforeEach(() => {
+    // Mock Client Registry
+    spyOn(DrizzleClientRegistry.prototype, 'getClientConfig').mockImplementation(async (clientId: string) => ({
+      clientId,
+      clientName: 'Mock Client',
+      appType: 'Login',
+      redirectUris: ['https://client.example.com/cb'],
+      allowedScopes: ['openid'],
+      isActive: true,
+      uen: 'UEN123',
+      hasAcceptedAgreement: true,
+      jwks: { keys: [{ kid: 'key-1' }] },
+    }));
+
     // Mock UserInfo repository
     spyOn(DrizzleUserInfoRepository.prototype, 'getUserByNric').mockImplementation(async (nric: string) => {
       if (nric === 'S1234567A') {

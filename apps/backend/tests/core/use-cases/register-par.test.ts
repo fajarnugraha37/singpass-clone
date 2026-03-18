@@ -39,6 +39,10 @@ describe('RegisterParUseCase', () => {
         clientName: 'Mock Client',
         appType: 'Login',
         redirectUris: ['https://client.example.com/cb'],
+        allowedScopes: ['openid'],
+        isActive: true,
+        uen: 'UEN123',
+        hasAcceptedAgreement: true,
         jwks: { keys: [{ kid: 'key-1' }] },
       }),
     };
@@ -150,6 +154,10 @@ describe('RegisterParUseCase', () => {
       clientId,
       appType: 'Login',
       redirectUris: ['https://client.example.com/cb'],
+      allowedScopes: ['openid'],
+      isActive: true,
+      uen: 'UEN123',
+      hasAcceptedAgreement: true,
       jwks: { keys: [{ kid: 'key-1' }] },
     });
 
@@ -167,6 +175,10 @@ describe('RegisterParUseCase', () => {
       clientId,
       appType: 'Login',
       redirectUris: [],
+      allowedScopes: ['openid'],
+      isActive: true,
+      uen: 'UEN123',
+      hasAcceptedAgreement: true,
       jwks: { keys: [{ kid: 'key-1' }] },
     });
 
@@ -185,6 +197,10 @@ describe('RegisterParUseCase', () => {
       clientId,
       appType: 'Login',
       redirectUris: ['https://client.example.com/cb1', 'https://client.example.com/cb2'],
+      allowedScopes: ['openid'],
+      isActive: true,
+      uen: 'UEN123',
+      hasAcceptedAgreement: true,
       jwks: { keys: [{ kid: 'key-1' }] },
     });
 

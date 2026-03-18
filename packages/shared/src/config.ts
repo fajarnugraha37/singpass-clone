@@ -35,10 +35,52 @@ export enum AuthenticationContextType {
 
 export const VALID_AUTH_CONTEXT_TYPES = Object.values(AuthenticationContextType);
 
+export const clientConfigSchema = z.object({
+  clientId: z.string().min(1),
+  clientName: z.string().min(1),
+  appType: z.enum(['Login', 'Myinfo']),
+  uen: z.string().min(1),
+  isActive: z.boolean().default(true),
+  allowedScopes: z.array(z.string()),
+  redirectUris: z.array(z.string().url()),
+  siteUrl: z.string().url().optional(),
+  appDescription: z.string().optional(),
+  supportEmails: z.array(z.string().email()).optional(),
+  hasAcceptedAgreement: z.boolean().default(false),
+});
+
+export type ClientConfig = z.infer<typeof clientConfigSchema>;
+
 export const parRequestSchema = z.object({
   response_type: z.literal('code'),
   client_id: z.string().min(1),
-  redirect_uri: z.string().url(),
+  redirect_uri: z.string().url().refine((url) => {
+    try {
+      const parsed = new URL(url);
+      const hostname = parsed.hostname;
+      
+      // Prohibit IP addresses (IPv4 and simple IPv6 check)
+      // FR-003: System MUST reject any Redirect URL or Site URL that contains an IP address.
+      const isIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname) || hostname.includes(':');
+      if (isIp) return false;
+
+      const isHttps = parsed.protocol === 'https:';
+      const isLocalhost = hostname === 'localhost';
+      
+      // In production, MUST be HTTPS and NOT an IP.
+      // In dev/test, allow http://localhost
+      const isDevOrTest = process.env.NODE_ENV !== 'production';
+      
+      if (isHttps) return true;
+      if (isDevOrTest && isLocalhost) return true;
+      
+      return false;
+    } catch {
+      return false;
+    }
+  }, {
+    message: 'redirect_uri must use HTTPS and cannot be an IP address (localhost allowed in development)',
+  }),
   scope: z.string().min(1).refine((s) => s.includes('openid'), {
     message: 'scope must include openid',
   }),

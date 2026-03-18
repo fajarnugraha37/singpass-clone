@@ -43,6 +43,11 @@ export class ClientAuthenticationService {
         throw FapiErrors.invalidClient('Client not found');
       }
 
+      // 2.1 Check Activation Status (US3 Compliance)
+      if (clientConfig.isActive === false) {
+        throw FapiErrors.unauthorizedClient('Client is deactivated');
+      }
+
       // 3. Find matching signature key
       const kid = header.kid;
       const clientKey = clientConfig?.jwks?.keys.find(k => k.use === 'sig' && (!kid || k.kid === kid));

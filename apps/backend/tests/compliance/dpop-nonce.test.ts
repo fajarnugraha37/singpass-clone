@@ -38,6 +38,10 @@ describe('DPoP-Nonce Compliance: Rotation and Retry', () => {
       clientName: 'Test Client',
       appType: 'Login',
       redirectUris: ['https://client.example.com/cb'],
+      allowedScopes: ['openid'],
+      isActive: true,
+      uen: 'UEN123',
+      hasAcceptedAgreement: true,
       jwks: { keys: [] },
     }));
 
@@ -89,6 +93,10 @@ describe('DPoP-Nonce Compliance: Rotation and Retry', () => {
       clientName: 'Test Client',
       appType: 'Login',
       redirectUris: ['https://client.example.com/cb'],
+      allowedScopes: ['openid'],
+      isActive: true,
+      uen: 'UEN123',
+      hasAcceptedAgreement: true,
       jwks: { keys: [{ kid: 'key-1' }] },
     }));
     spyOn(DrizzlePARRepository.prototype, 'isJtiConsumed').mockImplementation(async () => false);

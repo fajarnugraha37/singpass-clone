@@ -89,7 +89,7 @@ const userinfoRouter = createUserinfoRouter(
   sharedConfig.OIDC.ISSUER
 );
 
-const initiateAuthSessionUseCase = new InitiateAuthSessionUseCase(authSessionRepository, parRepository, auditService);
+const initiateAuthSessionUseCase = new InitiateAuthSessionUseCase(authSessionRepository, parRepository, auditService, clientRegistry);
 const validateLoginUseCase = new ValidateLoginUseCase(authSessionRepository, auditService, userInfoRepository);
 const generateAuthCodeUseCase = new GenerateAuthCodeUseCase(authCodeRepository, authSessionRepository, parRepository, auditService);
 const validate2FAUseCase = new Validate2FAUseCase(authSessionRepository, auditService, generateAuthCodeUseCase);

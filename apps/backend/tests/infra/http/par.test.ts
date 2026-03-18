@@ -2,6 +2,7 @@ import { expect, test, describe, beforeEach, spyOn, afterEach, mock } from 'bun:
 import app from '../../../src/index'
 import { JoseCryptoService } from '../../../src/infra/adapters/jose_crypto'
 import { DPoPValidator } from '../../../src/core/utils/dpop_validator'
+import { DrizzleClientRegistry } from '../../../src/infra/adapters/client_registry'
 import * as jose from 'jose'
 
 describe('PAR Endpoint', () => {
@@ -18,6 +19,19 @@ describe('PAR Endpoint', () => {
     spyOn(DPoPValidator.prototype, 'validate').mockImplementation(async () => ({
       isValid: true,
       jkt: 'test-jkt'
+    }));
+
+    // Mock Client Registry
+    spyOn(DrizzleClientRegistry.prototype, 'getClientConfig').mockImplementation(async (clientId: string) => ({
+      clientId,
+      clientName: 'Mock Client',
+      appType: 'Login',
+      redirectUris: ['http://localhost:3000/callback'],
+      allowedScopes: ['openid'],
+      isActive: true,
+      uen: 'UEN123',
+      hasAcceptedAgreement: true,
+      jwks: { keys: [{ kid: 'key-1' }] },
     }));
   });
 

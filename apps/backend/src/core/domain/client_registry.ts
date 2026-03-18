@@ -9,6 +9,14 @@ export interface ClientConfig {
   jwks?: {
     keys: jose.JWK[];
   };
+  // Remediation fields
+  allowedScopes: string[];
+  isActive: boolean;
+  uen: string;
+  siteUrl?: string;
+  appDescription?: string;
+  supportEmails?: string[];
+  hasAcceptedAgreement: boolean;
 }
 
 export interface ClientRegistry {

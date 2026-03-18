@@ -33,4 +33,19 @@ export interface UserInfoRepository {
    * Retrieves user by NRIC.
    */
   getUserByNric(nric: string): Promise<UserData | null>;
+
+  /**
+   * Creates a new user (US4 Compliance).
+   */
+  createUser(user: Omit<UserData, 'id'> & { passwordHash?: string, uen?: string }): Promise<UserData>;
+
+  /**
+   * Counts users associated with a specific UEN (US4 Compliance).
+   */
+  countUsersByUen(uen: string): Promise<number>;
+
+  /**
+   * Deletes a user by ID.
+   */
+  deleteUser(userId: string): Promise<void>;
 }

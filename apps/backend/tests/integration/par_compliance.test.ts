@@ -102,6 +102,10 @@ describe('PAR Compliance Audit Remediation', () => {
       clientName: 'Test Client',
       appType: 'Login',
       redirectUris: ['https://client.example.com/cb'],
+      allowedScopes: ['openid'],
+      isActive: true,
+      uen: 'UEN123',
+      hasAcceptedAgreement: true,
       jwks: { keys: [{ kid: 'test-client-key' }] },
     }));
     spyOn(DrizzlePARRepository.prototype, 'isJtiConsumed').mockImplementation(async () => false);
@@ -147,6 +151,10 @@ describe('PAR Compliance Audit Remediation', () => {
       clientName: 'Test Client',
       appType: 'Login',
       redirectUris: ['https://client.example.com/cb'],
+      allowedScopes: ['openid'],
+      isActive: true,
+      uen: 'UEN123',
+      hasAcceptedAgreement: true,
       jwks: { keys: [{ kid: 'test-client-key' }] },
     }));
     spyOn(DrizzlePARRepository.prototype, 'isJtiConsumed').mockImplementation(async () => false);

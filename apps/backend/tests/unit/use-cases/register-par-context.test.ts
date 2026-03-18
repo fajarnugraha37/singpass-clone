@@ -43,6 +43,10 @@ describe('RegisterParUseCase - Context Validation', () => {
         clientName: 'Mock Client',
         appType: 'Login',
         redirectUris: ['https://client.example.com/cb'],
+        allowedScopes: ['openid'],
+        isActive: true,
+        uen: 'UEN123',
+        hasAcceptedAgreement: true,
         jwks: { keys: [{ kid: 'key-1' }] },
       }),
     };
@@ -142,6 +146,10 @@ describe('RegisterParUseCase - Context Validation', () => {
       clientName: 'Myinfo Client',
       appType: 'Myinfo',
       redirectUris: ['https://client.example.com/cb'],
+      allowedScopes: ['openid'],
+      isActive: true,
+      uen: 'UEN123',
+      hasAcceptedAgreement: true,
       jwks: { keys: [{ kid: 'key-1' }] },
     });
 
@@ -159,6 +167,10 @@ describe('RegisterParUseCase - Context Validation', () => {
       clientName: 'Myinfo Client',
       appType: 'Myinfo',
       redirectUris: ['https://client.example.com/cb'],
+      allowedScopes: ['openid'],
+      isActive: true,
+      uen: 'UEN123',
+      hasAcceptedAgreement: true,
       jwks: { keys: [{ kid: 'key-1' }] },
     });
 

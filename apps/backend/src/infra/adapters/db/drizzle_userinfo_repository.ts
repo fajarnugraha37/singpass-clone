@@ -1,4 +1,4 @@
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { db } from '../../database/client';
 import { users, accessTokens, myinfoProfiles } from '../../database/schema';
 import { UserInfoRepository, AccessTokenData } from '../../../core/domain/userinfo_repository';
@@ -87,5 +87,50 @@ export class DrizzleUserInfoRepository implements UserInfoRepository {
       mobileno: result.mobileno,
       passwordHash: result.passwordHash || undefined,
     };
+  }
+
+  /**
+   * Creates a new user (US4 Compliance).
+   */
+  async createUser(user: Omit<UserData, 'id'> & { passwordHash?: string, uen?: string }): Promise<UserData> {
+    const [result] = await db
+      .insert(users)
+      .values({
+        nric: user.nric,
+        name: user.name,
+        email: user.email,
+        mobileno: user.mobileno,
+        passwordHash: user.passwordHash,
+        uen: user.uen,
+      })
+      .returning();
+
+    return {
+      id: result.id,
+      nric: result.nric || '',
+      name: result.name,
+      email: result.email || '',
+      mobileno: result.mobileno,
+    };
+  }
+
+  /**
+   * Counts users associated with a specific UEN (US4 Compliance).
+   */
+  async countUsersByUen(uen: string): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(users)
+      .where(eq(users.uen, uen))
+      .get();
+
+    return result?.count || 0;
+  }
+
+  /**
+   * Deletes a user by ID.
+   */
+  async deleteUser(userId: string): Promise<void> {
+    await db.delete(users).where(eq(users.id, userId));
   }
 }

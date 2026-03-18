@@ -12,18 +12,23 @@ Accepts a `application/x-www-form-urlencoded` payload from the client.
    - Validate `client_assertion` (which is a signed JWT). The server must verify the signature against the client's registered public key (JWKS), and ensure the `aud`, `iss`, `sub`, and `exp` claims are correct.
 2. **OIDC Parameters**:
    - `response_type` must be `code`.
-   - `scope` must include `openid`. For Myinfo it may include additional scopes.
+   - `scope` must include `openid`. Requested scopes MUST be pre-authorized for the client (checked against `allowedScopes`).
    - `client_id` must match the authenticated client.
    - `redirect_uri` must match a pre-registered URI for the client.
    - `state` and `nonce` must be present.
-3. **PKCE**:
+3. **Safety & Compliance**:
+   - **URL Safety**: All `redirect_uri` and `site_url` values MUST use HTTPS and MUST NOT contain IP addresses (e.g., `127.0.0.1`). `localhost` is allowed only in development/mock environments.
+   - **Client Status**: The client MUST be active (`isActive: true`). Deactivated clients are blocked from all OIDC transactions.
+   - **Entity Association**: Each client MUST be associated with a Unique Entity Number (UEN) and have an accepted service agreement.
+4. **PKCE**:
    - `code_challenge` must be present.
    - `code_challenge_method` must be `S256`.
-4. **DPoP**:
+5. **DPoP**:
    - The request must either contain a `DPoP` header (and validate the DPoP proof) OR include `dpop_jkt` in the body.
-5. **Singpass Specific**:
-   - `authentication_context_type`: Mandatory for Login apps.
+6. **Singpass Specific**:
+   - `authentication_context_type`: Mandatory for Login apps (e.g., `APP_AUTHENTICATION_DEFAULT`).
    - `purpose`: Mandatory for all requests. A string describing the business intent for data access.
+   - **Test Account Limit**: Entities (UENs) are limited to a maximum of 5 staging test accounts in production-like environments.
 
 ### DPoP Nonce Requirement (FAPI 2.0)
 The server MUST provide a `DPoP-Nonce` header in the response. If the client's DPoP proof is missing a nonce or uses an invalid/expired one, the server MUST return a `401 Unauthorized` with the `use_dpop_nonce` error code and a fresh `DPoP-Nonce` header.
