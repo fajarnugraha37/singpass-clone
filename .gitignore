@@ -43,3 +43,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 *.db-journal
 *.db-shm
 *.db-wal
+
+# certificate
+*.crt
+*.key

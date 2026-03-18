@@ -18,7 +18,7 @@ const clientPublicKeyJWK = await jose.exportJWK(publicKey);
 const assertion = await new jose.SignJWT({
   iss: "mock-client-id",
   sub: "mock-client-id",
-  aud: "http://localhost:3000/par",
+  aud: "https://localhost/par",
 })
   .setProtectedHeader({ alg: "ES256" })
   .setIssuedAt()
@@ -29,7 +29,7 @@ const assertion = await new jose.SignJWT({
 const dpopJwk = await jose.exportJWK(publicKey);
 const dpopProof = await new jose.SignJWT({
   htm: "POST",
-  htu: "http://localhost:3000/token",
+  htu: "https://localhost/token",
   jti: crypto.randomUUID(),
 })
   .setProtectedHeader({ alg: "ES256", typ: "dpop+jwt", jwk: dpopJwk })
@@ -48,7 +48,7 @@ group("Cryptographic Operations (SC-001)", () => {
       await dpopValidator.validate("mock-client-id", {
         proof: dpopProof,
         method: "POST",
-        url: "http://localhost:3000/token"
+        url: "https://localhost/token"
       });
     } catch (e) {
       // Ignore jti replay errors during benchmark as we're measuring pure latency

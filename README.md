@@ -20,6 +20,5 @@ Public documentation is pre-rendered at build time for optimal performance and S
 - Zero Cumulative Layout Shift (CLS) for documentation pages.
 
 ### CORS & Security
-In development, the backend allows requests from the Astro dev server (port 4321) with `credentials: true` to support cookie-based session hydration.
-In production, Astro builds into a static site that is served by the Hono backend, ensuring a unified origin.
+In development and production, the platform uses a unified HTTPS origin. Astro builds into a static site that is served by the Hono backend on port 443, ensuring consistent security policies and simplified session management.
 

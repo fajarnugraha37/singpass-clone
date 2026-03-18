@@ -53,7 +53,7 @@ export async function getPublicJWK(): Promise<jose.JWK> {
  */
 export async function signSingpassJWT(payload: Record<string, any>, options: { expiresIn?: string } = {}): Promise<string> {
   const { key, kid } = await getSigningKey();
-  const issuer = process.env.OIDC_ISSUER || 'http://localhost:3000';
+  const issuer = process.env.OIDC_ISSUER || 'https://localhost';
 
   return await new jose.SignJWT(payload)
     .setProtectedHeader({ alg: 'ES256', kid, typ: 'JWT' })

@@ -6,7 +6,7 @@ import { reportToMarkdown } from "../src/reporters/markdown.ts";
 
 const mockReport: AuditReport = {
   timestamp: new Date().toISOString(),
-  target: "http://localhost:3000",
+  target: "https://localhost",
   overallStatus: "PASS",
   summary: "All good",
   topFindings: [],

@@ -13,7 +13,7 @@ export const openapiSpec = {
       '**Security**: DPoP, PKCE (S256), private_key_jwt, JWS-in-JWE tokens',
   },
   servers: [
-    { url: 'http://localhost:3000', description: 'Local Development' },
+    { url: 'https://localhost', description: 'Local Development' },
   ],
   tags: [
     { name: 'OIDC Discovery', description: 'OpenID Connect Discovery and JWKS endpoints' },
@@ -40,7 +40,7 @@ export const openapiSpec = {
                 schema: {
                   type: 'object',
                   properties: {
-                    issuer: { type: 'string', example: 'http://localhost:3000' },
+                    issuer: { type: 'string', example: 'https://localhost' },
                     authorization_endpoint: { type: 'string' },
                     token_endpoint: { type: 'string' },
                     userinfo_endpoint: { type: 'string' },

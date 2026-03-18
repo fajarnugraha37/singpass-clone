@@ -64,6 +64,6 @@ MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgnR+Nq5tCtTsK4JKkRkE0pEz5m/g4wGPF
     delete process.env.OIDC_ISSUER;
     const jwt = await signSingpassJWT({ foo: 'bar' });
     const decoded = jose.decodeJwt(jwt);
-    expect(decoded.iss).toBe('http://localhost:3000');
+    expect(decoded.iss).toBe('https://localhost');
   });
 });

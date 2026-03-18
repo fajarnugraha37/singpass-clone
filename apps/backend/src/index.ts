@@ -26,7 +26,6 @@ import { DrizzleTokenRepository } from './infra/adapters/db/drizzle_token_reposi
 import { DrizzleUserInfoRepository } from './infra/adapters/db/drizzle_userinfo_repository';
 import { DrizzleClientRegistry } from './infra/adapters/client_registry';
 import { DrizzleJtiStore } from './infra/adapters/db/drizzle_jti_store';
-import { DPoPValidator } from './core/utils/dpop_validator';
 import { jwksCache } from './infra/adapters/jwks_cache';
 import { createAuthRouter } from './infra/http/authRouter';
 import { ValidateUserInfoRequestUseCase } from './application/usecases/validate-userinfo-request';
@@ -37,35 +36,40 @@ import { DrizzleServerKeyManager } from './infra/adapters/db/drizzle_key_manager
 import { swaggerUI } from '@hono/swagger-ui';
 import { openapiSpec } from './infra/http/openapi-spec';
 import { fapiHeaders } from './infra/middleware/fapi-headers';
+import { CertificateService } from './infra/http/certificate.service';
+import { HttpsServer } from './infra/http/https.server';
+import { HttpRedirectServer } from './infra/http/http.server';
+import { DPoPValidator } from './core/utils/dpop_validator';
+
+const certService = new CertificateService();
+// We still need certificates for the Hono app fetch if we use it, 
+// but we only really need them for HttpsServer. 
+// However, await is fine here as it's just generating files.
+const tls = await certService.ensureCertificates();
 
 const auditService = new DrizzleSecurityAuditService();
 const keyManager = new DrizzleServerKeyManager(auditService);
 const clientRegistry = new DrizzleClientRegistry();
 const cryptoService = new JoseCryptoService(keyManager, clientRegistry, auditService);
 
-// Ensure active keys exist on startup and handle rotation if needed
-await Promise.all([
-  keyManager.ensureActiveKey(),
-  keyManager.rotateKeys()
-]);
 const parRepository = new DrizzlePARRepository();
 const authSessionRepository = new DrizzleAuthSessionRepository();
 const authCodeRepository = new DrizzleAuthorizationCodeRepository();
 const tokenRepository = new DrizzleTokenRepository();
 const userInfoRepository = new DrizzleUserInfoRepository();
 const jtiStore = new DrizzleJtiStore();
-const dpopValidator = new DPoPValidator(jtiStore);
+const dpopValidatorInstance = new DPoPValidator(jtiStore);
 
 const clientAuthService = new ClientAuthenticationService(cryptoService, clientRegistry, jwksCache, jtiStore);
 const tokenService = new TokenService(cryptoService, clientRegistry, jwksCache);
 
-const registerParUseCase = new RegisterParUseCase(cryptoService, parRepository, clientRegistry, dpopValidator, jwksCache, auditService);
+const registerParUseCase = new RegisterParUseCase(cryptoService, parRepository, clientRegistry, dpopValidatorInstance, jwksCache, auditService);
 const tokenExchangeUseCase = new TokenExchangeUseCase(
   clientAuthService,
   tokenService,
   authCodeRepository,
   tokenRepository,
-  dpopValidator,
+  dpopValidatorInstance,
   userInfoRepository,
   cryptoService,
   sharedConfig.OIDC.ISSUER
@@ -73,12 +77,12 @@ const tokenExchangeUseCase = new TokenExchangeUseCase(
 const getUserInfoUseCase = new GetUserInfoUseCase(
   userInfoRepository,
   cryptoService,
-  dpopValidator,
+  dpopValidatorInstance,
   jwksCache,
   clientRegistry,
   auditService
 );
-const validateUserInfoRequestUseCase = new ValidateUserInfoRequestUseCase(userInfoRepository, dpopValidator, cryptoService);
+const validateUserInfoRequestUseCase = new ValidateUserInfoRequestUseCase(userInfoRepository, dpopValidatorInstance, cryptoService);
 const generateUserInfoPayloadUseCase = new GenerateUserInfoPayloadUseCase(cryptoService);
 
 const userinfoRouter = createUserinfoRouter(
@@ -106,6 +110,7 @@ const authRouter = createAuthRouter(
   clientRegistry,
   sharedConfig.OIDC.ISSUER
 );
+
 const api = new Hono()
   .use('*', fapiHeaders)
   .get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
@@ -117,11 +122,21 @@ const api = new Hono()
   .route('/auth', authRouter);
 
 const app = new Hono()
+  .use('*', async (c, next) => {
+    // Security Hardening
+    c.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+    c.header('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://localhost;");
+    c.header('X-Content-Type-Options', 'nosniff');
+    c.header('X-Frame-Options', 'DENY');
+    c.header('X-XSS-Protection', '1; mode=block');
+    await next();
+  })
   .use('*', cors({
     origin: (origin) => {
-      // Allow local development ports
+      // Allow local development and unified HTTPS origin
+      if (origin === 'https://localhost' || origin?.startsWith('https://localhost:')) return origin;
       if (origin?.startsWith('http://localhost:')) return origin;
-      return 'http://localhost:3000'; // Default Astro dev port
+      return 'https://localhost';
     },
     credentials: true,
   }))
@@ -165,44 +180,69 @@ app
   .get('/doc', (c) => c.json(openapiSpec))
   // Swagger UI will be available at /ui
   .get('/ui', swaggerUI({ url: '/doc' }))
-  // SPA Fallback
-  .get('/', serveStatic({ path: 'static/index.html' }))
   // Serve static assets from the frontend build
   .use('/*', serveStatic({ 
-    root: 'static',
-  }));
+    root: '../frontend/dist',
+  }))
+  // SPA Fallback
+  .get('*', serveStatic({ path: '../frontend/dist/index.html' }));
 
-// Periodic cleanup of expired FAPI records (every 10 minutes)
-const cleanupJob = new Cron('*/10 * * * *', async () => {
-  try {
-    const stats = await cleanupExpiredRecords();
-    if (stats.parCleaned > 0 || stats.authCodesCleaned > 0 || stats.sessionsCleaned > 0 || stats.jtisCleaned > 0 || stats.keysCleaned > 0) {
-      console.info(`[Cleanup] Purged expired records:`, stats);
+// Start Servers and Jobs only if not in test environment
+if (process.env.NODE_ENV !== 'test') {
+  // Ensure active keys exist on startup and handle rotation if needed
+  await Promise.all([
+    keyManager.ensureActiveKey(),
+    keyManager.rotateKeys()
+  ]);
+
+  // Periodic cleanup of expired FAPI records (every 10 minutes)
+  const cleanupJob = new Cron('*/10 * * * *', async () => {
+    try {
+      const stats = await cleanupExpiredRecords();
+      if (stats.parCleaned > 0 || stats.authCodesCleaned > 0 || stats.sessionsCleaned > 0 || stats.jtisCleaned > 0 || stats.keysCleaned > 0) {
+        console.info(`[Cleanup] Purged expired records:`, stats);
+      }
+    } catch (error) {
+      console.error(`[Cleanup] Error during periodic cleanup:`, error);
     }
-  } catch (error) {
-    console.error(`[Cleanup] Error during periodic cleanup:`, error);
-  }
-});
+  });
 
-// Daily Key Rotation Job (every day at midnight)
-const rotationJob = new Cron('0 0 * * *', async () => {
-  try {
-    await keyManager.rotateKeys();
-  } catch (error) {
-    console.error(`[Rotation] Error during periodic key rotation:`, error);
-  }
-});
+  // Daily Key Rotation Job (every day at midnight)
+  const rotationJob = new Cron('0 0 * * *', async () => {
+    try {
+      await keyManager.rotateKeys();
+    } catch (error) {
+      console.error(`[Rotation] Error during periodic key rotation:`, error);
+    }
+  });
 
-// Graceful shutdown logic
-const shutdown = () => {
-  console.info('[Shutdown] Stopping cleanup and rotation jobs...');
-  cleanupJob.stop();
-  rotationJob.stop();
-  process.exit(0);
-};
+  // Graceful shutdown logic
+  const shutdown = () => {
+    console.info('[Shutdown] Stopping cleanup and rotation jobs...');
+    cleanupJob.stop();
+    rotationJob.stop();
+    process.exit(0);
+  };
 
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
+
+  // Start Servers
+  const portHttps = parseInt(process.env.PORT_HTTPS || '443');
+  const portHttp = parseInt(process.env.PORT_HTTP || '80');
+
+  const httpsServer = new HttpsServer({
+    port: portHttps,
+    fetch: app.fetch,
+    tls,
+  });
+  httpsServer.start();
+
+  const httpServer = new HttpRedirectServer({
+    port: portHttp,
+  });
+  httpServer.start();
+}
 
 export type AppType = typeof app;
 export default app;

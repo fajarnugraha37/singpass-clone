@@ -28,7 +28,7 @@ export const initiateAuth = (useCase: InitiateAuthSessionUseCase) => {
     } catch (error: any) {
       console.error('[Auth Initiation] Error:', error);
       
-      const frontendUrl = process.env.PUBLIC_FRONTEND_URL || 'http://localhost:3000';
+      const frontendUrl = process.env.PUBLIC_FRONTEND_URL || 'https://localhost';
       const errorUrl = new URL(`${frontendUrl}/error`);
       errorUrl.searchParams.set('error', 'invalid_request');
       errorUrl.searchParams.set('error_description', error.message);

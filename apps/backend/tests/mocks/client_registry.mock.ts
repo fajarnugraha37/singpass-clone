@@ -9,7 +9,7 @@ export const MOCK_CLIENT_REGISTRY: Record<string, ClientConfig> = {
     clientId: 'mock-client-id',
     clientName: 'Mock Client Application',
     appType: 'Login',
-    redirectUris: ['http://localhost:3000/callback'],
+    redirectUris: ['https://localhost/callback'],
     jwks: {
       keys: [
         {
@@ -37,7 +37,7 @@ export const MOCK_CLIENT_REGISTRY: Record<string, ClientConfig> = {
     clientId: 'test-client',
     clientName: 'Test Client',
     appType: 'Myinfo',
-    redirectUris: ['http://localhost:3000/cb'],
+    redirectUris: ['https://localhost/cb'],
     jwks: {
       keys: [
         {

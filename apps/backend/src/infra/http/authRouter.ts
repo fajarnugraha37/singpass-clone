@@ -40,7 +40,7 @@ export const createAuthRouter = (
       '/',
       zValidator('query', initiateAuthRequestSchema, (result, c) => {
         if (!result.success) {
-          const frontendUrl = process.env.PUBLIC_FRONTEND_URL || 'http://localhost:3000';
+          const frontendUrl = process.env.PUBLIC_FRONTEND_URL || 'https://localhost';
           const errorUrl = new URL(`${frontendUrl}/error`);
           errorUrl.searchParams.set('error', 'invalid_request');
           errorUrl.searchParams.set('error_description', 'Missing or invalid client_id or request_uri');

@@ -3,7 +3,7 @@ import { checkDiscovery } from "../src/checks/discovery.ts";
 import { type AuditorConfig } from "../src/utils/types.ts";
 
 const mockConfig: AuditorConfig = {
-  targetDiscoveryUrl: "http://localhost:3000/.well-known/openid-configuration",
+  targetDiscoveryUrl: "https://localhost/.well-known/openid-configuration",
   clientId: "TEST_CLIENT",
   clientAssertionType: "client_secret",
   redirectUri: "http://localhost:8080/callback",
@@ -19,12 +19,12 @@ describe("Checks", () => {
 
   it("should pass discovery check if all endpoints are present", async () => {
     const mockDoc = {
-      authorization_endpoint: "http://localhost:3000/auth",
-      token_endpoint: "http://localhost:3000/token",
-      userinfo_endpoint: "http://localhost:3000/userinfo",
-      jwks_uri: "http://localhost:3000/jwks",
-      pushed_authorization_request_endpoint: "http://localhost:3000/par",
-      issuer: "http://localhost:3000",
+      authorization_endpoint: "https://localhost/auth",
+      token_endpoint: "https://localhost/token",
+      userinfo_endpoint: "https://localhost/userinfo",
+      jwks_uri: "https://localhost/jwks",
+      pushed_authorization_request_endpoint: "https://localhost/par",
+      issuer: "https://localhost",
     };
 
     global.fetch = mock(() => Promise.resolve(new Response(JSON.stringify(mockDoc))));
@@ -35,7 +35,7 @@ describe("Checks", () => {
 
   it("should fail discovery check if required endpoints are missing", async () => {
     const mockDoc = {
-      authorization_endpoint: "http://localhost:3000/auth",
+      authorization_endpoint: "https://localhost/auth",
     };
 
     global.fetch = mock(() => Promise.resolve(new Response(JSON.stringify(mockDoc))));

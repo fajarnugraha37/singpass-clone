@@ -15,14 +15,14 @@ export const sharedConfig = {
     ACCESS_TOKEN_LIFESPAN: 1800,
   },
   OIDC: {
-    ISSUER: 'https://vibe-auth.example.com',
+    ISSUER: 'https://localhost',
   }
 };
 
 export const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   DATABASE_URL: z.string().optional(),
-  PORT: z.string().default('3000'),
+  PORT: z.string().default('443'),
 });
 
 export type Env = z.infer<typeof envSchema>;

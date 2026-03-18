@@ -15,9 +15,9 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Install `selfsigned` dependency in `apps/backend/package.json`
-- [ ] T002 [P] Create `.ssl/` directory in `apps/backend/.ssl/` and add to `.gitignore`
-- [ ] T003 [P] Configure `PORT_HTTPS` (443) and `PORT_HTTP` (80) in `.env.example` and root `.env`
+- [x] T001 Install `selfsigned` dependency in `apps/backend/package.json`
+- [x] T002 [P] Create `.ssl/` directory in `apps/backend/.ssl/` and add to `.gitignore`
+- [x] T003 [P] Configure `PORT_HTTPS` (443) and `PORT_HTTP` (80) in `.env.example` and root `.env`
 
 ---
 
@@ -27,10 +27,10 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Implement `CertificateService` for automated TLS generation in `apps/backend/src/infrastructure/http/certificate.service.ts`
-- [ ] T005 [P] Create `ServerFactory` to encapsulate `Bun.serve` logic in `apps/backend/src/infrastructure/http/server.factory.ts`
-- [ ] T006 [P] Implement `HttpsServer` class with TLS support in `apps/backend/src/infrastructure/http/https.server.ts`
-- [ ] T007 [P] Implement `HttpRedirectServer` class for port 80 in `apps/backend/src/infrastructure/http/http.server.ts`
+- [x] T004 Implement `CertificateService` for automated TLS generation in `apps/backend/src/infrastructure/http/certificate.service.ts`
+- [x] T005 [P] Create `ServerFactory` to encapsulate `Bun.serve` logic in `apps/backend/src/infrastructure/http/server.factory.ts`
+- [x] T006 [P] Implement `HttpsServer` class with TLS support in `apps/backend/src/infrastructure/http/https.server.ts`
+- [x] T007 [P] Implement `HttpRedirectServer` class for port 80 in `apps/backend/src/infrastructure/http/http.server.ts`
 
 **Checkpoint**: Foundation ready - server components are defined and TLS logic is in place.
 
@@ -44,8 +44,8 @@
 
 ### Implementation for User Story 3
 
-- [ ] T008 [US3] Integrate `CertificateService` into backend startup sequence in `apps/backend/src/index.ts`
-- [ ] T009 [US3] Add filesystem check logic to verify certificate validity in `apps/backend/src/infrastructure/http/certificate.service.ts`
+- [x] T008 [US3] Integrate `CertificateService` into backend startup sequence in `apps/backend/src/index.ts`
+- [x] T009 [US3] Add filesystem check logic to verify certificate validity in `apps/backend/src/infrastructure/http/certificate.service.ts`
 
 **Checkpoint**: User Story 3 is functional; certificates are managed automatically.
 
@@ -59,10 +59,10 @@
 
 ### Implementation for User Story 1
 
-- [ ] T010 [US1] Configure main Hono app to serve static assets from `apps/frontend/dist` in `apps/backend/src/index.ts`
-- [ ] T011 [US1] Initialize `HttpsServer` on port 443 with TLS credentials in `apps/backend/src/index.ts`
-- [ ] T012 [P] [US1] Update `apps/frontend/astro.config.mjs` to set `site` and `base` for the new HTTPS origin
-- [ ] T013 [P] [US1] Update `apps/frontend/package.json` build script to output to `apps/backend/static` if needed, or update Hono to point to `apps/frontend/dist`
+- [x] T010 [US1] Configure main Hono app to serve static assets from `apps/frontend/dist` in `apps/backend/src/index.ts`
+- [x] T011 [US1] Initialize `HttpsServer` on port 443 with TLS credentials in `apps/backend/src/index.ts`
+- [x] T012 [P] [US1] Update `apps/frontend/astro.config.mjs` to set `site` and `base` for the new HTTPS origin
+- [x] T013 [P] [US1] Update `apps/frontend/package.json` build script to output to `apps/backend/static` if needed, or update Hono to point to `apps/frontend/dist`
 
 **Checkpoint**: User Story 1 is functional; the platform is accessible over HTTPS.
 
@@ -76,8 +76,8 @@
 
 ### Implementation for User Story 2
 
-- [ ] T014 [US2] Initialize `HttpRedirectServer` on port 80 in `apps/backend/src/index.ts`
-- [ ] T015 [US2] Implement global redirect middleware in `apps/backend/src/infrastructure/http/http.server.ts`
+- [x] T014 [US2] Initialize `HttpRedirectServer` on port 80 in `apps/backend/src/index.ts`
+- [x] T015 [US2] Implement global redirect middleware in `apps/backend/src/infrastructure/http/http.server.ts`
 
 **Checkpoint**: User Story 2 is functional; HTTP is upgraded to HTTPS.
 
@@ -91,9 +91,9 @@
 
 ### Implementation for User Story 4
 
-- [ ] T016 [US4] Search and replace all hardcoded `3000` and `4321` references in `.env`, `README.md`, and config files
-- [ ] T017 [US4] Update `packages/shared/src/config.ts` to use the unified HTTPS origin
-- [ ] T018 [US4] Update `apps/backend/src/index.ts` CORS configuration to trust the unified origin
+- [x] T016 [US4] Search and replace all hardcoded `3000` and `4321` references in `.env`, `README.md`, and config files
+- [x] T017 [US4] Update `packages/shared/src/config.ts` to use the unified HTTPS origin
+- [x] T018 [US4] Update `apps/backend/src/index.ts` CORS configuration to trust the unified origin
 
 **Checkpoint**: All stories are complete and integrated.
 
@@ -103,11 +103,11 @@
 
 **Purpose**: Security hardening and final verification
 
-- [ ] T019 [P] Add HSTS and CSP headers to Hono middleware in `apps/backend/src/index.ts`
-- [ ] T020 [P] Implement proper MIME type detection for static assets in `apps/backend/src/index.ts`
-- [ ] T021 [P] Validate directory traversal protection in static file serving logic
-- [ ] T022 Update root `README.md` and `quickstart.md` with new port requirements
-- [ ] T023 Run final validation of all scenarios in `specs/038-unified-https-arch/spec.md`
+- [x] T019 [P] Add HSTS and CSP headers to Hono middleware in `apps/backend/src/index.ts`
+- [x] T020 [P] Implement proper MIME type detection for static assets in `apps/backend/src/index.ts`
+- [x] T021 [P] Validate directory traversal protection in static file serving logic
+- [x] T022 Update root `README.md` and `quickstart.md` with new port requirements
+- [x] T023 Run final validation of all scenarios in `specs/038-unified-https-arch/spec.md`
 
 ---
 
