@@ -70,14 +70,14 @@ async function seed() {
     const postal = faker.location.zipCode('######');
 
     if (person.regadd) {
-      person.regadd.type.value = 'SG';
+      person.regadd.type = 'SG';
       person.regadd.block.value = block;
       person.regadd.building.value = building;
       person.regadd.floor.value = faker.string.numeric(2);
       person.regadd.unit.value = faker.string.numeric(3);
       person.regadd.street.value = street;
       person.regadd.postal.value = postal;
-      person.regadd.country.value = 'SG';
+      person.regadd.country = { code: 'SG', desc: 'SINGAPORE' };
     }
 
     // Finance Data
@@ -87,16 +87,43 @@ async function seed() {
       person.finance['cpfbalances.ra'].value = 0;
       person.finance['cpfbalances.sa'].value = parseFloat(faker.finance.amount({ min: 5000, max: 60000 }));
 
-      person.finance.cpfcontributions = Array.from({ length: 3 }).map(() => ({
-        date: { value: faker.date.recent().toISOString().split('T')[0], source: '1', classification: 'C', lastupdated: '2024-03-18' },
-        amount: { value: parseFloat(faker.finance.amount({ min: 500, max: 3000 })), source: '1', classification: 'C', lastupdated: '2024-03-18' },
-        employer: { value: faker.company.name().toUpperCase(), source: '1', classification: 'C', lastupdated: '2024-03-18' },
-      }));
+      person.finance.cpfcontributions = Array.from({ length: 3 }).map((_, idx) => {
+        const date = faker.date.recent();
+        return {
+          date: { value: date.toISOString().split('T')[0], source: '1', classification: 'C', lastupdated: '2024-03-18' },
+          amount: { value: parseFloat(faker.finance.amount({ min: 500, max: 3000 })), source: '1', classification: 'C', lastupdated: '2024-03-18' },
+          employer: { value: faker.company.name().toUpperCase(), source: '1', classification: 'C', lastupdated: '2024-03-18' },
+          month: { value: `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`, source: '1', classification: 'C', lastupdated: '2024-03-18' },
+        };
+      }).sort((a, b) => a.date.value!.localeCompare(b.date.value!));
 
       person.finance['noa-basic'].amount.value = parseFloat(faker.finance.amount({ min: 30000, max: 150000 }));
       person.finance['noa-basic'].yearofassessment.value = '2023';
+      
+      person.finance.noa = {
+        amount: { value: person.finance['noa-basic'].amount.value, source: '1', classification: 'C', lastupdated: '2024-03-18' },
+        yearofassessment: { value: '2023', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+        employment: { value: person.finance['noa-basic'].amount.value * 0.8, source: '1', classification: 'C', lastupdated: '2024-03-18' },
+        trade: { value: 0, source: '1', classification: 'C', lastupdated: '2024-03-18' },
+        rent: { value: 0, source: '1', classification: 'C', lastupdated: '2024-03-18' },
+        interest: { value: person.finance['noa-basic'].amount.value * 0.05, source: '1', classification: 'C', lastupdated: '2024-03-18' },
+        taxclearance: { value: 'N', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+        taxcategory: { value: 'INCOME TAX', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+      };
+      
+      person.finance.noahistory = [person.finance.noa];
       person.finance.ownerprivate.value = faker.helpers.arrayElement(['Y', 'N']);
     }
+
+    // Vehicle Data
+    person.vehicles = [
+      {
+        vehicleno: { value: `SBA${faker.string.numeric(4)}${faker.string.alpha(1).toUpperCase()}`, source: '1', classification: 'C', lastupdated: '2024-03-18' },
+        type: { value: 'PRIVATE MOTOR CAR', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+        make: { value: 'TOYOTA', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+        model: { value: 'COROLLA', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+      }
+    ];
 
     // Family Data
     if (person.family) {
@@ -113,6 +140,31 @@ async function seed() {
           lifestatus: { value: '1', source: '1', classification: 'C', lastupdated: '2024-03-18' }
         } satisfies MyinfoChildBirthRecord));
       }
+    }
+
+    // Education Data
+    if (person.education) {
+      person.education.employment.value = 'PRIVATE SECTOR';
+      person.education.occupation.value = 'SOFTWARE ENGINEER';
+      person.education.academicqualifications = [
+        {
+          qualification: { value: 'BACHELOR OF SCIENCE', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+          school: { value: 'NATIONAL UNIVERSITY OF SINGAPORE', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+          yearofgraduation: { value: '2020', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+        }
+      ];
+    }
+
+    // Property Data
+    if (person.property) {
+      person.property.hdbownership = [
+        {
+          noofowners: { value: 1, source: '1', classification: 'C', lastupdated: '2024-03-18' },
+          address: { ...person.regadd },
+          hdbtype: { value: '4-ROOM', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+          leasecommencementdate: { value: '2021-01-01', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+        }
+      ];
     }
     // Check if profile exists
     const existingProfile = await db.query.myinfoProfiles.findFirst({

@@ -1,19 +1,22 @@
 export interface MyinfoValue<T> {
   value: T | null;
-  source?: string;
-  classification?: string;
-  lastupdated?: string;
+  source: string;
+  classification: string;
+  lastupdated: string;
 }
 
 export interface MyinfoAddress {
-  type: MyinfoValue<string>;
+  type: string;
   block: MyinfoValue<string>;
   building: MyinfoValue<string>;
   floor: MyinfoValue<string>;
   unit: MyinfoValue<string>;
   street: MyinfoValue<string>;
   postal: MyinfoValue<string>;
-  country: MyinfoValue<string>;
+  country: {
+    code: string;
+    desc: string;
+  };
 }
 
 export interface MyinfoMobileNo {
@@ -55,6 +58,18 @@ export interface MyinfoCpfContribution {
   date: MyinfoValue<string>;
   amount: MyinfoValue<number>;
   employer: MyinfoValue<string>;
+  month: MyinfoValue<string>;
+}
+
+export interface MyinfoNoaDetailed {
+  amount: MyinfoValue<number>;
+  yearofassessment: MyinfoValue<string>;
+  employment: MyinfoValue<number>;
+  trade: MyinfoValue<number>;
+  rent: MyinfoValue<number>;
+  interest: MyinfoValue<number>;
+  taxclearance: MyinfoValue<string>;
+  taxcategory: MyinfoValue<string>;
 }
 
 export interface MyinfoFinance {
@@ -67,12 +82,24 @@ export interface MyinfoFinance {
     amount: MyinfoValue<number>;
     yearofassessment: MyinfoValue<string>;
   };
+  noa: MyinfoNoaDetailed;
+  noahistory: MyinfoNoaDetailed[];
   ownerprivate: MyinfoValue<string>;
 }
 
 export interface MyinfoEducation {
   employment: MyinfoValue<string>;
   occupation: MyinfoValue<string>;
+  academicqualifications: {
+    qualification: MyinfoValue<string>;
+    school: MyinfoValue<string>;
+    yearofgraduation: MyinfoValue<string>;
+  }[];
+  ltavocationallicences: {
+    licence: MyinfoValue<string>;
+    validity: MyinfoValue<string>;
+    expirydate: MyinfoValue<string>;
+  }[];
 }
 
 export interface MyinfoChildBirthRecord {
@@ -89,7 +116,7 @@ export interface MyinfoFamily {
   childrenbirthrecords: MyinfoChildBirthRecord[];
 }
 
-export interface MyinfoVehicle {
+export interface MyinfoVehicleRecord {
   vehicleno: MyinfoValue<string>;
   type: MyinfoValue<string>;
   make: MyinfoValue<string>;
@@ -106,6 +133,7 @@ export interface MyinfoDrivingLicence {
 
 export interface MyinfoProperty {
   hdbownership: {
+    noofowners: MyinfoValue<number>;
     address: MyinfoAddress;
     hdbtype: MyinfoValue<string>;
     leasecommencementdate: MyinfoValue<string>;
@@ -129,7 +157,7 @@ export interface MyinfoCatalog {
   finance: MyinfoFinance;
   education: MyinfoEducation;
   family: MyinfoFamily;
-  vehicle: MyinfoVehicle;
+  vehicles: MyinfoVehicleRecord[];
   drivingLicence: MyinfoDrivingLicence;
   property: MyinfoProperty;
   governmentScheme: MyinfoGovernmentScheme;
@@ -139,7 +167,7 @@ export type MyinfoPerson = MyinfoPersonal &
   Partial<MyinfoFinance> & 
   Partial<MyinfoEducation> & 
   Partial<MyinfoFamily> & 
-  Partial<MyinfoVehicle> & 
+  { vehicles?: MyinfoVehicleRecord[] } & 
   Partial<MyinfoDrivingLicence> & 
   Partial<MyinfoProperty> & 
   Partial<MyinfoGovernmentScheme>;

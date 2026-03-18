@@ -24,8 +24,17 @@ export const SCOPE_TO_ATTRIBUTES: Record<string, string[]> = {
   
   // Financial Scopes
   'cpfbalances': ['cpfbalances.oa', 'cpfbalances.ma', 'cpfbalances.ra', 'cpfbalances.sa'],
+  'cpfbalances.oa': ['cpfbalances.oa'],
+  'cpfbalances.ma': ['cpfbalances.ma'],
+  'cpfbalances.ra': ['cpfbalances.ra'],
+  'cpfbalances.sa': ['cpfbalances.sa'],
   'cpfcontributions': ['cpfcontributions'],
   'noa-basic': ['noa-basic'],
+  'noa': ['noa'],
+  'noahistory': ['noahistory'],
+  
+  // Vehicle Scopes
+  'vehicles': ['vehicles'],
   
   // Family Scopes
   'marital': ['marital'],
@@ -66,17 +75,16 @@ export function filterPersonByScopes(person: Record<string, any>, scopes: string
       filtered[attr] = person[attr];
     }
     
-    // Handle nested finance/family if they are in the person object
+    // Handle nested finance/family/vehicles if they are in the person object
     if (attr.includes('.') && person.finance) {
       const parts = attr.split('.');
-      if (parts[0] === 'cpfbalances' && person.finance.cpfbalances) {
+      if (parts[0] === 'cpfbalances' && person.finance[attr] !== undefined) {
         if (!filtered.finance) filtered.finance = {};
-        if (!filtered.finance.cpfbalances) filtered.finance.cpfbalances = {};
-        filtered.finance.cpfbalances[parts[1]] = person.finance.cpfbalances[parts[1]];
+        filtered.finance[attr] = person.finance[attr];
       }
     }
     
-    if (['cpfcontributions', 'noa-basic'].includes(attr) && person.finance) {
+    if (['cpfcontributions', 'noa-basic', 'noa', 'noahistory'].includes(attr) && person.finance) {
       if (!filtered.finance) filtered.finance = {};
       filtered.finance[attr] = person.finance[attr];
     }
@@ -84,6 +92,10 @@ export function filterPersonByScopes(person: Record<string, any>, scopes: string
     if (['marital', 'marriagedate', 'childrenbirthrecords'].includes(attr) && person.family) {
       if (!filtered.family) filtered.family = {};
       filtered.family[attr] = person.family[attr];
+    }
+
+    if (attr === 'vehicles' && person.vehicles) {
+      filtered.vehicles = person.vehicles;
     }
   }
   

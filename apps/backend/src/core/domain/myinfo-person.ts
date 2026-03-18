@@ -3,7 +3,7 @@ import {
   MyinfoFinance,
   MyinfoEducation,
   MyinfoFamily,
-  MyinfoVehicle,
+  MyinfoVehicleRecord,
   MyinfoDrivingLicence,
   MyinfoProperty,
   MyinfoGovernmentScheme
@@ -19,7 +19,7 @@ export interface MyinfoPerson extends MyinfoPersonal {
   finance: MyinfoFinance;
   education: MyinfoEducation;
   family: MyinfoFamily;
-  vehicle: MyinfoVehicle;
+  vehicles: MyinfoVehicleRecord[];
   drivingLicence: MyinfoDrivingLicence;
   property: MyinfoProperty;
   governmentScheme: MyinfoGovernmentScheme;
@@ -74,14 +74,14 @@ export function createEmptyMyinfoPerson(userId: string): MyinfoPerson {
     },
     email: withMeta(null, '4'),
     regadd: {
-      type: withMeta(null),
+      type: 'SG',
       block: withMeta(null),
       building: withMeta(null),
       floor: withMeta(null),
       unit: withMeta(null),
       street: withMeta(null),
       postal: withMeta(null),
-      country: withMeta(null),
+      country: { code: 'SG', desc: 'SINGAPORE' },
     },
     hdbtype: withMeta(null),
     housingtype: withMeta(null),
@@ -97,23 +97,31 @@ export function createEmptyMyinfoPerson(userId: string): MyinfoPerson {
         amount: withMeta(null),
         yearofassessment: withMeta(null),
       },
+      noa: {
+        amount: withMeta(null),
+        yearofassessment: withMeta(null),
+        employment: withMeta(null),
+        trade: withMeta(null),
+        rent: withMeta(null),
+        interest: withMeta(null),
+        taxclearance: withMeta(null),
+        taxcategory: withMeta(null),
+      },
+      noahistory: [],
       ownerprivate: withMeta(null),
     },
     education: {
       employment: withMeta(null),
       occupation: withMeta(null),
+      academicqualifications: [],
+      ltavocationallicences: [],
     },
     family: {
       marital: withMeta(null),
       marriagedate: withMeta(null),
       childrenbirthrecords: [],
     },
-    vehicle: {
-      vehicleno: withMeta(null),
-      type: withMeta(null),
-      make: withMeta(null),
-      model: withMeta(null),
-    },
+    vehicles: [],
     drivingLicence: {
       qdl: {
         validity: withMeta(null),

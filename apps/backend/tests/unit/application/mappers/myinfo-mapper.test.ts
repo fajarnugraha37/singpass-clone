@@ -30,7 +30,7 @@ describe('MyinfoMapper', () => {
 
   it('should return explicit null for missing fields with metadata', () => {
     const person = createEmptyMyinfoPerson('user-1');
-    // createEmptyMyinfoPerson already sets them to { value: null }
+    // createEmptyMyinfoPerson already sets them to { value: null, source: '1', ... }
     
     const result = mapMyinfoProfile(person);
     
@@ -42,21 +42,41 @@ describe('MyinfoMapper', () => {
     });
   });
 
-  it('should handle complex nested structures like mobileno', () => {
+  it('should handle complex nested structures like regadd correctly', () => {
     const person = createEmptyMyinfoPerson('user-1');
-    person.mobileno = {
-      prefix: { value: '+' },
-      areacode: { value: '65' },
-      nbr: { value: '91234567' }
+    person.regadd = {
+      type: 'SG',
+      block: { value: '123', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+      building: { value: 'TECH TOWER', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+      floor: { value: '10', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+      unit: { value: '101', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+      street: { value: 'STREET 1', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+      postal: { value: '123456', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+      country: { code: 'SG', desc: 'SINGAPORE' }
     };
     
     const result = mapMyinfoProfile(person);
     
-    expect(result.mobileno).toEqual({
-      prefix: { value: '+' },
-      areacode: { value: '65' },
-      nbr: { value: '91234567' }
-    });
+    expect(result.regadd.type).toBe('SG');
+    expect(result.regadd.country).toEqual({ code: 'SG', desc: 'SINGAPORE' });
+    expect(result.regadd.block.value).toBe('123');
+  });
+
+  it('should handle vehicles array correctly', () => {
+    const person = createEmptyMyinfoPerson('user-1');
+    person.vehicles = [
+      {
+        vehicleno: { value: 'SBA1234A', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+        type: { value: 'PRIVATE MOTOR CAR', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+        make: { value: 'TOYOTA', source: '1', classification: 'C', lastupdated: '2024-03-18' },
+        model: { value: 'COROLLA', source: '1', classification: 'C', lastupdated: '2024-03-18' }
+      }
+    ];
+    
+    const result = mapMyinfoProfile(person);
+    
+    expect(Array.isArray(result.vehicles)).toBe(true);
+    expect(result.vehicles[0].vehicleno.value).toBe('SBA1234A');
   });
 
   it('should return the full person_info structure', () => {

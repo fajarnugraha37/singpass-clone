@@ -12,7 +12,7 @@ export function mapMyinfoProfile(person: MyinfoPerson) {
     finance, 
     education, 
     family, 
-    vehicle, 
+    vehicles, 
     drivingLicence, 
     property, 
     governmentScheme, 
@@ -26,10 +26,6 @@ export function mapMyinfoProfile(person: MyinfoPerson) {
   const mergeCatalog = (catalog: any) => {
     if (catalog) {
       for (const [key, val] of Object.entries(catalog)) {
-        // Special handling for property or other complex arrays if needed
-        // But the domain entity already follows the { value: ... } wrapping
-        // for individual attributes. Arrays like cpfcontributions or hdbownership
-        // are returned as arrays of objects.
         personInfo[key] = val;
       }
     }
@@ -38,10 +34,14 @@ export function mapMyinfoProfile(person: MyinfoPerson) {
   mergeCatalog(finance);
   mergeCatalog(education);
   mergeCatalog(family);
-  mergeCatalog(vehicle);
   mergeCatalog(drivingLicence);
   mergeCatalog(property);
   mergeCatalog(governmentScheme);
+
+  // Vehicles is a separate top-level field in person_info
+  if (vehicles) {
+    personInfo.vehicles = vehicles;
+  }
 
   return personInfo;
 }

@@ -12,8 +12,9 @@ describe('Singpass OIDC Compliance: Data Minimization', () => {
     email: { value: 'john@example.com' },
     mobileno: { value: '91234567' },
     finance: {
-      cpfbalances: { oa: { value: 100 }, ma: { value: 50 } },
-      noa_basic: { value: 5000 }
+      'cpfbalances.oa': { value: 100, source: '1', classification: 'C', lastupdated: '2024-03-18' },
+      'cpfbalances.ma': { value: 50, source: '1', classification: 'C', lastupdated: '2024-03-18' },
+      'noa-basic': { amount: { value: 5000, source: '1', classification: 'C', lastupdated: '2024-03-18' }, yearofassessment: { value: '2023', source: '1', classification: 'C', lastupdated: '2024-03-18' } }
     }
   };
 
@@ -41,7 +42,7 @@ describe('Singpass OIDC Compliance: Data Minimization', () => {
     const filtered = filterPersonByScopes(mockPerson, scopes);
     
     expect(filtered.finance).toBeDefined();
-    expect(filtered.finance.cpfbalances).toBeDefined();
-    expect(filtered.finance.noa_basic).toBeUndefined();
+    expect(filtered.finance['cpfbalances.oa']).toBeDefined();
+    expect(filtered.finance['noa-basic']).toBeUndefined();
   });
 });
