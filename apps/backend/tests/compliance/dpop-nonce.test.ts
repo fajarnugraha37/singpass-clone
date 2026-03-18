@@ -47,7 +47,7 @@ describe('DPoP-Nonce Compliance: Rotation and Retry', () => {
 
     const dpopProof = await generateDPoPProof('POST', 'http://localhost/api/par');
 
-    const clientAssertion = await new jose.SignJWT({ iss: clientId, sub: clientId, aud: 'https://vibe-auth.example.com', jti: 'jti' })
+    const clientAssertion = await new jose.SignJWT({ iss: clientId, sub: clientId, aud: 'https://localhost', jti: 'jti' })
       .setProtectedHeader({ alg: 'ES256', kid: 'key-1' })
       .sign(clientKeyPair.privateKey);
 
@@ -106,7 +106,7 @@ describe('DPoP-Nonce Compliance: Rotation and Retry', () => {
     const dpopProof = await generateDPoPProof('POST', 'http://localhost/api/par', serverNonce);
     
     // We need client_assertion for a successful PAR
-    const clientAssertion = await new jose.SignJWT({ iss: clientId, sub: clientId, aud: 'https://vibe-auth.example.com', jti: 'jti' })
+    const clientAssertion = await new jose.SignJWT({ iss: clientId, sub: clientId, aud: 'https://localhost', jti: 'jti' })
       .setProtectedHeader({ alg: 'ES256', kid: 'key-1' })
       .sign(clientKeyPair.privateKey);
 

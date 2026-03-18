@@ -5,8 +5,10 @@ The auditor tool maintains state internally during its execution. No persistent 
 ## Core Entities
 
 ### 1. `AuditorConfig`
+
 Represents the target configuration and parameters for the run.
-- `targetDiscoveryUrl`: string (e.g., `http://localhost:3000/.well-known/openid-configuration`)
+
+- `targetDiscoveryUrl`: string (e.g., `https://localhost/.well-known/openid-configuration`)
 - `clientId`: string
 - `clientAssertionType`: 'client_secret' | 'private_key_jwt'
 - `clientSecret`?: string
@@ -17,7 +19,9 @@ Represents the target configuration and parameters for the run.
 - `myinfoConfig`?: MyInfoVerificationConfig
 
 ### 2. `AuditReport`
+
 The final output of the auditor.
+
 - `timestamp`: string (ISO 8601)
 - `target`: string
 - `overallStatus`: 'PASS' | 'PARTIAL' | 'FAIL'
@@ -26,7 +30,9 @@ The final output of the auditor.
 - `checks`: AuditFinding[]
 
 ### 3. `AuditFinding`
+
 An individual test evaluation.
+
 - `id`: string (e.g., `CH-001`)
 - `title`: string
 - `status`: 'PASS' | 'PARTIAL' | 'FAIL' | 'MANUAL'
@@ -36,7 +42,9 @@ An individual test evaluation.
 - `referenceUrl`?: string
 
 ### 4. `AuthSessionState`
+
 Transient state maintained during the OIDC flow execution.
+
 - `state`: string
 - `nonce`: string
 - `codeVerifier`: string

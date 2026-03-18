@@ -10,6 +10,7 @@ The system MUST utilize Hono RPC to synchronize type definitions between `apps/b
 ### Implementation Details
 
 1. **Backend Export**: `apps/backend/src/index.ts` must export the final application type:
+
    ```typescript
    // apps/backend/src/index.ts
    import { Hono } from 'hono'
@@ -24,12 +25,13 @@ The system MUST utilize Hono RPC to synchronize type definitions between `apps/b
    ```
 
 2. **Frontend Consumption**: `apps/frontend/src/lib/api-client.ts` must use the exported type:
+
    ```typescript
    // apps/frontend/src/lib/api-client.ts
    import { hc } from 'hono/client'
    import type { AppType } from 'backend/src/index' // via workspace reference
    
-   export const client = hc<AppType>('http://localhost:3000/')
+   export const client = hc<AppType>('https://localhost/')
    ```
 
 3. **Validation**: All endpoints MUST use `hono/zod` (or similar) to ensure the request body and parameters match the TypeScript contract at runtime.

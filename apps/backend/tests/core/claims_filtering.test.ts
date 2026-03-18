@@ -7,6 +7,7 @@ describe('mapUserInfoClaims', () => {
     nric: 'S1234567A',
     name: 'JOHN DOE',
     email: 'john@example.com',
+    mobileno: '91234567',
   };
 
   it('should return only openid claims (sub, iss, aud, iat, acr, amr, sub_type) when no other scopes are provided', () => {

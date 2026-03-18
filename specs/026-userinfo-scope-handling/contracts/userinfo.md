@@ -8,7 +8,7 @@
 ```json
 {
   "sub": "7c9c72ec-5be2-495a-a78e-61e809a2a236",
-  "iss": "https://vibe-auth.example.com",
+  "iss": "https://localhost",
   "aud": "test-client",
   "iat": 1710400000,
   "acr": "urn:singpass:authentication:loa:2",

@@ -60,7 +60,7 @@ describe('Token Exchange Compliance Audit Remediation', () => {
     
     spyOn(require('../../src/infra/adapters/client_registry').DrizzleClientRegistry.prototype, 'getClientConfig').mockImplementation(async () => ({
       clientId: 'test-client',
-      redirectUris: ['http://localhost:3000/cb'],
+      redirectUris: ['https://localhost/cb'],
       jwks: { keys: [{ kid: 'test-client-key', use: 'sig', kty: 'EC', crv: 'P-256', x: '...', y: '...' }] }
     } as any));
 
@@ -76,7 +76,7 @@ describe('Token Exchange Compliance Audit Remediation', () => {
       body: new URLSearchParams({
         grant_type: 'authorization_code',
         code: 'valid-code',
-        redirect_uri: 'http://localhost:3000/cb',
+        redirect_uri: 'https://localhost/cb',
         code_verifier: 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk',
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
         client_assertion: clientAssertion,
@@ -103,7 +103,7 @@ describe('Token Exchange Compliance Audit Remediation', () => {
     spyOn(JoseCryptoService.prototype, 'generateDPoPNonce').mockImplementation(async () => 'next-server-nonce');
     spyOn(require('../../src/infra/adapters/client_registry').DrizzleClientRegistry.prototype, 'getClientConfig').mockImplementation(async () => ({
       clientId: 'test-client',
-      redirectUris: ['http://localhost:3000/cb'],
+      redirectUris: ['https://localhost/cb'],
       jwks: { keys: [{ kid: 'test-client-key', use: 'sig', kty: 'EC', crv: 'P-256', x: '...', y: '...' }] }
     } as any));
     const jwk = await jose.exportJWK(clientKeyPair.publicKey);
@@ -111,7 +111,7 @@ describe('Token Exchange Compliance Audit Remediation', () => {
 
     spyOn(DrizzleAuthorizationCodeRepository.prototype, 'getByCode').mockImplementation(async () => ({
       clientId: 'test-client',
-      redirectUri: 'http://localhost:3000/cb',
+      redirectUri: 'https://localhost/cb',
       codeChallenge: 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM',
       dpopJkt: jkt,
       scope: 'openid',
@@ -144,7 +144,7 @@ describe('Token Exchange Compliance Audit Remediation', () => {
       body: new URLSearchParams({
         grant_type: 'authorization_code',
         code: 'valid-code',
-        redirect_uri: 'http://localhost:3000/cb',
+        redirect_uri: 'https://localhost/cb',
         code_verifier: 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk',
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
         client_assertion: clientAssertion,

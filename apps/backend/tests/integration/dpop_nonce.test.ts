@@ -57,7 +57,7 @@ describe('DPoP Nonce Enforcement Integration', () => {
     spyOn(require('../../src/infra/adapters/client_registry').DrizzleClientRegistry.prototype, 'getClientConfig').mockImplementation(async () => ({
       clientId: 'test-client',
       appType: 'Login',
-      redirectUris: ['http://localhost:3000/cb'],
+      redirectUris: ['https://localhost/cb'],
       jwks: { keys: [{ kid: 'test-client-key', use: 'sig', kty: 'EC', crv: 'P-256', x: '...', y: '...' }] }
     } as any));
 
@@ -74,7 +74,7 @@ describe('DPoP Nonce Enforcement Integration', () => {
         url: 'http://localhost/api/par', // Pass absolute URL for validation
         response_type: 'code',
         client_id: 'test-client',
-        redirect_uri: 'http://localhost:3000/cb',
+        redirect_uri: 'https://localhost/cb',
         scope: 'openid',
         state: 'a'.repeat(30),
         nonce: 'b'.repeat(30),

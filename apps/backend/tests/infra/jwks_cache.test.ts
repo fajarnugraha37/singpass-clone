@@ -46,7 +46,7 @@ describe('JWKSCacheService', () => {
       } as Response;
     });
 
-    await expect(cacheService.getClientEncryptionKey('client-1', 'https://example.com/404-test'))
+    expect(cacheService.getClientEncryptionKey('client-1', 'https://example.com/404-test'))
       .rejects.toThrow('Failed to fetch JWKS');
   });
 
@@ -59,7 +59,7 @@ describe('JWKSCacheService', () => {
       } as Response;
     });
 
-    await expect(cacheService.getClientEncryptionKey('client-1', 'https://example.com/sig-only-test'))
+    expect(cacheService.getClientEncryptionKey('client-1', 'https://example.com/sig-only-test'))
       .rejects.toThrow('No suitable encryption key found');
   });
 

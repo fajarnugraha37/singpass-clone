@@ -4,11 +4,12 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://localhost',
   i18n: {
     locales: ["es", "en", "pt-br"],
     defaultLocale: "en",
   },
-  outDir: "../backend/static",
+  outDir: "./dist",
   integrations: [
     svelte()
   ],

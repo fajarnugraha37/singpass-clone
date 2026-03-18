@@ -24,7 +24,7 @@ export class JoseCryptoService implements CryptoService {
   ) {}
 
   private async useEnvKeys(): Promise<boolean> {
-    return !!process.env.OIDC_PRIVATE_KEY && !process.env.OIDC_PRIVATE_KEY.includes('-----BEGIN PRIVATE KEY-----\\n...');
+    return !!process.env.OIDC_PRIVATE_KEY && !process.env.OIDC_PRIVATE_KEY.includes('...');
   }
 
   async generateKeyPair(): Promise<{ id: string; privateKey: Uint8Array; publicKey: JWK }> {

@@ -2,10 +2,12 @@ import { describe, it, expect, beforeAll } from 'bun:test';
 import * as jose from 'jose';
 import { JoseCryptoService } from '../../src/infra/adapters/jose_crypto';
 import { DrizzleServerKeyManager } from '../../src/infra/adapters/db/drizzle_key_manager';
+import { DrizzleClientRegistry } from 'src/infra/adapters/client_registry';
+import { DrizzleSecurityAuditService } from 'src/infra/adapters/security_logger';
 
 describe('JoseCryptoService: signAndEncrypt', () => {
   let cryptoService: JoseCryptoService;
-  let clientPrivateKey: jose.KeyLike;
+  let clientPrivateKey: jose.CryptoKey;
   let clientPublicKey: jose.JWK;
   let serverPublicKey: jose.JWK;
   let serverKeyId: string;
@@ -13,7 +15,7 @@ describe('JoseCryptoService: signAndEncrypt', () => {
   beforeAll(async () => {
     process.env.SERVER_KEY_ENCRYPTION_SECRET = '00'.repeat(32);
     const keyManager = new DrizzleServerKeyManager();
-    cryptoService = new JoseCryptoService(keyManager);
+    cryptoService = new JoseCryptoService(keyManager, new DrizzleClientRegistry(), new DrizzleSecurityAuditService());
     
     // 1. Setup Server Key
     const serverKey = await cryptoService.generateKeyPair();

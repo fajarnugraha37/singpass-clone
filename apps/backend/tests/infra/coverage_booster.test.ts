@@ -22,7 +22,7 @@ describe('Coverage Booster', () => {
         getClientConfig: async (clientId: string) => ({
           clientId: 'test-client',
           clientName: 'Test Client',
-          redirectUris: ['http://localhost:3000/cb'],
+          redirectUris: ['https://localhost/cb'],
           jwks: { keys: [] }
         })
       };
@@ -54,7 +54,7 @@ describe('Coverage Booster', () => {
     });
 
     it('should validate redirect URI', async () => {
-      const isValid = await cryptoService.validateRedirectUri('test-client', 'http://localhost:3000/cb');
+      const isValid = await cryptoService.validateRedirectUri('test-client', 'https://localhost/cb');
       expect(typeof isValid).toBe('boolean');
     });
 

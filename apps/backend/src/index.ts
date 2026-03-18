@@ -42,10 +42,6 @@ import { HttpRedirectServer } from './infra/http/http.server';
 import { DPoPValidator } from './core/utils/dpop_validator';
 
 const certService = new CertificateService();
-// We still need certificates for the Hono app fetch if we use it, 
-// but we only really need them for HttpsServer. 
-// However, await is fine here as it's just generating files.
-const tls = await certService.ensureCertificates();
 
 const auditService = new DrizzleSecurityAuditService();
 const keyManager = new DrizzleServerKeyManager(auditService);
@@ -187,62 +183,6 @@ app
   // SPA Fallback
   .get('*', serveStatic({ path: '../frontend/dist/index.html' }));
 
-// Start Servers and Jobs only if not in test environment
-if (process.env.NODE_ENV !== 'test') {
-  // Ensure active keys exist on startup and handle rotation if needed
-  await Promise.all([
-    keyManager.ensureActiveKey(),
-    keyManager.rotateKeys()
-  ]);
-
-  // Periodic cleanup of expired FAPI records (every 10 minutes)
-  const cleanupJob = new Cron('*/10 * * * *', async () => {
-    try {
-      const stats = await cleanupExpiredRecords();
-      if (stats.parCleaned > 0 || stats.authCodesCleaned > 0 || stats.sessionsCleaned > 0 || stats.jtisCleaned > 0 || stats.keysCleaned > 0) {
-        console.info(`[Cleanup] Purged expired records:`, stats);
-      }
-    } catch (error) {
-      console.error(`[Cleanup] Error during periodic cleanup:`, error);
-    }
-  });
-
-  // Daily Key Rotation Job (every day at midnight)
-  const rotationJob = new Cron('0 0 * * *', async () => {
-    try {
-      await keyManager.rotateKeys();
-    } catch (error) {
-      console.error(`[Rotation] Error during periodic key rotation:`, error);
-    }
-  });
-
-  // Graceful shutdown logic
-  const shutdown = () => {
-    console.info('[Shutdown] Stopping cleanup and rotation jobs...');
-    cleanupJob.stop();
-    rotationJob.stop();
-    process.exit(0);
-  };
-
-  process.on('SIGINT', shutdown);
-  process.on('SIGTERM', shutdown);
-
-  // Start Servers
-  const portHttps = parseInt(process.env.PORT_HTTPS || '443');
-  const portHttp = parseInt(process.env.PORT_HTTP || '80');
-
-  const httpsServer = new HttpsServer({
-    port: portHttps,
-    fetch: app.fetch,
-    tls,
-  });
-  httpsServer.start();
-
-  const httpServer = new HttpRedirectServer({
-    port: portHttp,
-  });
-  httpServer.start();
-}
-
+export { certService, keyManager };
 export type AppType = typeof app;
 export default app;

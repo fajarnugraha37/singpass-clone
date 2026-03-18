@@ -2,7 +2,6 @@ import { expect, test, describe, beforeAll, beforeEach } from "bun:test";
 import { DrizzleAuthDataService } from "../../../src/infra/adapters/drizzle_auth_data";
 import { db } from "../../../src/infra/database/client";
 import * as schema from "../../../src/infra/database/schema";
-import { eq } from "drizzle-orm";
 
 describe("DrizzleAuthDataService - Auth Data Lifecycle", () => {
   let authDataService: DrizzleAuthDataService;
@@ -66,7 +65,7 @@ describe("DrizzleAuthDataService - Auth Data Lifecycle", () => {
     const [par] = await db.insert(schema.parRequests).values({
       requestUri: "urn:test:123",
       clientId: "client-1",
-      payload: { scope: "openid", redirect_uri: "http://localhost:3000/cb" },
+      payload: { scope: "openid", redirect_uri: "https://localhost/cb" },
       expiresAt: new Date(Date.now() + 300000)
     }).returning();
 

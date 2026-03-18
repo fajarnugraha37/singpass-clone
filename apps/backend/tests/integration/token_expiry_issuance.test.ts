@@ -42,7 +42,7 @@ describe('Token Expiry Issuance Integration', () => {
         dpopJkt: jkt,
         loa: 2,
         amr: ['pwd', 'otp-sms'],
-        redirectUri: 'http://localhost:3000/cb',
+        redirectUri: 'https://localhost/cb',
         expiresAt: new Date(Date.now() + 300000),
         used: false,
         createdAt: new Date()
@@ -79,7 +79,7 @@ describe('Token Expiry Issuance Integration', () => {
     const body = new URLSearchParams({
       grant_type: 'authorization_code',
       code: 'valid-code-123',
-      redirect_uri: 'http://localhost:3000/cb',
+      redirect_uri: 'https://localhost/cb',
       code_verifier: 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk',
       client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
       client_assertion: clientAssertion,

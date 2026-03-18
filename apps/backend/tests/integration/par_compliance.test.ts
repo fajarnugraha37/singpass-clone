@@ -33,7 +33,7 @@ describe('PAR Compliance Audit Remediation', () => {
   const validNonce = 'b'.repeat(30);
 
   test('POST /par should fail if state is less than 30 characters', async () => {
-    const clientAssertion = await generateClientAssertion('test-client', 'https://vibe-auth.example.com/api/par');
+    const clientAssertion = await generateClientAssertion('test-client', 'https://localhost/api/par');
 
     const body = new URLSearchParams({
       response_type: 'code',
@@ -64,7 +64,7 @@ describe('PAR Compliance Audit Remediation', () => {
   });
 
   test('POST /par should fail if nonce is less than 30 characters', async () => {
-    const clientAssertion = await generateClientAssertion('test-client', 'https://vibe-auth.example.com/api/par');
+    const clientAssertion = await generateClientAssertion('test-client', 'https://localhost/api/par');
 
     const body = new URLSearchParams({
       response_type: 'code',
@@ -107,12 +107,13 @@ describe('PAR Compliance Audit Remediation', () => {
       uen: 'UEN123',
       hasAcceptedAgreement: true,
       jwks: { keys: [{ kid: 'test-client-key' }] },
+      environment: 'Staging',
     }));
     spyOn(DrizzlePARRepository.prototype, 'isJtiConsumed').mockImplementation(async () => false);
     spyOn(DrizzlePARRepository.prototype, 'consumeJti').mockImplementation(async () => {});
     spyOn(DrizzlePARRepository.prototype, 'save').mockImplementation(async () => {});
 
-    const clientAssertion = await generateClientAssertion('test-client', 'https://vibe-auth.example.com/api/par');
+    const clientAssertion = await generateClientAssertion('test-client', 'https://localhost/api/par');
 
     const body = new URLSearchParams({
       response_type: 'code',
@@ -156,12 +157,13 @@ describe('PAR Compliance Audit Remediation', () => {
       uen: 'UEN123',
       hasAcceptedAgreement: true,
       jwks: { keys: [{ kid: 'test-client-key' }] },
+      environment: 'Staging',
     }));
     spyOn(DrizzlePARRepository.prototype, 'isJtiConsumed').mockImplementation(async () => false);
     spyOn(DrizzlePARRepository.prototype, 'consumeJti').mockImplementation(async () => {});
     spyOn(DrizzlePARRepository.prototype, 'save').mockImplementation(async () => {});
 
-    const clientAssertion = await generateClientAssertion('test-client', 'https://vibe-auth.example.com/api/par');
+    const clientAssertion = await generateClientAssertion('test-client', 'https://localhost/api/par');
 
     const body = new URLSearchParams({
       response_type: 'code',

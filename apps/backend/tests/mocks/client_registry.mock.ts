@@ -1,4 +1,4 @@
-import type { ClientConfig } from '../../../src/core/domain/client_registry';
+import type { ClientConfig } from '../../src/core/domain/client_registry';
 
 /**
  * Mock registry for testing purposes only.
@@ -6,6 +6,11 @@ import type { ClientConfig } from '../../../src/core/domain/client_registry';
  */
 export const MOCK_CLIENT_REGISTRY: Record<string, ClientConfig> = {
   'mock-client-id': {
+    allowedScopes: ['openid'],
+    environment: 'Staging',
+    hasAcceptedAgreement: true,
+    uen: 'UEN123',
+    isActive: true,
     clientId: 'mock-client-id',
     clientName: 'Mock Client Application',
     appType: 'Login',
@@ -34,6 +39,11 @@ export const MOCK_CLIENT_REGISTRY: Record<string, ClientConfig> = {
     },
   },
   'test-client': {
+    allowedScopes: ['openid'],
+    environment: 'Staging',
+    hasAcceptedAgreement: true,
+    uen: 'UEN123',
+    isActive: true,
     clientId: 'test-client',
     clientName: 'Test Client',
     appType: 'Myinfo',

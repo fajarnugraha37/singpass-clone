@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeAll } from 'bun:test';
 import { JoseCryptoService } from '../../../src/infra/adapters/jose_crypto';
 import { DrizzleServerKeyManager } from '../../../src/infra/adapters/db/drizzle_key_manager';
+import { DrizzleClientRegistry } from 'src/infra/adapters/client_registry';
+import { DrizzleSecurityAuditService } from 'src/infra/adapters/security_logger';
 
 describe('JoseCryptoService: getPublicJWKS Security', () => {
   let cryptoService: JoseCryptoService;
@@ -9,7 +11,7 @@ describe('JoseCryptoService: getPublicJWKS Security', () => {
     // Ensure environment is set up for encryption
     process.env.SERVER_KEY_ENCRYPTION_SECRET = '00'.repeat(32);
     const keyManager = new DrizzleServerKeyManager();
-    cryptoService = new JoseCryptoService(keyManager);
+    cryptoService = new JoseCryptoService(keyManager, new DrizzleClientRegistry(), new DrizzleSecurityAuditService());
   });
 
   it('should NOT include private key components (d) in exported JWKS', async () => {

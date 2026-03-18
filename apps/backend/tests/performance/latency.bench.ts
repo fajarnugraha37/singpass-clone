@@ -2,13 +2,16 @@ import { bench, group, run } from "mitata";
 import { JoseCryptoService } from "../../src/infra/adapters/jose_crypto";
 import { DPoPValidator } from "../../src/core/utils/dpop_validator";
 import * as jose from "jose";
+import { DrizzleServerKeyManager } from "src/infra/adapters/db/drizzle_key_manager";
+import { DrizzleClientRegistry } from "src/infra/adapters/client_registry";
+import { DrizzleSecurityAuditService } from "src/infra/adapters/security_logger";
 
 /**
  * Performance Benchmark for SC-001:
  * All cryptographic validation operations (DPoP, private_key_jwt) must complete in under 50ms.
  */
 
-const cryptoService = new JoseCryptoService();
+const cryptoService = new JoseCryptoService(new DrizzleServerKeyManager, new DrizzleClientRegistry, new DrizzleSecurityAuditService);
 const dpopValidator = new DPoPValidator();
 process.env.SERVER_KEY_ENCRYPTION_SECRET = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 

@@ -4,6 +4,7 @@
 
 1. **Database Setup**
    Ensure your database is generated and migrated to include the new mock user structure.
+
    ```bash
    cd apps/backend
    bun run db:generate
@@ -12,12 +13,14 @@
 
 2. **Seeding Mock Users**
    Run the database seed script to populate mock users with full Myinfo catalog data and the default password `test1234`.
+
    ```bash
    bun run db:seed
    ```
 
 3. **Running the Server**
    Start the backend and frontend development servers.
+
    ```bash
    bun run dev
    ```
@@ -33,7 +36,7 @@
    ```bash
    curl -H "Authorization: DPoP <access_token>" \
         -H "DPoP: <dpop_proof_jwt>" \
-        http://localhost:3000/userinfo
+        https://localhost/userinfo
    ```
 
 3. **Verify the Response**

@@ -2,7 +2,6 @@ import { expect, test, describe, beforeAll, spyOn, afterEach, mock } from 'bun:t
 import app from '../../src/index';
 import * as jose from 'jose';
 import { JoseCryptoService } from '../../src/infra/adapters/jose_crypto';
-import { JWKSCacheService } from '../../src/infra/adapters/jwks_cache';
 import { DrizzleUserInfoRepository } from '../../src/infra/adapters/db/drizzle_userinfo_repository';
 import { DrizzleClientRegistry } from '../../src/infra/adapters/client_registry';
 import { createEmptyMyinfoPerson } from '../../src/core/domain/myinfo-person';
@@ -67,6 +66,7 @@ describe('UserInfo Integration', () => {
           nric: 'S1234567A',
           name: 'JOHN DOE',
           email: 'john@example.com',
+          mobileno: '91234567',
         };
       }
       return null;
@@ -80,6 +80,12 @@ describe('UserInfo Integration', () => {
           jwks: {
             keys: [clientEncJwk],
           },
+          allowedScopes: ['openid'],
+          isActive: true,
+          uen: 'UEN123',
+          hasAcceptedAgreement: true,
+          environment: 'Staging',
+          appType: 'Login',
         };
       }
       return null;

@@ -16,7 +16,7 @@ export async function getSigningKey(): Promise<{ key: jose.CryptoKey, kid: strin
   if (cachedPrivateKey) return { key: cachedPrivateKey, kid: 'server-v1' };
 
   const pem = process.env.OIDC_PRIVATE_KEY;
-  if (!pem || pem.includes('-----BEGIN PRIVATE KEY-----\\n...')) {
+  if (!pem || pem.includes('...')) {
     throw new Error('OIDC_PRIVATE_KEY is not configured or contains placeholder value.');
   }
 

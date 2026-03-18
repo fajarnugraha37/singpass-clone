@@ -47,6 +47,7 @@ describe('Consent Flow Integration: Purpose Propagation', () => {
       uen: 'UEN123',
       hasAcceptedAgreement: true,
       jwks: { keys: [{ kid: 'test-client-key' }] },
+      environment: 'Staging',
     }));
 
     // 2. Mock PAR Repo
@@ -84,7 +85,7 @@ describe('Consent Flow Integration: Purpose Propagation', () => {
     // --- EXECUTION ---
 
     // A. Create PAR
-    const clientAssertion = await generateClientAssertion(clientId, 'https://vibe-auth.example.com/api/par');
+    const clientAssertion = await generateClientAssertion(clientId, 'https://localhost/api/par');
     const parBody = new URLSearchParams({
       response_type: 'code',
       client_id: clientId,

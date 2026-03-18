@@ -49,7 +49,7 @@ describe('Singpass Compliance: URL Safety Enforcement', () => {
         clientId,
         clientName: 'Mock Client',
         appType: 'Login',
-        redirectUris: ['https://client.example.com/cb', 'http://localhost:3000/cb'],
+        redirectUris: ['https://client.example.com/cb', 'https://localhost/cb'],
         allowedScopes: ['openid'],
         isActive: true,
         uen: 'UEN123',
@@ -110,7 +110,7 @@ describe('Singpass Compliance: URL Safety Enforcement', () => {
     try {
       const input = {
         ...getBaseInput(),
-        redirect_uri: 'http://localhost:3000/cb',
+        redirect_uri: 'https://localhost/cb',
       } as any;
 
       const result = await useCase.execute(input);
@@ -127,7 +127,7 @@ describe('Singpass Compliance: URL Safety Enforcement', () => {
     try {
       const input = {
         ...getBaseInput(),
-        redirect_uri: 'http://localhost:3000/cb',
+        redirect_uri: 'http://localhost/cb',
       } as any;
 
       expect(useCase.execute(input)).rejects.toThrow('redirect_uri is insecure or contains an IP address');

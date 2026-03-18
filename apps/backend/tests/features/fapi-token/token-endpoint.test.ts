@@ -69,7 +69,7 @@ describe('Token Controller - Integration Tests', () => {
     const jwk = await jose.exportJWK(testKeyPair.publicKey);
     testDpopProof = await new jose.SignJWT({
       htm: 'POST',
-      htu: 'http://localhost:3000/token',
+      htu: 'https://localhost/token',
       jti: 'test-jti',
     })
       .setProtectedHeader({ alg: 'ES256', typ: 'dpop+jwt', jwk })
@@ -84,7 +84,7 @@ describe('Token Controller - Integration Tests', () => {
 
   // Test for missing DPoP header (explicitly checked in controller)
   it('should return invalid_dpop_proof error when DPoP header is missing', async () => {
-    const request = new Request('http://localhost:3000/token', {
+    const request = new Request('https://localhost/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -93,7 +93,7 @@ describe('Token Controller - Integration Tests', () => {
       body: new URLSearchParams({
         grant_type: 'authorization_code',
         code: 'valid_code',
-        redirect_uri: 'http://localhost:3000/callback',
+        redirect_uri: 'https://localhost/callback',
         code_verifier: VALID_CODE_VERIFIER,
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
         client_assertion: 'dummy_assertion',
@@ -119,13 +119,13 @@ describe('Token Controller - Integration Tests', () => {
 
   // Test for invalid request due to body parsing or schema validation
   it('should return invalid_request error when request body is malformed', async () => {
-    const request = new Request('http://localhost:3000/token', {
+    const request = new Request('https://localhost/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'DPoP': testDpopProof,
       },
-      body: 'grant_type=authorization_code&code=valid_code&redirect_uri=http://localhost:3000/callback&code_verifier=' + VALID_CODE_VERIFIER + '&client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer&client_assertion=dummy_assertion&invalid_param=extra', // Malformed body
+      body: 'grant_type=authorization_code&code=valid_code&redirect_uri=https://localhost/callback&code_verifier=' + VALID_CODE_VERIFIER + '&client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer&client_assertion=dummy_assertion&invalid_param=extra', // Malformed body
     }).clone();
 
     c = await createMockContext(request);
@@ -148,7 +148,7 @@ describe('Token Controller - Integration Tests', () => {
 
   // Test for invalid_token error when use case throws it
   it('should return invalid_token error when use case specifically throws it', async () => { 
-    const request = new Request('http://localhost:3000/token', {
+    const request = new Request('https://localhost/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -157,7 +157,7 @@ describe('Token Controller - Integration Tests', () => {
       body: new URLSearchParams({
         grant_type: 'authorization_code',
         code: 'valid_code',
-        redirect_uri: 'http://localhost:3000/callback',
+        redirect_uri: 'https://localhost/callback',
         code_verifier: VALID_CODE_VERIFIER,
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
         client_assertion: 'dummy_assertion',
@@ -184,7 +184,7 @@ describe('Token Controller - Integration Tests', () => {
 
   // Test for server_error when use case throws an unexpected error
   it('should return server_error when use case execution fails with an unexpected error', async () => {
-    const request = new Request('http://localhost:3000/token', {
+    const request = new Request('https://localhost/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -193,7 +193,7 @@ describe('Token Controller - Integration Tests', () => {
       body: new URLSearchParams({
         grant_type: 'authorization_code',
         code: 'valid_code',
-        redirect_uri: 'http://localhost:3000/callback',
+        redirect_uri: 'https://localhost/callback',
         code_verifier: VALID_CODE_VERIFIER,
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
         client_assertion: 'dummy_assertion',

@@ -1,26 +1,33 @@
 # Quickstart: UserInfo Scope Handling
 
 ## Overview
+
 This feature extends the system's ability to handle the `mobileno` scope and correctly populate `sub_attributes` in the ID Token and `person_info` in the UserInfo response, adhering to Singpass FAPI 2.0 standards.
 
 ## Verification Steps
 
 ### 1. Verify Domain Logic
+
 Run the unit tests for the claims mapping logic:
+
 ```bash
 bun test apps/backend/tests/core/claims.test.ts
 bun test apps/backend/tests/core/claims_filtering.test.ts
 ```
 
 ### 2. Verify UserInfo Response
+
 Initiate a UserInfo request using an access token with full scopes:
+
 ```bash
 # Assuming you have a valid DPoP Access Token and Proof
-curl -X GET https://vibe-auth.example.com/userinfo \
+curl -X GET https://localhost/userinfo \
   -H "Authorization: DPoP <access_token>" \
   -H "DPoP: <dpop_proof>"
 ```
+
 Expected `person_info` in the decrypted payload:
+
 ```json
 {
   "person_info": {
@@ -33,8 +40,10 @@ Expected `person_info` in the decrypted payload:
 ```
 
 ### 3. Verify ID Token Claims
+
 Inspect the ID Token returned during the token exchange flow when `user.identity` is requested.
 Expected `sub_attributes`:
+
 ```json
 {
   "sub_attributes": {

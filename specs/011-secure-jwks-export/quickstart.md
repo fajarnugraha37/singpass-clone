@@ -24,15 +24,15 @@ The test should pass, confirming that the `d` parameter (and other private compo
 
 You can also manually query the endpoint and inspect the output.
 
-1.  **Start the backend service.**
+1. **Start the backend service.**
 
-2.  **Use `curl` to fetch the keys:**
+2. **Use `curl` to fetch the keys:**
 
     ```bash
-    curl http://localhost:3000/.well-known/keys | jq
+    curl https://localhost/.well-known/keys | jq
     ```
 
-3.  **Inspect the output.** A successful, secure response will look like this:
+3. **Inspect the output.** A successful, secure response will look like this:
 
     ```json
     {
@@ -50,10 +50,10 @@ You can also manually query the endpoint and inspect the output.
     }
     ```
 
-4.  **Verify the absence of private keys.** You can use `grep` to fail if the `d` parameter is found. The following command should produce no output:
+4. **Verify the absence of private keys.** You can use `grep` to fail if the `d` parameter is found. The following command should produce no output:
 
     ```bash
-    curl -s http://localhost:3000/.well-known/keys | grep '"d":'
+    curl -s https://localhost/.well-known/keys | grep '"d":'
     ```
 
 ### 3. Programmatic Verification (One-liner)

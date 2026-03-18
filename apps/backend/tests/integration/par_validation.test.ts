@@ -42,12 +42,13 @@ describe('PAR Redirect URI Validation Integration', () => {
       uen: 'UEN123',
       hasAcceptedAgreement: true,
       jwks: { keys: [{ kid: 'test-client-key' }] },
+      environment: 'Staging',
     }));
     spyOn(DrizzlePARRepository.prototype, 'isJtiConsumed').mockImplementation(async () => false);
     spyOn(DrizzlePARRepository.prototype, 'consumeJti').mockImplementation(async () => {});
     spyOn(DrizzlePARRepository.prototype, 'save').mockImplementation(async () => {});
 
-    const clientAssertion = await generateClientAssertion('test-client', 'https://vibe-auth.example.com/api/par');
+    const clientAssertion = await generateClientAssertion('test-client', 'https://localhost/api/par');
 
     const body = new URLSearchParams({
       response_type: 'code',
@@ -90,9 +91,10 @@ describe('PAR Redirect URI Validation Integration', () => {
       uen: 'UEN123',
       hasAcceptedAgreement: true,
       jwks: { keys: [{ kid: 'test-client-key' }] },
+      environment: 'Staging',
     }));
 
-    const clientAssertion = await generateClientAssertion('test-client', 'https://vibe-auth.example.com/api/par');
+    const clientAssertion = await generateClientAssertion('test-client', 'https://localhost/api/par');
 
     const body = new URLSearchParams({
       response_type: 'code',
@@ -124,7 +126,7 @@ describe('PAR Redirect URI Validation Integration', () => {
   });
 
   test('POST /par should fail if redirect_uri is missing', async () => {
-    const clientAssertion = await generateClientAssertion('test-client', 'https://vibe-auth.example.com/api/par');
+    const clientAssertion = await generateClientAssertion('test-client', 'https://localhost/api/par');
 
     const body = new URLSearchParams({
       response_type: 'code',

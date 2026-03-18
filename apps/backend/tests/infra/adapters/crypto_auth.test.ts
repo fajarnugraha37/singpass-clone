@@ -2,6 +2,8 @@ import { expect, test, describe, beforeAll } from "bun:test";
 import { JoseCryptoService } from "../../../src/infra/adapters/jose_crypto";
 import { DrizzleServerKeyManager } from "../../../src/infra/adapters/db/drizzle_key_manager";
 import * as jose from "jose";
+import { DrizzleClientRegistry } from "src/infra/adapters/client_registry";
+import { DrizzleSecurityAuditService } from "src/infra/adapters/security_logger";
 
 describe("JoseCryptoService - Client Authentication", () => {
   let cryptoService: JoseCryptoService;
@@ -10,7 +12,7 @@ describe("JoseCryptoService - Client Authentication", () => {
   beforeAll(() => {
     process.env.SERVER_KEY_ENCRYPTION_SECRET = mockSecret;
     const keyManager = new DrizzleServerKeyManager();
-    cryptoService = new JoseCryptoService(keyManager);
+    cryptoService = new JoseCryptoService(keyManager, new DrizzleClientRegistry(), new DrizzleSecurityAuditService());
   });
 
   test("should validate a valid private_key_jwt client assertion", async () => {
@@ -22,7 +24,7 @@ describe("JoseCryptoService - Client Authentication", () => {
     const assertion = await new jose.SignJWT({
       iss: "mock-client-id",
       sub: "mock-client-id",
-      aud: "https://vibe-auth.example.com",
+      aud: "https://localhost",
     })
       .setProtectedHeader({ alg: "ES256" })
       .setIssuedAt()
@@ -106,7 +108,7 @@ describe("JoseCryptoService - Client Authentication", () => {
     const assertion = await new jose.SignJWT({
       iss: "client-id",
       sub: "client-id",
-      aud: "https://vibe-auth.example.com",
+      aud: "https://localhost",
       iat: now,
       exp: now + 120,
     })

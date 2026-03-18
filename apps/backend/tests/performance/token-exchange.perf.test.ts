@@ -4,6 +4,7 @@ import { ClientAuthenticationService } from '../../src/core/application/services
 import { TokenService } from '../../src/core/application/services/token.service';
 import { DPoPValidator } from '../../src/core/utils/dpop_validator';
 import * as jose from 'jose';
+import { JWKSCacheService } from 'src/infra/adapters/jwks_cache';
 
 // Minimal Mocks for Performance Testing
 const mockJtiStore: any = {
@@ -73,8 +74,9 @@ describe('Token Exchange Performance', () => {
         ] }
       })
     };
-    const clientAuthService = new ClientAuthenticationService(mockCryptoService, mockClientRegistry);
-    const tokenService = new TokenService(mockCryptoService, mockClientRegistry);
+    const jwksCacheService = new JWKSCacheService();
+    const clientAuthService = new ClientAuthenticationService(mockCryptoService, mockClientRegistry, jwksCacheService);
+    const tokenService = new TokenService(mockCryptoService, mockClientRegistry, jwksCacheService);
     const dpopValidator = new DPoPValidator(mockJtiStore);
     const mockUserInfoRepo: any = {
       getUserById: async () => ({ id: 'user-123', nric: 'S1234567A', name: 'Test User' }),

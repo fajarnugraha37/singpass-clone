@@ -29,22 +29,23 @@ describe('Token Endpoint DPoP-Nonce Integration', () => {
   }
 
   async function generateDPoPProof(method: string, url: string, nonce?: string, accessToken?: string) {
-    const jwt = new jose.SignJWT({
+    const jwtPayload: Record<string, string | number | undefined> = {
       htm: method,
       htu: url,
       iat: Math.floor(Date.now() / 1000),
       exp: Math.floor(Date.now() / 1000) + 120,
       jti: crypto.randomUUID(),
       nonce,
-    });
+    };
 
     if (accessToken) {
-      const ath = await jose.base64url.encode(
+      const ath = jose.base64url.encode(
         new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(accessToken)))
       );
-      jwt.setPayload({ ...jwt.payload, ath });
+      jwtPayload.ath = ath;
     }
 
+    const jwt = new jose.SignJWT(jwtPayload);
     return await jwt
       .setProtectedHeader({ alg: 'ES256', typ: 'dpop+jwt', jwk: await jose.exportJWK(clientKeyPair.publicKey) })
       .sign(clientKeyPair.privateKey);
@@ -70,14 +71,19 @@ describe('Token Endpoint DPoP-Nonce Integration', () => {
           { ...publicJwk, kid: 'key-2', use: 'enc' }
         ] 
       },
+      allowedScopes: ['openid'],
+      isActive: true,
+      uen: 'UEN123',
+      hasAcceptedAgreement: true,
+      environment: 'Staging',
     }));
 
-    const dpopProof = await generateDPoPProof('POST', 'http://localhost/api/token', invalidNonce);
-    const clientAssertion = await new jose.SignJWT({ iss: clientId, sub: clientId, aud: 'https://vibe-auth.example.com', jti: crypto.randomUUID() })
+    const dpopProof = await generateDPoPProof('POST', 'https://localhost/api/token', invalidNonce);
+    const clientAssertion = await new jose.SignJWT({ iss: clientId, sub: clientId, aud: 'https://localhost', jti: crypto.randomUUID() })
       .setProtectedHeader({ alg: 'ES256', kid: 'key-1' })
       .sign(clientKeyPair.privateKey);
 
-    const res = await app.request('/api/token', {
+    const res = await app.request('https://localhost/api/token', {
       method: 'POST',
       headers: {
         'DPoP': dpopProof,
@@ -123,6 +129,11 @@ describe('Token Endpoint DPoP-Nonce Integration', () => {
           { ...publicJwk, kid: 'key-2', use: 'enc' }
         ] 
       },
+      allowedScopes: ['openid'],
+      isActive: true,
+      uen: 'UEN123',
+      hasAcceptedAgreement: true,
+      environment: 'Staging',
     }));
     spyOn(DrizzleAuthorizationCodeRepository.prototype, 'getByCode').mockImplementation(async () => ({
       code: 'valid-code',
@@ -145,12 +156,12 @@ describe('Token Endpoint DPoP-Nonce Integration', () => {
       mobileno: '91234567',
     }));
 
-    const dpopProof = await generateDPoPProof('POST', 'http://localhost/api/token', serverNonce);
-    const clientAssertion = await new jose.SignJWT({ iss: clientId, sub: clientId, aud: 'https://vibe-auth.example.com', jti: crypto.randomUUID() })
+    const dpopProof = await generateDPoPProof('POST', 'https://localhost/api/token', serverNonce);
+    const clientAssertion = await new jose.SignJWT({ iss: clientId, sub: clientId, aud: 'https://localhost', jti: crypto.randomUUID() })
       .setProtectedHeader({ alg: 'ES256', kid: 'key-1' })
       .sign(clientKeyPair.privateKey);
 
-    const res = await app.request('/api/token', {
+    const res = await app.request('https://localhost/api/token', {
       method: 'POST',
       headers: {
         'DPoP': dpopProof,

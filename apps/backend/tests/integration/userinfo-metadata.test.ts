@@ -59,6 +59,12 @@ describe('UserInfo Metadata Integration', () => {
       clientId: 'test-client',
       clientName: 'Test Client',
       jwks: { keys: [clientEncJwk] },
+      allowedScopes: ['openid'],
+      isActive: true,
+      uen: 'UEN123',
+      hasAcceptedAgreement: true,
+      environment: 'Staging',
+      appType: 'Login',
     }));
 
     spyOn(JoseCryptoService.prototype, 'validateDPoPNonce').mockImplementation(async () => true);

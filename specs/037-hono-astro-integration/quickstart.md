@@ -3,26 +3,33 @@
 ## Developer Setup
 
 ### 1. Unified Contract Update
+
 Update `packages/shared/src/contracts/auth.ts` to ensure `authSessionResponseSchema` is exported and used correctly by the Hono RPC.
 
 ### 2. Backend RPC Export
+
 Ensure `apps/backend/src/index.ts` exports the `AppType`:
+
 ```typescript
 export type AppType = typeof app;
 ```
 
 ### 3. Frontend Client Initialization
+
 In `apps/frontend/src/lib/rpc.ts`:
+
 ```typescript
 import { hc } from 'hono/client';
 import type { AppType } from '../../../backend/src/index';
 
-const backendUrl = import.meta.env.PUBLIC_BACKEND_URL || 'http://localhost:3000';
+const backendUrl = import.meta.env.PUBLIC_BACKEND_URL || 'https://localhost';
 export const client = hc<AppType>(backendUrl);
 ```
 
 ### 4. Svelte Component Mounting
+
 Use `onMount` to fetch the session:
+
 ```svelte
 <script lang="ts">
   import { onMount } from 'svelte';
@@ -41,9 +48,9 @@ Use `onMount` to fetch the session:
 
 ## Running the Integration
 
-1.  **Start Backend**: `cd apps/backend && bun run dev`
-2.  **Start Frontend**: `cd apps/frontend && bun run dev`
-3.  **Visit UI**: `http://localhost:4321`
+1. **Start Backend**: `cd apps/backend && bun run dev`
+2. **Start Frontend**: `cd apps/frontend && bun run dev`
+3. **Visit UI**: `http://localhost:4321`
 
 ## Verification Checklist
 

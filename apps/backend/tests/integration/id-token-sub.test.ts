@@ -58,6 +58,11 @@ describe('ID Token Compliance: NRIC to UUID Migration', () => {
           clientEncJwk 
         ] 
       },
+      allowedScopes: ['openid'],
+      environment: 'Staging',
+      hasAcceptedAgreement: true,
+      isActive: true,
+      uen: '123456789',
     }));
     spyOn(DrizzleAuthorizationCodeRepository.prototype, 'getByCode').mockImplementation(async () => ({
       code: 'valid-code',
@@ -77,9 +82,10 @@ describe('ID Token Compliance: NRIC to UUID Migration', () => {
       nric: userNric,
       name: 'Test User',
       email: 'test@example.com',
+      mobileno: '6512345678',
     }));
 
-    const clientAssertion = await new jose.SignJWT({ iss: clientId, sub: clientId, aud: 'https://vibe-auth.example.com', jti: crypto.randomUUID() })
+    const clientAssertion = await new jose.SignJWT({ iss: clientId, sub: clientId, aud: 'https://localhost', jti: crypto.randomUUID() })
       .setProtectedHeader({ alg: 'ES256', kid: 'key-1' })
       .sign(clientKeyPair.privateKey);
 

@@ -1,15 +1,19 @@
 # Server Implementation: Token Endpoint (Token Exchange)
 
 ## Overview
+
 The Token endpoint is where clients exchange the `authorization_code` for an `id_token` and an `access_token`. This endpoint strictly enforces FAPI 2.0 constraints, including Private Key JWT authentication, PKCE, and DPoP.
 
 ## Endpoint: `POST /token` (e.g. `/fapi/token`)
+
 Accepts an `application/x-www-form-urlencoded` payload.
 
 ### Request Headers
+
 - `DPoP`: Mandatory DPoP proof JWT.
 
 ### Validation Requirements
+
 1. **Client Authentication**:
    - `client_assertion_type` must be `urn:ietf:params:oauth:client-assertion-type:jwt-bearer`.
    - `client_assertion` must be a signed JWT. Verify the signature against the client's public JWK (from static `jwks` or fetched from `jwks_uri`).
@@ -26,7 +30,9 @@ Accepts an `application/x-www-form-urlencoded` payload.
    - **Nonce Check**: The DPoP proof MUST contain a `nonce` that matches the expected server-signed nonce. If missing or invalid, return `401 Unauthorized` with `use_dpop_nonce` error and a fresh `DPoP-Nonce` header.
 
 ### Token Generation
+
 Upon successful validation:
+
 1. **Access Token**: Generate a secure `access_token` bound to the client's DPoP key. (Set lifetime, e.g., 30 minutes).
 2. **ID Token (JWE/JWS)**: Generate an `id_token`.
    - **Claims**: Include `sub` (**MUST be a persistent UUID**, not NRIC), `aud` (client_id), `iss`, `iat`, `exp`, `nonce` (from PAR), `acr` (e.g., `urn:singpass:authentication:loa:2`), `amr` (e.g., `["pwd", "otp-sms"]`), and conditionally `sub_attributes` (if specific scopes like `name` or `user.identity` were requested).
@@ -35,7 +41,9 @@ Upon successful validation:
    - **Algorithms**: `ECDH-ES+A256KW` for key wrap and `A256GCM` for content encryption.
 
 ### Response
+
 Return a `200 OK` JSON response with `application/json` content type and a fresh `DPoP-Nonce` header:
+
 ```json
 {
   "access_token": "string (opaque)",
@@ -45,17 +53,20 @@ Return a `200 OK` JSON response with `application/json` content type and a fresh
   "refresh_token": "string (optional)"
 }
 ```
+
 Header: `DPoP-Nonce: <signed-jwt-nonce>`
 
-
 ### Error Handling
+
 Return structured JSON errors (e.g., `invalid_grant`, `invalid_client`, `invalid_dpop_proof`) mapped to HTTP 400 or 401.
 
 ## Mock Client Configuration (Development)
+
 For local development and integration testing, a mock client is available with pre-configured keys.
 
 ### Client ID: `mock-client-id`
-- **Redirect URI**: `http://localhost:3000/callback`
+
+- **Redirect URI**: `https://localhost/callback`
 - **JWKS (Public Encryption Key)**:
   - **kid**: `mock-client-enc-key`
   - **use**: `enc`

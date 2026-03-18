@@ -19,7 +19,7 @@
     "email": "john@example.com",
     "mobileno": "91234567"
   },
-  "iss": "https://vibe-auth.example.com",
+  "iss": "https://localhost",
   "exp": 1710403600,
   "iat": 1710400000,
   "nonce": "WjqUMMmOevYOXmwC27mcAQWsFBn3O7wwhbRItl2FJk8"

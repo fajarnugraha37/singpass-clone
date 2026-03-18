@@ -27,7 +27,7 @@ describe('Token Endpoint DPoP Integration', () => {
     const params = new URLSearchParams({
       grant_type: 'authorization_code',
       code: 'test-code',
-      redirect_uri: 'http://localhost:3000/callback',
+      redirect_uri: 'https://localhost/callback',
       code_verifier: 'test-verifier-that-is-at-least-43-characters-long-and-valid',
       client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
       client_assertion: 'mock-assertion'
@@ -57,7 +57,7 @@ describe('Token Endpoint DPoP Integration', () => {
     const params = new URLSearchParams({
       grant_type: 'authorization_code',
       code: 'test-code',
-      redirect_uri: 'http://localhost:3000/callback',
+      redirect_uri: 'https://localhost/callback',
       code_verifier: 'test-verifier-that-is-at-least-43-characters-long-and-valid',
       client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
       client_assertion: 'mock-assertion'
@@ -82,7 +82,7 @@ describe('Token Endpoint DPoP Integration', () => {
       const params = new URLSearchParams({
         grant_type: 'authorization_code',
         code: 'test-code',
-        redirect_uri: 'http://localhost:3000/callback',
+        redirect_uri: 'https://localhost/callback',
         code_verifier: 'too-short',
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
         client_assertion: 'mock-assertion'
@@ -106,7 +106,7 @@ describe('Token Endpoint DPoP Integration', () => {
       const params = new URLSearchParams({
         grant_type: 'authorization_code',
         code: 'test-code',
-        redirect_uri: 'http://localhost:3000/callback',
+        redirect_uri: 'https://localhost/callback',
         code_verifier: 'invalid-verifier-with-!@#$%^&*()-characters-that-are-not-allowed',
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
         client_assertion: 'mock-assertion'
@@ -136,7 +136,7 @@ describe('Token Endpoint DPoP Integration', () => {
       const params = new URLSearchParams({
         grant_type: 'authorization_code',
         code: 'test-code',
-        redirect_uri: 'http://localhost:3000/callback',
+        redirect_uri: 'https://localhost/callback',
         code_verifier: 'valid-verifier-that-is-at-least-43-characters-long-and-uses-safe-chars_~',
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
         client_assertion: 'mock-assertion'

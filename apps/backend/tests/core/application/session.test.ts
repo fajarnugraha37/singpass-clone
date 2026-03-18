@@ -39,7 +39,8 @@ describe("Session Tracking (US3)", () => {
     
     await authDataService.updateSession(sessionId, {
       loa: 1,
-      isAuthenticated: true
+      isAuthenticated: true,
+      amr: [],
     });
 
     const session = await authDataService.getSession(sessionId);
@@ -53,13 +54,15 @@ describe("Session Tracking (US3)", () => {
     // First step: Password
     await authDataService.updateSession(sessionId, {
       loa: 1,
-      isAuthenticated: true
+      isAuthenticated: true,
+      amr: [],
     });
 
     // Second step: 2FA
     await authDataService.updateSession(sessionId, {
       loa: 2,
-      isAuthenticated: true
+      isAuthenticated: true,
+      amr: [],
     });
 
     const session = await authDataService.getSession(sessionId);

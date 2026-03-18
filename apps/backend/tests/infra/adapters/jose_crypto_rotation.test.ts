@@ -2,9 +2,10 @@ import { describe, it, expect, beforeAll, afterAll } from 'bun:test';
 import { JoseCryptoService } from '../../../src/infra/adapters/jose_crypto';
 import { db } from '../../../src/infra/database/client';
 import { serverKeys } from '../../../src/infra/database/schema';
-import { eq, and } from 'drizzle-orm';
-import { sharedConfig } from '../../../../../packages/shared/src/config';
+import { eq } from 'drizzle-orm';
 import { DrizzleServerKeyManager } from '../../../src/infra/adapters/db/drizzle_key_manager';
+import { DrizzleClientRegistry } from 'src/infra/adapters/client_registry';
+import { DrizzleSecurityAuditService } from 'src/infra/adapters/security_logger';
 
 describe('JoseCryptoService: Key Rotation', () => {
   let cryptoService: JoseCryptoService;
@@ -16,7 +17,7 @@ describe('JoseCryptoService: Key Rotation', () => {
     delete process.env.OIDC_PRIVATE_KEY;
     process.env.SERVER_KEY_ENCRYPTION_SECRET = '00'.repeat(32);
     keyManager = new DrizzleServerKeyManager();
-    cryptoService = new JoseCryptoService(keyManager);
+    cryptoService = new JoseCryptoService(keyManager, new DrizzleClientRegistry(), new DrizzleSecurityAuditService());
   });
 
   afterAll(() => {

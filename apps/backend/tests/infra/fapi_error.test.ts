@@ -1,5 +1,5 @@
 import { describe, it, expect, mock } from 'bun:test';
-import { FapiErrors, fapiErrorHandler, FapiError } from '../../src/infra/middleware/fapi-error';
+import { FapiErrors, fapiErrorHandler } from '../../src/infra/middleware/fapi-error';
 import { Context } from 'hono';
 
 describe('FapiErrors and Middleware', () => {

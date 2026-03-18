@@ -2,7 +2,6 @@ import { expect, test, describe, beforeAll, spyOn, afterEach, mock } from 'bun:t
 import app from '../../src/index';
 import * as jose from 'jose';
 import { DrizzleUserInfoRepository } from '../../src/infra/adapters/db/drizzle_userinfo_repository';
-import { DrizzleClientRegistry } from '../../src/infra/adapters/client_registry';
 
 describe('UserInfo Security Integration', () => {
   let clientKeyPair: jose.GenerateKeyPairResult;
@@ -36,6 +35,8 @@ describe('UserInfo Security Integration', () => {
           scope: 'openid profile',
           expiresAt: new Date(Date.now() + 3600000),
           revoked: false,
+          amr: [],
+          loa: 0,
         };
       }
       return null;

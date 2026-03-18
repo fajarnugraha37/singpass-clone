@@ -2,7 +2,6 @@ import { expect, test, describe, beforeAll, afterAll } from "bun:test";
 import { DrizzleAuthDataService } from "../../../src/infra/adapters/drizzle_auth_data";
 import { db } from "../../../src/infra/database/client";
 import { parRequests } from "../../../src/infra/database/schema";
-import { sql } from "drizzle-orm";
 
 describe("DrizzleAuthDataService - PAR Lifecycle", () => {
   let authDataService: DrizzleAuthDataService;
@@ -16,7 +15,7 @@ describe("DrizzleAuthDataService - PAR Lifecycle", () => {
   const validPARPayload = {
     response_type: 'code',
     client_id: 'mock-client-id',
-    redirect_uri: 'http://localhost:3000/callback',
+    redirect_uri: 'https://localhost/callback',
     scope: 'openid profile',
     state: 'a'.repeat(30),
     nonce: 'b'.repeat(30),
