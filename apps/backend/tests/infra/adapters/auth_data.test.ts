@@ -1,12 +1,13 @@
 import { expect, test, describe, beforeAll, beforeEach } from "bun:test";
 import { DrizzleAuthDataService } from "../../../src/infra/adapters/drizzle_auth_data";
-import { db } from "../../../src/infra/database/client";
+import { getDb, db } from "../../../src/infra/database/client";
 import * as schema from "../../../src/infra/database/schema";
 
 describe("DrizzleAuthDataService - Auth Data Lifecycle", () => {
   let authDataService: DrizzleAuthDataService;
 
   beforeAll(async () => {
+    await getDb();
     authDataService = new DrizzleAuthDataService();
   });
 

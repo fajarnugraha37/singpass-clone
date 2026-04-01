@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'bun:test';
 import { JoseCryptoService } from '../../../src/infra/adapters/jose_crypto';
-import { db } from '../../../src/infra/database/client';
+import { getDb, db } from '../../../src/infra/database/client';
 import { serverKeys } from '../../../src/infra/database/schema';
 import { eq } from 'drizzle-orm';
 import { DrizzleServerKeyManager } from '../../../src/infra/adapters/db/drizzle_key_manager';
@@ -13,6 +13,7 @@ describe('JoseCryptoService: Key Rotation', () => {
   let originalOidcKey: string | undefined;
 
   beforeAll(async () => {
+    await getDb();
     originalOidcKey = process.env.OIDC_PRIVATE_KEY;
     delete process.env.OIDC_PRIVATE_KEY;
     process.env.SERVER_KEY_ENCRYPTION_SECRET = '00'.repeat(32);

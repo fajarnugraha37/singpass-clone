@@ -78,6 +78,34 @@
       "when": 1773841292809,
       "tag": "0010_flippant_satana",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1773871978778,
+      "tag": "0011_lying_weapon_omega",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1773872134734,
+      "tag": "0012_zippy_sister_grimm",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1773873051412,
+      "tag": "0013_green_rumiko_fujikawa",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1775083601986,
+      "tag": "0014_sour_tombstone",
+      "breakpoints": true
     }
   ]
 }

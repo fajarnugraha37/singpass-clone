@@ -61,19 +61,3 @@ export const tokenRequestSchema = z.object({
   client_assertion: z.string(),
 });
 
-export const tokenErrorResponseSchema = z.object({
-  error: z.enum([
-    'invalid_request',
-    'invalid_client',
-    'invalid_grant',
-    'unauthorized_client',
-    'unsupported_grant_type',
-    'invalid_scope',
-    'server_error',
-    'temporarily_unavailable',
-    'invalid_token',
-  ]),
-  error_description: z.string().optional(),
-  error_uri: z.string().url().optional(),
-});
-

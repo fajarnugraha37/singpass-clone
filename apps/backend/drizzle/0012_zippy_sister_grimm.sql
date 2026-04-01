@@ -1,0 +1,1 @@
+ALTER TABLE `qr_sessions` ADD `code_verifier` text(255) NOT NULL;

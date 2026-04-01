@@ -155,3 +155,19 @@ export const authorizationCodes = sqliteTable('authorization_codes', {
   usedAt: integer('used_at', { mode: 'timestamp' }),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 });
+
+export const qrSessions = sqliteTable('qr_sessions', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  parentSessionId: text('parent_session_id'),
+  clientId: text('client_id').notNull(),
+  state: text('state', { length: 255 }).notNull(),
+  nonce: text('nonce', { length: 255 }).notNull(),
+  codeVerifier: text('code_verifier', { length: 255 }).notNull(),
+  dpopJkt: text('dpop_jkt'), // Thumbprint of the DPoP key
+  requestUri: text('request_uri', { length: 1024 }).notNull(),
+  status: text('status', { enum: ['PENDING', 'AUTHORIZED', 'CANCELLED', 'EXPIRED', 'ERROR'] }).notNull().default('PENDING'),
+  authCode: text('auth_code', { length: 2048 }),
+  idToken: text('id_token'),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+});

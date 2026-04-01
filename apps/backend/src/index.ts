@@ -1,8 +1,6 @@
 import { cors } from 'hono/cors';
 import { serveStatic } from 'hono/bun';
 import { Hono } from 'hono';
-import { cleanupExpiredRecords } from './infra/database/cleanup';
-import { Cron } from 'croner';
 import { getDiscoveryDocument } from './infra/http/controllers/discovery.controller';
 import { getJWKS } from './infra/http/controllers/jwks.controller';
 import { registerPar } from './infra/http/controllers/par.controller';
@@ -28,6 +26,9 @@ import { DrizzleClientRegistry } from './infra/adapters/client_registry';
 import { DrizzleJtiStore } from './infra/adapters/db/drizzle_jti_store';
 import { jwksCache } from './infra/adapters/jwks_cache';
 import { createAuthRouter } from './infra/http/authRouter';
+import { createSingpassQRRouter } from './infra/http/routes/singpass-qr-routes';
+import { SingpassNDIAdapter } from './infra/adapters/singpass-ndi.adapter';
+import { QRAuthService } from './core/services/qr_auth_service';
 import { ValidateUserInfoRequestUseCase } from './application/usecases/validate-userinfo-request';
 import { GenerateUserInfoPayloadUseCase } from './application/usecases/generate-userinfo-payload';
 import { createUserinfoRouter } from './infra/http/routes/userinfo-routes';
@@ -37,152 +38,184 @@ import { swaggerUI } from '@hono/swagger-ui';
 import { openapiSpec } from './infra/http/openapi-spec';
 import { fapiHeaders } from './infra/middleware/fapi-headers';
 import { CertificateService } from './infra/http/certificate.service';
-import { HttpsServer } from './infra/http/https.server';
-import { HttpRedirectServer } from './infra/http/http.server';
 import { DPoPValidator } from './core/utils/dpop_validator';
+import { getDb } from './infra/database/client';
 
-const certService = new CertificateService();
+export async function createApp() {
+  // Ensure DB is initialized and migrated
+  await getDb();
 
-const auditService = new DrizzleSecurityAuditService();
-const keyManager = new DrizzleServerKeyManager(auditService);
-const clientRegistry = new DrizzleClientRegistry();
-const cryptoService = new JoseCryptoService(keyManager, clientRegistry, auditService);
+  const certService = new CertificateService();
+  const auditService = new DrizzleSecurityAuditService();
+  const keyManager = new DrizzleServerKeyManager(auditService);
+  const clientRegistry = new DrizzleClientRegistry();
+  const cryptoService = new JoseCryptoService(keyManager, clientRegistry, auditService);
 
-const parRepository = new DrizzlePARRepository();
-const authSessionRepository = new DrizzleAuthSessionRepository();
-const authCodeRepository = new DrizzleAuthorizationCodeRepository();
-const tokenRepository = new DrizzleTokenRepository();
-const userInfoRepository = new DrizzleUserInfoRepository();
-const jtiStore = new DrizzleJtiStore();
-const dpopValidatorInstance = new DPoPValidator(jtiStore);
+  const parRepository = new DrizzlePARRepository();
+  const authSessionRepository = new DrizzleAuthSessionRepository();
+  const authCodeRepository = new DrizzleAuthorizationCodeRepository();
+  const tokenRepository = new DrizzleTokenRepository();
+  const userInfoRepository = new DrizzleUserInfoRepository();
+  const jtiStore = new DrizzleJtiStore();
+  const dpopValidatorInstance = new DPoPValidator(jtiStore);
 
-const clientAuthService = new ClientAuthenticationService(cryptoService, clientRegistry, jwksCache, jtiStore);
-const tokenService = new TokenService(cryptoService, clientRegistry, jwksCache);
+  const clientAuthService = new ClientAuthenticationService(cryptoService, clientRegistry, jwksCache, jtiStore);
+  const tokenService = new TokenService(cryptoService, clientRegistry, jwksCache);
 
-const registerParUseCase = new RegisterParUseCase(cryptoService, parRepository, clientRegistry, dpopValidatorInstance, jwksCache, auditService);
-const tokenExchangeUseCase = new TokenExchangeUseCase(
-  clientAuthService,
-  tokenService,
-  authCodeRepository,
-  tokenRepository,
-  dpopValidatorInstance,
-  userInfoRepository,
-  cryptoService,
-  sharedConfig.OIDC.ISSUER
-);
-const getUserInfoUseCase = new GetUserInfoUseCase(
-  userInfoRepository,
-  cryptoService,
-  dpopValidatorInstance,
-  jwksCache,
-  clientRegistry,
-  auditService
-);
-const validateUserInfoRequestUseCase = new ValidateUserInfoRequestUseCase(userInfoRepository, dpopValidatorInstance, cryptoService);
-const generateUserInfoPayloadUseCase = new GenerateUserInfoPayloadUseCase(cryptoService);
+  const registerParUseCase = new RegisterParUseCase(cryptoService, parRepository, clientRegistry, dpopValidatorInstance, jwksCache, auditService);
+  const tokenExchangeUseCase = new TokenExchangeUseCase(
+    clientAuthService,
+    tokenService,
+    authCodeRepository,
+    tokenRepository,
+    dpopValidatorInstance,
+    userInfoRepository,
+    cryptoService,
+    sharedConfig.OIDC.ISSUER
+  );
+  const getUserInfoUseCase = new GetUserInfoUseCase(
+    userInfoRepository,
+    cryptoService,
+    dpopValidatorInstance,
+    jwksCache,
+    clientRegistry,
+    auditService
+  );
+  const validateUserInfoRequestUseCase = new ValidateUserInfoRequestUseCase(userInfoRepository, dpopValidatorInstance, cryptoService);
+  const generateUserInfoPayloadUseCase = new GenerateUserInfoPayloadUseCase(cryptoService);
 
-const userinfoRouter = createUserinfoRouter(
-  validateUserInfoRequestUseCase,
-  generateUserInfoPayloadUseCase,
-  userInfoRepository,
-  clientRegistry,
-  jwksCache,
-  auditService,
-  sharedConfig.OIDC.ISSUER
-);
+  const userinfoRouter = createUserinfoRouter(
+    validateUserInfoRequestUseCase,
+    generateUserInfoPayloadUseCase,
+    userInfoRepository,
+    clientRegistry,
+    jwksCache,
+    auditService,
+    sharedConfig.OIDC.ISSUER
+  );
 
-const initiateAuthSessionUseCase = new InitiateAuthSessionUseCase(authSessionRepository, parRepository, auditService, clientRegistry);
-const validateLoginUseCase = new ValidateLoginUseCase(authSessionRepository, auditService, userInfoRepository);
-const generateAuthCodeUseCase = new GenerateAuthCodeUseCase(authCodeRepository, authSessionRepository, parRepository, auditService);
-const validate2FAUseCase = new Validate2FAUseCase(authSessionRepository, auditService, generateAuthCodeUseCase);
+  const initiateAuthSessionUseCase = new InitiateAuthSessionUseCase(authSessionRepository, parRepository, auditService, clientRegistry);
+  const validateLoginUseCase = new ValidateLoginUseCase(authSessionRepository, auditService, userInfoRepository);
+  const generateAuthCodeUseCase = new GenerateAuthCodeUseCase(authCodeRepository, authSessionRepository, parRepository, auditService);
+  const validate2FAUseCase = new Validate2FAUseCase(authSessionRepository, auditService, generateAuthCodeUseCase);
 
-const authRouter = createAuthRouter(
-  initiateAuthSessionUseCase,
-  validateLoginUseCase,
-  validate2FAUseCase,
-  getUserInfoUseCase,
-  authSessionRepository,
-  parRepository,
-  clientRegistry,
-  sharedConfig.OIDC.ISSUER
-);
+  const authRouter = createAuthRouter(
+    initiateAuthSessionUseCase,
+    validateLoginUseCase,
+    validate2FAUseCase,
+    getUserInfoUseCase,
+    authSessionRepository,
+    parRepository,
+    clientRegistry,
+    sharedConfig.OIDC.ISSUER
+  );
 
-const api = new Hono()
-  .use('*', fapiHeaders)
-  .get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
-  .post('/par', registerPar(registerParUseCase))
-  .post('/token', exchangeToken(tokenExchangeUseCase))
-  .get('/clients/:clientId', getClient(clientRegistry))
-  .route('/userinfo', userinfoRouter)
-  // API: Auth RPC Endpoints (mounted at /api/auth)
-  .route('/auth', authRouter);
+  const singpassNDIAdapter = new SingpassNDIAdapter(keyManager);
+  const qrAuthService = new QRAuthService(singpassNDIAdapter, userInfoRepository, cryptoService);
+  const singpassQRRouter = createSingpassQRRouter(qrAuthService);
 
-const app = new Hono()
-  .use('*', async (c, next) => {
-    // Security Hardening
-    c.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
-    c.header('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://localhost;");
-    c.header('X-Content-Type-Options', 'nosniff');
-    c.header('X-Frame-Options', 'DENY');
-    c.header('X-XSS-Protection', '1; mode=block');
-    await next();
-  })
-  .use('*', cors({
-    origin: (origin) => {
-      // Allow local development and unified HTTPS origin
-      if (origin === 'https://localhost' || origin?.startsWith('https://localhost:')) return origin;
-      if (origin?.startsWith('http://localhost:')) return origin;
-      return 'https://localhost';
-    },
-    credentials: true,
-  }))
-  .onError((err, c) => {
-    if (err.name === 'FapiError') {
-      const fapiErr = err as any;
-      console.warn(`[FAPI Error] ${fapiErr.error}: ${fapiErr.description || 'No description'}`);
-      
-      if (fapiErr.headers) {
-        Object.entries(fapiErr.headers).forEach(([key, value]) => {
-          c.header(key, value as string);
-        });
+  const api = new Hono()
+    .use('*', fapiHeaders)
+    .get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
+    .post('/par', registerPar(registerParUseCase))
+    .post('/token', exchangeToken(tokenExchangeUseCase))
+    .get('/clients/:clientId', getClient(clientRegistry))
+    .route('/userinfo', userinfoRouter)
+    // API: Auth RPC Endpoints (mounted at /api/auth)
+    .route('/auth', authRouter)
+    // Singpass Auth Endpoints
+    .route('/auth/singpass', singpassQRRouter);
+
+  const app = new Hono()
+    .use('*', async (c, next) => {
+      // Security Hardening
+      c.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+      c.header('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://www.common.gov.sg; connect-src 'self' https://localhost;");
+      c.header('X-Content-Type-Options', 'nosniff');
+      c.header('X-Frame-Options', 'DENY');
+      c.header('X-XSS-Protection', '1; mode=block');
+      await next();
+    })
+    .use('*', cors({
+      origin: (origin) => {
+        // Allow local development and unified HTTPS origin
+        if (origin === 'https://localhost' || origin?.startsWith('https://localhost:')) return origin;
+        if (origin?.startsWith('http://localhost:')) return origin;
+        return 'https://localhost';
+      },
+      credentials: true,
+    }))
+    .onError((err, c) => {
+      if (err.name === 'FapiError') {
+        const fapiErr = err as any;
+        console.warn(`[FAPI Error] ${fapiErr.error}: ${fapiErr.description || 'No description'}`);
+        
+        if (fapiErr.headers) {
+          Object.entries(fapiErr.headers).forEach(([key, value]) => {
+            c.header(key, value as string);
+          });
+        }
+
+        return c.json({
+          error: fapiErr.error,
+          error_description: fapiErr.description,
+        }, fapiErr.status || 400);
       }
-
+      
+      console.error('[Unhandled Error]', err);
       return c.json({
-        error: fapiErr.error,
-        error_description: fapiErr.description,
-      }, fapiErr.status || 400);
-    }
-    
-    console.error('[Unhandled Error]', err);
-    return c.json({
-      error: 'server_error',
-      error_description: 'An internal server error occurred',
-    }, 500);
-  })
-  // API Routes
-  .route('/api', api)
-  // Auth Initiation (mounted at /auth)
-  .route('/auth', authRouter)
-  // UserInfo (aligned with Myinfo v5)
-  .route('/userinfo', userinfoRouter)
-  // Public OIDC Endpoints at Root
-  .use('/.well-known/*', fapiHeaders)
-  .get('/.well-known/openid-configuration', getDiscoveryDocument)
-  .get('/.well-known/keys', getJWKS(cryptoService))
-  .use('/token', fapiHeaders)
-  .post('/token', exchangeToken(tokenExchangeUseCase));
+        error: 'server_error',
+        error_description: 'An internal server error occurred',
+      }, 500);
+    })
+    // API Routes
+    .route('/api', api)
+    // Auth Initiation (mounted at /auth)
+    .route('/auth', authRouter)
+    // UserInfo (aligned with Myinfo v5)
+    .route('/userinfo', userinfoRouter)
+    // Public OIDC Endpoints at Root
+    .use('/.well-known/*', fapiHeaders)
+    .get('/.well-known/openid-configuration', getDiscoveryDocument)
+    .get('/.well-known/keys', getJWKS(cryptoService))
+    .use('/token', fapiHeaders)
+    .post('/token', exchangeToken(tokenExchangeUseCase))
+    .get('/doc', (c) => c.json(openapiSpec))
+    // Swagger UI will be available at /ui
+    .get('/ui', swaggerUI({ url: '/doc' }))
+    // Serve static assets from the frontend build
+    .use('/*', serveStatic({ 
+      root: '../frontend/dist',
+    }))
+    // SPA Fallback
+    .get('*', serveStatic({ path: '../frontend/dist/index.html' }));
 
-app
-  .get('/doc', (c) => c.json(openapiSpec))
-  // Swagger UI will be available at /ui
-  .get('/ui', swaggerUI({ url: '/doc' }))
-  // Serve static assets from the frontend build
-  .use('/*', serveStatic({ 
-    root: '../frontend/dist',
-  }))
-  // SPA Fallback
-  .get('*', serveStatic({ path: '../frontend/dist/index.html' }));
+  return { app, certService, keyManager, cryptoService };
+}
 
-export { certService, keyManager };
-export type AppType = typeof app;
-export default app;
+// Global instances for direct execution (e.g. bun run src/main.ts)
+let appInstance: Hono | undefined;
+let certServiceInstance: CertificateService | undefined;
+let keyManagerInstance: DrizzleServerKeyManager | undefined;
+
+export const getApp = async () => {
+  if (!appInstance) {
+    const { app, certService, keyManager } = await createApp();
+    appInstance = app;
+    certServiceInstance = certService;
+    keyManagerInstance = keyManager;
+  }
+  return { app: appInstance, certService: certServiceInstance, keyManager: keyManagerInstance };
+};
+
+// Default export for Hono execution
+export default {
+  fetch: async (req: Request) => {
+    const { app } = await getApp();
+    return app.fetch(req);
+  },
+  request: async (...args: Parameters<Hono['request']>) => {
+    const { app } = await getApp();
+    return app.request(...args);
+  }
+};

@@ -1,13 +1,16 @@
-import { describe, it, expect, mock, beforeEach, afterEach, spyOn } from 'bun:test';
+import { describe, it, expect, mock, beforeEach, beforeAll, afterEach, spyOn } from 'bun:test';
 import * as jose from 'jose';
 import { JoseCryptoService } from '../../src/infra/adapters/jose_crypto';
 import { DrizzleSecurityAuditService } from '../../src/infra/adapters/security_logger';
 import { cleanupExpiredRecords } from '../../src/infra/database/cleanup';
-import { db } from '../../src/infra/database/client';
+import { getDb, db } from '../../src/infra/database/client';
 import * as schema from '../../src/infra/database/schema';
 import { eq, lt, sql } from 'drizzle-orm';
 
 describe('Coverage Booster', () => {
+  beforeAll(async () => {
+    await getDb();
+  });
   describe('JoseCryptoService', () => {
     let cryptoService: JoseCryptoService;
     let mockKeyManager: any;

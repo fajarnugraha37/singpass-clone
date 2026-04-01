@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, beforeEach } from 'bun:test';
-import { db } from '../../src/infra/database/client';
+import { db, getDb } from '../../src/infra/database/client';
 import * as schema from '../../src/infra/database/schema';
 import { DrizzleAuthorizationCodeRepository } from '../../src/infra/adapters/db/drizzle_authorization_code_repository';
 import { DrizzleAuthSessionRepository } from '../../src/infra/adapters/db/drizzle_session_repository';
@@ -12,6 +12,10 @@ describe('Drizzle Repositories Integration', () => {
   const sessionRepo = new DrizzleAuthSessionRepository();
   const tokenRepo = new DrizzleTokenRepository();
   const userInfoRepo = new DrizzleUserInfoRepository();
+
+  beforeAll(async () => {
+    await getDb();
+  });
 
   beforeEach(async () => {
     // Cleanup data between tests to avoid constraints

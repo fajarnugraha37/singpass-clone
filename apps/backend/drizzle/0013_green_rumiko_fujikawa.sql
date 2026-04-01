@@ -1,0 +1,1 @@
+ALTER TABLE `qr_sessions` ADD `dpop_key` text;

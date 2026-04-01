@@ -1,11 +1,16 @@
 <script lang="ts">
   import { i18n } from '../lib/i18n.svelte';
-  import QRPlaceholder from './QRPlaceholder.svelte';
+  import QRAuth from './QRAuth.svelte';
   import LoginForm from './LoginForm.svelte';
 
   type Tab = 'app' | 'password';
 
-  let activeTab = $state<Tab>('password');
+  interface Props {
+    onSuccess?: () => void;
+  }
+
+  let { onSuccess }: Props = $props();
+  let activeTab = $state<Tab>('app'); // Default to Singpass App per spec
 
   function setTab(tab: Tab) {
     activeTab = tab;
@@ -37,10 +42,10 @@
   <div class="p-6 md:p-8">
     {#if activeTab === 'app'}
       <div class="flex flex-col items-center">
-        <QRPlaceholder />
+        <QRAuth />
       </div>
     {:else}
-      <LoginForm />
+      <LoginForm {onSuccess} />
     {/if}
   </div>
 

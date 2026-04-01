@@ -1,12 +1,24 @@
-import { expect, test, describe, beforeEach, spyOn } from 'bun:test'
-import app from '../../../src/index'
+import { expect, test, describe, beforeEach, spyOn, beforeAll } from 'bun:test'
+
+// Set memory DB before importing app
+process.env.DATABASE_URL = 'file::memory:?cache=shared';
+
+import { createApp } from '../../../src/index'
 import { DrizzlePARRepository } from '../../../src/infra/adapters/db/drizzle_par_repository'
 import { DrizzleAuthSessionRepository } from '../../../src/infra/adapters/db/drizzle_session_repository'
 import { DrizzleAuthorizationCodeRepository } from '../../../src/infra/adapters/db/drizzle_authorization_code_repository'
 import { DrizzleUserInfoRepository } from '../../../src/infra/adapters/db/drizzle_userinfo_repository'
 import { DrizzleClientRegistry } from '../../../src/infra/adapters/client_registry'
+import type { Hono } from 'hono';
+
+let app: Hono;
 
 describe('Auth Endpoints', () => {
+  beforeAll(async () => {
+    const result = await createApp();
+    app = result.app;
+  });
+
   beforeEach(() => {
     // Mock Client Registry
     spyOn(DrizzleClientRegistry.prototype, 'getClientConfig').mockImplementation(async (clientId: string) => ({

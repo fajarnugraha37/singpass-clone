@@ -9,10 +9,10 @@ describe("LoginTabs Component Logic", () => {
     expect(existsSync(componentPath)).toBe(true);
   });
 
-  test("Default tab is 'password'", () => {
+  test("Default tab is 'app'", () => {
     const content = readFileSync(componentPath, "utf-8");
     // Verify the state initialization
-    expect(content).toContain("let activeTab = $state<Tab>('password');");
+    expect(content).toContain("let activeTab = $state<Tab>('app');");
   });
 
   test("Renders tabs with correct onClick handlers", () => {
@@ -21,10 +21,9 @@ describe("LoginTabs Component Logic", () => {
     expect(content).toContain("onclick={() => setTab('password')}");
   });
 
-  test("Renders LoginForm by default (when activeTab is password)", () => {
+  test("Renders LoginForm conditionally", () => {
     const content = readFileSync(componentPath, "utf-8");
-    expect(content).toContain("<LoginForm />");
+    expect(content).toContain("<LoginForm {onSuccess} />");
     expect(content).toContain("{#if activeTab === 'app'}");
-    expect(content).toContain("<QRPlaceholder />");
   });
 });

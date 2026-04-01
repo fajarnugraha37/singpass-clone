@@ -9,6 +9,14 @@ let cachedPrivateKey: jose.CryptoKey | null = null;
 let cachedPublicKey: jose.CryptoKey | null = null;
 
 /**
+ * Resets the key cache (for testing purposes).
+ */
+export function resetKeyCache() {
+  cachedPrivateKey = null;
+  cachedPublicKey = null;
+}
+
+/**
  * Loads the server's private key for signing.
  * The key is expected in the OIDC_PRIVATE_KEY environment variable (PEM format).
  */

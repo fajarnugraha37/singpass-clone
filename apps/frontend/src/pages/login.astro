@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import LoginForm from '../components/LoginForm.svelte';
+import LoginTabs from '../components/LoginTabs.svelte';
 import TwoFactorForm from '../components/TwoFactorForm.svelte';
 
 // We use client-side state to toggle between login and 2FA
@@ -18,7 +18,7 @@ import TwoFactorForm from '../components/TwoFactorForm.svelte';
 
       <div id="login-section">
         <h1 id="login-title" class="text-2xl font-bold text-gray-900 mb-6">Log in</h1>
-        <LoginForm client:load onSuccess={() => {
+        <LoginTabs client:load onSuccess={() => {
           document.getElementById('login-section')?.classList.add('hidden');
           document.getElementById('2fa-section')?.classList.remove('hidden');
         }} />

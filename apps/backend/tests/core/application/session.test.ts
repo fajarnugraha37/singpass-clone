@@ -1,6 +1,6 @@
 import { expect, test, describe, beforeAll } from "bun:test";
 import { DrizzleAuthDataService } from "../../../src/infra/adapters/drizzle_auth_data";
-import { db } from "../../../src/infra/database/client";
+import { getDb, db } from "../../../src/infra/database/client";
 import { sessions, users, myinfoProfiles } from "../../../src/infra/database/schema";
 
 describe("Session Tracking (US3)", () => {
@@ -8,6 +8,7 @@ describe("Session Tracking (US3)", () => {
   let testUserId: string;
 
   beforeAll(async () => {
+    await getDb();
     authDataService = new DrizzleAuthDataService();
     // Clean up
     await db.delete(sessions);

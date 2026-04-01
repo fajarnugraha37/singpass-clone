@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from 'bun:test';
 import app from '../../src/index';
-import { db } from '../../src/infra/database/client';
+import { getDb, db } from '../../src/infra/database/client';
 import * as schema from '../../src/infra/database/schema';
 import { eq } from 'drizzle-orm';
 
@@ -9,6 +9,8 @@ describe('Performance Benchmark: Authentication Flow (SC-003)', () => {
   const testUserId = crypto.randomUUID();
 
   beforeAll(async () => {
+    await getDb();
+    
     // Ensure test user exists with correct password
     const password = 'test1234';
     const passwordHash = await Bun.password.hash(password);

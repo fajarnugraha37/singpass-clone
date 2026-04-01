@@ -1,8 +1,8 @@
-import { expect, test, describe, beforeEach, afterEach } from 'bun:test'
+import { expect, test, describe, beforeEach, afterEach, beforeAll } from 'bun:test'
 import { DrizzleUserInfoRepository } from '../../src/infra/adapters/db/drizzle_userinfo_repository'
 import { DrizzleClientRegistry } from '../../src/infra/adapters/client_registry'
 import { CreateTestUserUseCase } from '../../src/core/use-cases/create-test-user'
-import { db } from '../../src/infra/database/client'
+import { getDb, db } from '../../src/infra/database/client'
 import { users, clients } from '../../src/infra/database/schema'
 import { eq } from 'drizzle-orm'
 
@@ -13,6 +13,10 @@ describe('Singpass Compliance: Metadata and Entity Association', () => {
 
   const TEST_UEN = 'UEN1234567';
   const createdUserIds: string[] = [];
+
+  beforeAll(async () => {
+    await getDb();
+  });
 
   afterEach(async () => {
     // Cleanup users

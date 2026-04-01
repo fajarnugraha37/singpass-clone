@@ -6,6 +6,7 @@
     "test": "bun test"
   },
   "dependencies": {
+    "drizzle-orm": "latest",
     "zod": "latest"
   }
 }
