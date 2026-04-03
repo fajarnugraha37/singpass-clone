@@ -8,12 +8,14 @@ import * as jose from 'jose';
 
 import type { UserInfoRepository } from '../domain/userinfo_repository';
 import type { CryptoService } from '../domain/crypto_service';
+import type { GenerateAuthCodeUseCase } from '../use-cases/GenerateAuthCode';
 
 export class QRAuthService {
   constructor(
     private ndiAdapter: NDIPort,
     private userinfoRepository: UserInfoRepository,
-    private cryptoService: CryptoService
+    private cryptoService: CryptoService,
+    private generateAuthCodeUseCase: GenerateAuthCodeUseCase
   ) {}
 
   /**
@@ -104,7 +106,7 @@ export class QRAuthService {
 
     return {
       status: session.status as 'PENDING' | 'AUTHORIZED' | 'CANCELLED' | 'EXPIRED' | 'ERROR',
-      redirectUrl: session.status === 'AUTHORIZED' ? '/dashboard' : undefined,
+      redirectUrl: session.status === 'AUTHORIZED' ? session.authCode : undefined,
     };
   }
 
@@ -141,19 +143,27 @@ export class QRAuthService {
         throw new Error('User not found in local directory');
       }
 
+      let finalRedirectUri = undefined;
+
       // 3. Update the PARENT OIDC Session (auth_sessions)
       if (session.parentSessionId) {
         await db.update(authSessions).set({
           userId: user.id,
-          status: 'authenticated',
+          status: 'COMPLETED',
+          loa: 2,
+          amr: ['singpass'],
           updatedAt: new Date(),
         }).where(eq(authSessions.id, session.parentSessionId));
+
+        // 4. Generate Auth Code for the Relying Party using the normal flow use case
+        const result = await this.generateAuthCodeUseCase.execute({ sessionId: session.parentSessionId });
+        finalRedirectUri = result.redirectUri;
       }
       
-      // 4. Update QR session status
+      // 5. Update QR session status
       await db.update(qrSessions).set({ 
         status: 'AUTHORIZED', 
-        authCode: code,
+        authCode: finalRedirectUri || code, // Store the redirect URI here for polling
         idToken: tokenResponse.id_token 
       }).where(eq(qrSessions.id, session.id));
 

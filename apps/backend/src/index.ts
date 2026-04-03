@@ -111,7 +111,7 @@ export async function createApp() {
   );
 
   const singpassNDIAdapter = new SingpassNDIAdapter(keyManager);
-  const qrAuthService = new QRAuthService(singpassNDIAdapter, userInfoRepository, cryptoService);
+  const qrAuthService = new QRAuthService(singpassNDIAdapter, userInfoRepository, cryptoService, generateAuthCodeUseCase);
   const singpassQRRouter = createSingpassQRRouter(qrAuthService);
 
   const api = new Hono()

@@ -3,6 +3,7 @@ import { QRAuthService } from '../../src/core/services/qr_auth_service';
 import type { NDIPort } from '../../src/core/domain/ndi.port';
 import type { UserInfoRepository } from '../../src/core/domain/userinfo_repository';
 import type { CryptoService } from '../../src/core/domain/crypto_service';
+import type { GenerateAuthCodeUseCase } from '../../src/core/use-cases/GenerateAuthCode';
 import * as jose from 'jose';
 import { getDb, db } from '../../src/infra/database/client';
 import { authSessions, qrSessions, users, serverKeys } from '../../src/infra/database/schema';
@@ -13,6 +14,7 @@ describe('QRAuthService', () => {
   let mockNDIAdapter: NDIPort;
   let mockUserInfoRepo: UserInfoRepository;
   let mockCryptoService: CryptoService;
+  let mockGenerateAuthCodeUseCase: GenerateAuthCodeUseCase;
 
   beforeAll(async () => {
     await getDb();
@@ -48,7 +50,11 @@ describe('QRAuthService', () => {
       getUserByNric: mock(() => Promise.resolve({ id: 'user-123' })),
     } as any;
 
-    service = new QRAuthService(mockNDIAdapter, mockUserInfoRepo, mockCryptoService);
+    mockGenerateAuthCodeUseCase = {
+      execute: mock(() => Promise.resolve({ redirectUri: 'https://rp.example.com/callback?code=123', code: '123' }))
+    } as any;
+
+    service = new QRAuthService(mockNDIAdapter, mockUserInfoRepo, mockCryptoService, mockGenerateAuthCodeUseCase);
   });
 
   it('should initialize a QR session', async () => {
