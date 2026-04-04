@@ -66,19 +66,22 @@ As an Administrator, I want to generate high-fidelity synthetic MyInfo attribute
 
 ### Functional Requirements
 
-- **FR-001**: System MUST provide a Developer registration, login, and password reset flow using OTP (One-Time Password) via Email.
+- **FR-001**: System MUST provide a Developer registration, login, and password reset flow using OTP (One-Time Password) via Email. OTPs MUST be 6-digit numeric codes, valid for 10 minutes, and invalidated immediately upon use or after 3 failed verification attempts.
 - **FR-002**: System MUST seed default Admin and Developer accounts (`password: test1234`) and 10 Sandbox users during environment hydration.
-- **FR-003**: System MUST enforce Role-Based Access Control (RBAC) differentiating Developer and Admin capabilities.
+- **FR-003**: System MUST enforce Role-Based Access Control (RBAC):
+    - **Developer**: Can perform CRUD on own OIDC clients, view own active sessions, and revoke own sessions.
+    - **Admin**: Has "God Mode" access to all Developer accounts, all OIDC clients, all active sessions (global revocation), and Singpass Sandbox user management.
 - **FR-004**: System MUST allow Developers to perform CRUD operations on their own OIDC clients (client_id, client_name, jwks_uri, redirect_uris, allowed_scopes, grant_types).
 - **FR-005**: System MUST allow Administrators to perform global CRUD on all Developer accounts, OIDC clients, and Singpass Sandbox users.
-- **FR-006**: System MUST provide a "Faker" utility for generating realistic Singaporean identity data for Sandbox users.
+- **FR-006**: System MUST provide a "Faker" utility for generating realistic Singaporean identity data (Name, NRIC, Birth Date, Address, Gender, Race, Nationality) for Sandbox users. If a generated NRIC conflicts with an existing user, the utility MUST retry generation up to 5 times.
 - **FR-007**: System MUST provide a Session Inspector to view granular details of active sessions (Client ID, User Sub, Scopes, IAT/EXP).
-- **FR-008**: System MUST allow Developers to revoke sessions for their own clients, and Admins to revoke any session globally.
+- **FR-008**: System MUST allow Developers to revoke sessions for their own clients, and Admins to revoke any session globally. Access attempts with a revoked session MUST return a 401 Unauthorized error with a `session_revoked` indicator.
 - **FR-009**: System MUST ensure client configuration changes are immediately available to the OIDC backend provider.
-- **FR-010**: System MUST support mocked email sending by default (with SMTP configuration option), print OTPs to the console when mocked, and audit all email sending events into an `email_log` table.
-- **FR-011**: System MUST automatically revoke all active sessions immediately when an OIDC client is soft-deleted or deactivated.
-- **FR-012**: System MUST implement server-side, cursor-based pagination and search for all list views in the Admin God Mode dashboard.
+- **FR-010**: System MUST support mocked email sending by default (with SMTP configuration option), print OTPs to the console when mocked, and audit all email sending events into an `email_log` table. Logs older than 30 days MAY be pruned.
+- **FR-011**: System MUST automatically revoke all active sessions immediately when an OIDC client is soft-deleted or deactivated. Soft-deleted clients MUST be restorable only by an Admin.
+- **FR-012**: System MUST implement server-side, cursor-based pagination and search for all list views in the Admin God Mode dashboard. Default limit: 20, Max limit: 100.
 - **FR-013**: System MUST immediately invalidate old client secrets when a Developer rotates them, offering no grace period.
+- **FR-014**: System MUST implement security cooldowns: 5 failed OTP attempts for an email within 1 hour results in a 15-minute lockout for that email.
 
 ### Key Entities *(include if feature involves data)*
 
