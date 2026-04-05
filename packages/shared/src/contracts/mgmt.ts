@@ -81,6 +81,10 @@ export const ResetSandboxUserPasswordSchema = z.object({
   newPassword: z.string().min(8).optional(),
 });
 
+export const UpdateSandboxUserSchema = z.object({
+  myinfoPayload: z.record(z.string(), z.unknown()),
+});
+
 // Session Schemas
 export const SessionSchema = z.object({
   sessionId: z.string(),
@@ -118,8 +122,10 @@ export type ManagementAPI = {
   
   // Singpass Sandbox
   "GET /api/mgmt/admin/sandbox/users": { query: typeof CursorPaginationSchema, response: z.infer<ReturnType<typeof PaginatedResponseSchema<typeof SandboxUserSchema>>> };
+  "GET /api/mgmt/admin/sandbox/users/:userId": { response: typeof SandboxUserSchema };
   "POST /api/mgmt/admin/sandbox/users": { body: typeof CreateSandboxUserSchema, response: typeof SandboxUserSchema };
   "PATCH /api/mgmt/admin/sandbox/users/:userId/status": { body: typeof ToggleSandboxUserStatusSchema, response: typeof SandboxUserSchema };
   "POST /api/mgmt/admin/sandbox/users/:userId/reset-password": { body: typeof ResetSandboxUserPasswordSchema, response: { success: boolean, password: string } };
+  "PUT /api/mgmt/admin/sandbox/users/:userId/attributes": { body: typeof UpdateSandboxUserSchema, response: typeof SandboxUserSchema };
   "DELETE /api/mgmt/admin/sandbox/users/:userId": { response: { success: boolean } };
 };

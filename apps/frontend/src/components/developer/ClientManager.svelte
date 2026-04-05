@@ -52,7 +52,7 @@
 
   async function submitClientForm() {
     const payload = {
-      name: formName,
+      clientName: formName,
       appType: formAppType,
       uen: formUen,
       redirectUris: formRedirectUris.split(',').map(u => u.trim()),

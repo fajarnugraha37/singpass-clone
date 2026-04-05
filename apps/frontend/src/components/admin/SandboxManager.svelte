@@ -86,6 +86,41 @@
     }
   }
 
+  let showEditModal = $state(false);
+  let editingUserAttributes = $state('');
+  let editingUserId = $state<string | null>(null);
+
+  async function openEditModal(userId: string) {
+    const res = await client.api.mgmt.admin.sandbox.users[':userId'].$get({
+      param: { userId }
+    });
+    if (res.ok) {
+      const data = await res.json() as any;
+      editingUserId = userId;
+      editingUserAttributes = JSON.stringify(data.myinfoPayload, null, 2);
+      showEditModal = true;
+    }
+  }
+
+  async function saveAttributes() {
+    if (!editingUserId) return;
+    try {
+      const myinfoPayload = JSON.parse(editingUserAttributes);
+      const res = await client.api.mgmt.admin.sandbox.users[':userId'].attributes.$put({
+        param: { userId: editingUserId },
+        json: { myinfoPayload }
+      });
+      if (res.ok) {
+        showEditModal = false;
+        await fetchUsers();
+      } else {
+        alert('Failed to save attributes');
+      }
+    } catch (e) {
+      alert('Invalid JSON format');
+    }
+  }
+
   onMount(fetchUsers);
 </script>
 
@@ -138,6 +173,7 @@
                 </button>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
+                <button onclick={() => openEditModal(u.id)} class="text-blue-600 hover:text-blue-900">Edit Profile</button>
                 <button onclick={() => resetPassword(u.id)} class="text-indigo-600 hover:text-indigo-900">Reset PW</button>
                 <button onclick={() => deleteUser(u.id)} class="text-red-600 hover:text-red-900">Delete</button>
               </td>
@@ -159,3 +195,24 @@
     {/if}
   </div>
 </div>
+
+{#if showEditModal}
+  <div class="fixed z-50 inset-0 overflow-y-auto" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick={() => showEditModal = false}></div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      <div class="relative inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Edit MyInfo Attributes</h3>
+        <p class="text-sm text-gray-500 mb-4">Modify the raw JSON payload for this sandbox user's MyInfo profile.</p>
+        <textarea
+          bind:value={editingUserAttributes}
+          class="w-full h-96 p-3 font-mono text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+        ></textarea>
+        <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
+          <button onclick={saveAttributes} class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 sm:col-start-2 sm:text-sm">Save Changes</button>
+          <button onclick={() => showEditModal = false} class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:col-start-1 sm:text-sm">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{/if}

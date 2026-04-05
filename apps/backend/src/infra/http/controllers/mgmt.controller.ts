@@ -179,6 +179,14 @@ export const listSandboxUsers = (sandboxService: SandboxService) => {
   };
 };
 
+export const getSandboxUser = (sandboxService: SandboxService) => {
+  return async (c: Context) => {
+    const userId = c.req.param('userId')!;
+    const user = await sandboxService.getUser(userId);
+    return c.json(user);
+  };
+};
+
 export const createSandboxUser = (sandboxService: SandboxService) => {
   return async (c: Context) => {
     const data = await c.req.json();
@@ -210,6 +218,15 @@ export const resetSandboxUserPassword = (sandboxService: SandboxService) => {
     const { newPassword } = await c.req.json();
     const generatedPassword = await sandboxService.resetSandboxUserPassword(userId, newPassword);
     return c.json({ success: true, password: generatedPassword });
+  };
+};
+
+export const updateSandboxUserAttributes = (sandboxService: SandboxService) => {
+  return async (c: Context) => {
+    const userId = c.req.param('userId')!;
+    const { myinfoPayload } = await c.req.json();
+    const user = await sandboxService.updateSandboxUserAttributes(userId, myinfoPayload);
+    return c.json(user);
   };
 };
 

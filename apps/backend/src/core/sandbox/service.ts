@@ -35,6 +35,23 @@ export class SandboxService {
     return { items, nextCursor };
   }
 
+  async getUser(userId: string): Promise<any> {
+    const user = await this.db.query.users.findFirst({
+      where: eq(users.id, userId)
+    });
+    
+    if (!user) throw new Error('User not found');
+    
+    const profile = await this.db.query.myinfoProfiles.findFirst({
+      where: eq(myinfoProfiles.userId, userId)
+    });
+    
+    return {
+      ...user,
+      myinfoPayload: profile?.data || {}
+    };
+  }
+
   async createUser(data: { nric: string; password?: string; generateMockData: boolean }): Promise<any> {
     const passwordHash = await Bun.password.hash(data.password || 'test1234');
     const nric = data.nric || NRIC.Generate().toString();
@@ -106,5 +123,21 @@ export class SandboxService {
       
     if (!user) throw new Error('User not found');
     return password;
+  }
+
+  async updateSandboxUserAttributes(userId: string, attributes: any): Promise<any> {
+    const [profile] = await this.db.update(myinfoProfiles)
+      .set({ data: attributes, updatedAt: new Date() })
+      .where(eq(myinfoProfiles.userId, userId))
+      .returning();
+      
+    if (!profile) throw new Error('Profile not found');
+    
+    // Return the associated user record to match standard responses
+    const user = await this.db.query.users.findFirst({
+      where: eq(users.id, userId)
+    });
+    
+    return user;
   }
 }
