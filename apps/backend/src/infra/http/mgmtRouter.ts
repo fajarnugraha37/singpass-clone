@@ -13,7 +13,9 @@ import {
   CreateClientSchema,
   UpdateClientSchema,
   CursorPaginationSchema,
-  CreateSandboxUserSchema
+  CreateSandboxUserSchema,
+  ToggleSandboxUserStatusSchema,
+  ResetSandboxUserPasswordSchema
 } from '@vibe/shared/contracts/mgmt';
 
 export const createMgmtRouter = (
@@ -46,9 +48,11 @@ export const createMgmtRouter = (
       .delete('/admin/sessions/:sessionId', mgmtController.revokeSession(sessionService))
 
       // Sandbox Routes
-      .get('/sandbox/users', zValidator('query', CursorPaginationSchema), mgmtController.listSandboxUsers(sandboxService))
-      .post('/sandbox/users', zValidator('json', CreateSandboxUserSchema), mgmtController.createSandboxUser(sandboxService))
-      .delete('/sandbox/users/:userId', mgmtController.deleteSandboxUser(sandboxService))
+      .get('/admin/sandbox/users', zValidator('query', CursorPaginationSchema), mgmtController.listSandboxUsers(sandboxService))
+      .post('/admin/sandbox/users', zValidator('json', CreateSandboxUserSchema), mgmtController.createSandboxUser(sandboxService))
+      .patch('/admin/sandbox/users/:userId/status', zValidator('json', ToggleSandboxUserStatusSchema), mgmtController.toggleSandboxUserStatus(sandboxService))
+      .post('/admin/sandbox/users/:userId/reset-password', zValidator('json', ResetSandboxUserPasswordSchema), mgmtController.resetSandboxUserPassword(sandboxService))
+      .delete('/admin/sandbox/users/:userId', mgmtController.deleteSandboxUser(sandboxService))
     );
 
   return mgmt;
