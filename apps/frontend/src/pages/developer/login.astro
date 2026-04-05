@@ -1,0 +1,21 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Login from '../../components/developer/Login.svelte';
+---
+
+<Layout title="Developer Login | Vibe-Auth">
+	<main class="min-h-screen bg-gray-50 flex flex-col justify-center">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+      <div class="flex justify-center">
+        <span class="text-3xl font-extrabold text-indigo-600">Vibe-Auth</span>
+      </div>
+      <h2 class="mt-2 text-center text-sm font-semibold text-gray-500 uppercase tracking-widest">
+        Management Console
+      </h2>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+      <Login client:load />
+    </div>
+	</main>
+</Layout>

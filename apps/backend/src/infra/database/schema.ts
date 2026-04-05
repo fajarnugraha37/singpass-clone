@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { text, integer, sqliteTable } from 'drizzle-orm/sqlite-core';
+import { text, integer, sqliteTable, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 export const users = sqliteTable('users', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -13,61 +13,91 @@ export const users = sqliteTable('users', {
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 });
 
-export const clients = sqliteTable('clients', {
-  id: text('id').primaryKey(), // Using client_id
-  name: text('name').notNull(),
-  appType: text('app_type').notNull(), // 'Login' or 'Myinfo'
-  uen: text('uen').notNull(),
-  isActive: integer('is_active', { mode: 'boolean' }).default(true).notNull(),
-  allowedScopes: text('allowed_scopes', { mode: 'json' }).notNull(), // JSON Array
-  redirectUris: text('redirect_uris', { mode: 'json' }).notNull(), // JSON Array
-  jwks: text('jwks', { mode: 'json' }), // JSON Object
-  jwksUri: text('jwks_uri'),
-  siteUrl: text('site_url'),
-  description: text('description'),
-  supportEmails: text('support_emails', { mode: 'json' }), // JSON Array
-  environment: text('environment', { enum: ['Staging', 'Production'] }).default('Staging').notNull(),
-  agreementAccepted: integer('agreement_accepted', { mode: 'boolean' }).default(false).notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-});
-
-export const userAccountLinks = sqliteTable('user_account_links', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  userId: text('user_id').notNull(),
-  clientId: text('client_id').notNull(),
-  linkedAt: integer('linked_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`).notNull(),
-}, (table) => ({
-  idx_client_user: sql`unique index idx_client_user on ${table.clientId}, ${table.userId}`,
+export const developers = sqliteTable('developers', (t) => ({
+  id: t.text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  email: t.text('email').unique().notNull(),
+  role: t.text('role').default('developer').notNull(),
+  status: t.text('status').default('active').notNull(),
+  createdAt: t.integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+  updatedAt: t.integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
 }));
 
-export const myinfoProfiles = sqliteTable('myinfo_profiles', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  userId: text('user_id').references(() => users.id).notNull(),
-  data: text('data', { mode: 'json' }).notNull(),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-});
+export const otpCodes = sqliteTable('otp_codes', (t) => ({
+  id: t.text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  email: t.text('email').notNull(),
+  code: t.text('code').notNull(),
+  expiresAt: t.integer('expires_at', { mode: 'timestamp' }).notNull(),
+  used: t.integer('used', { mode: 'boolean' }).default(false).notNull(),
+  createdAt: t.integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+}));
 
-export const sessions = sqliteTable('sessions', {
-  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  userId: text('user_id').references(() => users.id),
-  dpopJkt: text('dpop_jkt'),
-  loa: integer('loa').default(0).notNull(),
-  amr: text('amr'), // Stringified JSON array
-  isAuthenticated: integer('is_authenticated', { mode: 'boolean' }).default(false).notNull(),
-  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
-});
+export const emailLog = sqliteTable('email_log', (t) => ({
+  id: t.text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  recipient: t.text('recipient').notNull(),
+  subject: t.text('subject').notNull(),
+  body: t.text('body').notNull(),
+  sentAt: t.integer('sent_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+}));
 
-export const parRequests = sqliteTable('par_requests', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  requestUri: text('request_uri').unique().notNull(),
-  clientId: text('client_id').notNull(),
-  purpose: text('purpose').notNull().default('General Authentication'),
-  dpopJkt: text('dpop_jkt'),
-  payload: text('payload', { mode: 'json' }).notNull(),
-  expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-});
+export const clients = sqliteTable('clients', (t) => ({
+  id: t.text('id').primaryKey(), // Using client_id
+  developerId: t.text('developer_id').references(() => developers.id),
+  clientSecret: t.text('client_secret'), // Hashed secret
+  name: t.text('name').notNull(),
+  appType: t.text('app_type').notNull(), // 'Login' or 'Myinfo'
+  uen: t.text('uen').notNull(),
+  isActive: t.integer('is_active', { mode: 'boolean' }).default(true).notNull(),
+  allowedScopes: t.text('allowed_scopes', { mode: 'json' }).notNull(), // JSON Array
+  redirectUris: t.text('redirect_uris', { mode: 'json' }).notNull(), // JSON Array
+  jwks: t.text('jwks', { mode: 'json' }), // JSON Object
+  jwksUri: t.text('jwks_uri'),
+  siteUrl: t.text('site_url'),
+  description: t.text('description'),
+  supportEmails: t.text('support_emails', { mode: 'json' }), // JSON Array
+  environment: t.text('environment').default('Staging').notNull(),
+  agreementAccepted: t.integer('agreement_accepted', { mode: 'boolean' }).default(false).notNull(),
+  deletedAt: t.integer('deleted_at', { mode: 'timestamp' }),
+  createdAt: t.integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+  updatedAt: t.integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+}));
+
+export const userAccountLinks = sqliteTable('user_account_links', (t) => ({
+  id: t.integer('id').primaryKey({ autoIncrement: true }),
+  userId: t.text('user_id').notNull(),
+  clientId: t.text('client_id').notNull(),
+  linkedAt: t.integer('linked_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`).notNull(),
+}));
+
+export const myinfoProfiles = sqliteTable('myinfo_profiles', (t) => ({
+  id: t.text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: t.text('user_id').references(() => users.id).notNull(),
+  data: t.text('data', { mode: 'json' }).notNull(),
+  updatedAt: t.integer('updated_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+}));
+
+export const sessions = sqliteTable('sessions', (t) => ({
+  id: t.text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: t.text('user_id').references(() => users.id),
+  clientId: t.text('client_id').references(() => clients.id),
+  scopes: t.text('scopes', { mode: 'json' }),
+  dpopJkt: t.text('dpop_jkt'),
+  loa: t.integer('loa').default(0).notNull(),
+  amr: t.text('amr'), // Stringified JSON array
+  isAuthenticated: t.integer('is_authenticated', { mode: 'boolean' }).default(false).notNull(),
+  expiresAt: t.integer('expires_at', { mode: 'timestamp' }).notNull(),
+  createdAt: t.integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+}));
+
+export const parRequests = sqliteTable('par_requests', (t) => ({
+  id: t.integer('id').primaryKey({ autoIncrement: true }),
+  requestUri: t.text('request_uri').unique().notNull(),
+  clientId: t.text('client_id').notNull(),
+  purpose: t.text('purpose').notNull().default('General Authentication'),
+  dpopJkt: t.text('dpop_jkt'),
+  payload: t.text('payload', { mode: 'json' }).notNull(),
+  expiresAt: t.integer('expires_at', { mode: 'timestamp' }).notNull(),
+  createdAt: t.integer('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
+}));
 
 export const serverKeys = sqliteTable('server_keys', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -165,7 +195,7 @@ export const qrSessions = sqliteTable('qr_sessions', {
   codeVerifier: text('code_verifier', { length: 255 }).notNull(),
   dpopJkt: text('dpop_jkt'), // Thumbprint of the DPoP key
   requestUri: text('request_uri', { length: 1024 }).notNull(),
-  status: text('status', { enum: ['PENDING', 'AUTHORIZED', 'CANCELLED', 'EXPIRED', 'ERROR'] }).notNull().default('PENDING'),
+  status: text('status').notNull().default('PENDING'), // Removed enum option
   authCode: text('auth_code', { length: 2048 }),
   idToken: text('id_token'),
   expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),

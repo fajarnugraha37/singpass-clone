@@ -23,10 +23,10 @@ description: "Task list for feature implementation"
 
 **Purpose**: Project initialization and base definitions
 
-- [ ] T001 Define Management API Schemas in `packages/shared/src/contracts/mgmt.ts`
-- [ ] T002 [P] Create Drizzle ORM schema extensions for management console in `apps/backend/src/adapters/database/schema.ts`
-- [ ] T003 Generate and apply database migrations via `bun run check_migrations.ts`
-- [ ] T004 [P] Update environment seeding script to include default Admin, Developer, and 10 Sandbox users in `apps/backend/src/scripts/seed.ts`
+- [x] T001 Define Management API Schemas in `packages/shared/src/contracts/mgmt.ts`
+- [x] T002 [P] Create Drizzle ORM schema extensions for management console in `apps/backend/src/adapters/database/schema.ts`
+- [x] T003 Generate and apply database migrations via `bun run check_migrations.ts`
+- [x] T004 [P] Update environment seeding script to include default Admin, Developer, and 10 Sandbox users in `apps/backend/src/scripts/seed.ts`
 
 ---
 
@@ -36,9 +36,9 @@ description: "Task list for feature implementation"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 [P] Implement Mock Email Adapter (with SMTP support and `email_log` writing) in `apps/backend/src/adapters/email/mock.ts`
-- [ ] T006 [P] Implement RBAC Auth Middleware (`developer` and `admin` scopes) in `apps/backend/src/adapters/http/middleware/rbac.ts`
-- [ ] T007 Setup base Hono router for Management API in `apps/backend/src/adapters/http/mgmt.ts`
+- [x] T005 [P] Implement Mock Email Adapter (with SMTP support and `email_log` writing) in `apps/backend/src/adapters/email/mock.ts`
+- [x] T006 [P] Implement RBAC Auth Middleware (`developer` and `admin` scopes) in `apps/backend/src/adapters/http/middleware/rbac.ts`
+- [x] T007 Setup base Hono router for Management API in `apps/backend/src/adapters/http/mgmt.ts`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin.
 
@@ -52,19 +52,19 @@ description: "Task list for feature implementation"
 
 ### Tests for User Story 1 ⚠️
 
-- [ ] T008 [P] [US1] Write unit tests for IAM core logic (OTP generation/verification) in `apps/backend/tests/core/iam.test.ts`
-- [ ] T009 [P] [US1] Write unit tests for Client Management core logic (CRUD, secret rotation, soft-delete cascade) in `apps/backend/tests/core/clients.test.ts`
+- [x] T008 [P] [US1] Write unit tests for IAM core logic (OTP generation/verification) in `apps/backend/tests/core/iam.test.ts`
+- [x] T009 [P] [US1] Write unit tests for Client Management core logic (CRUD, secret rotation, soft-delete cascade) in `apps/backend/tests/core/clients.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T010 [P] [US1] Implement IAM Core Domain in `apps/backend/src/core/iam/service.ts`
-- [ ] T011 [P] [US1] Implement Client Management Core Domain in `apps/backend/src/core/clients/service.ts`
-- [ ] T012 [US1] Implement Auth RPC endpoints in `apps/backend/src/adapters/http/routes/auth.ts`
-- [ ] T013 [US1] Implement Developer Client RPC endpoints in `apps/backend/src/adapters/http/routes/developer.ts`
-- [ ] T014 [P] [US1] Create Developer Dashboard layout and pages in `apps/frontend/src/pages/developer/`
-- [ ] T015 [P] [US1] Implement Svelte 5 Login component with OTP flow in `apps/frontend/src/components/developer/Login.svelte`
-- [ ] T016 [US1] Implement Svelte 5 Client Management components (List, Create, Edit, Rotate) in `apps/frontend/src/components/developer/ClientManager.svelte`
-- [ ] T017 [US1] Integrate Developer frontend components with Hono RPC client
+- [x] T010 [P] [US1] Implement IAM Core Domain in `apps/backend/src/core/iam/service.ts`
+- [x] T011 [P] [US1] Implement Client Management Core Domain in `apps/backend/src/core/clients/service.ts`
+- [x] T012 [US1] Implement Auth RPC endpoints in `apps/backend/src/adapters/http/routes/auth.ts`
+- [x] T013 [US1] Implement Developer Client RPC endpoints in `apps/backend/src/adapters/http/routes/developer.ts`
+- [x] T014 [P] [US1] Create Developer Dashboard layout and pages in `apps/frontend/src/pages/developer/`
+- [x] T015 [P] [US1] Implement Svelte 5 Login component with OTP flow in `apps/frontend/src/components/developer/Login.svelte`
+- [x] T016 [US1] Implement Svelte 5 Client Management components (List, Create, Edit, Rotate) in `apps/frontend/src/components/developer/ClientManager.svelte`
+- [x] T017 [US1] Integrate Developer frontend components with Hono RPC client
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently. MVP is achieved.
 
@@ -78,17 +78,17 @@ description: "Task list for feature implementation"
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T018 [P] [US2] Write unit tests for Session Management core logic in `apps/backend/tests/core/sessions.test.ts`
-- [ ] T019 [P] [US2] Write unit tests for Admin God Mode queries (cursor pagination) in `apps/backend/tests/core/admin.test.ts`
+- [x] T018 [P] [US2] Write unit tests for Session Management core logic in `apps/backend/tests/core/sessions.test.ts`
+- [x] T019 [P] [US2] Write unit tests for Admin God Mode queries (cursor pagination) in `apps/backend/tests/core/admin.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T020 [P] [US2] Implement Session Management Core Domain (Revocation) in `apps/backend/src/core/sessions/service.ts`
-- [ ] T021 [P] [US2] Implement Admin Core Domain (Global list queries with cursor pagination) in `apps/backend/src/core/admin/service.ts`
-- [ ] T022 [US2] Implement Admin RPC endpoints in `apps/backend/src/adapters/http/routes/admin.ts`
-- [ ] T023 [P] [US2] Create Admin God Mode layout and pages in `apps/frontend/src/pages/admin/`
-- [ ] T024 [P] [US2] Implement Svelte 5 Admin Global Lists components (Developers, Clients, Sessions) with cursor pagination in `apps/frontend/src/components/admin/GodMode.svelte`
-- [ ] T025 [US2] Integrate Admin frontend components with Hono RPC client
+- [x] T020 [P] [US2] Implement Session Management Core Domain (Revocation) in `apps/backend/src/core/sessions/service.ts`
+- [x] T021 [P] [US2] Implement Admin Core Domain (Global list queries with cursor pagination) in `apps/backend/src/core/admin/service.ts`
+- [x] T022 [US2] Implement Admin RPC endpoints in `apps/backend/src/adapters/http/routes/admin.ts`
+- [x] T023 [P] [US2] Create Admin God Mode layout and pages in `apps/frontend/src/pages/admin/`
+- [x] T024 [P] [US2] Implement Svelte 5 Admin Global Lists components (Developers, Clients, Sessions) with cursor pagination in `apps/frontend/src/components/admin/GodMode.svelte`
+- [x] T025 [US2] Integrate Admin frontend components with Hono RPC client
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently.
 
@@ -102,14 +102,14 @@ description: "Task list for feature implementation"
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T026 [P] [US3] Write unit tests for Sandbox User core logic and Faker utility in `apps/backend/tests/core/sandbox.test.ts`
+- [x] T026 [P] [US3] Write unit tests for Sandbox User core logic and Faker utility in `apps/backend/tests/core/sandbox.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T027 [P] [US3] Implement Sandbox Core Domain (CRUD, Faker generation via `@faker-js/faker`) in `apps/backend/src/core/sandbox/service.ts`
-- [ ] T028 [US3] Implement Sandbox RPC endpoints in `apps/backend/src/adapters/http/routes/sandbox.ts`
-- [ ] T029 [P] [US3] Implement Svelte 5 Sandbox User components (List, Create with Faker) in `apps/frontend/src/components/admin/SandboxManager.svelte`
-- [ ] T030 [US3] Integrate Sandbox UI with Hono RPC client
+- [x] T027 [P] [US3] Implement Sandbox Core Domain (CRUD, Faker generation via `@faker-js/faker`) in `apps/backend/src/core/sandbox/service.ts`
+- [x] T028 [US3] Implement Sandbox RPC endpoints in `apps/backend/src/adapters/http/routes/sandbox.ts`
+- [x] T029 [P] [US3] Implement Svelte 5 Sandbox User components (List, Create with Faker) in `apps/frontend/src/components/admin/SandboxManager.svelte`
+- [x] T030 [US3] Integrate Sandbox UI with Hono RPC client
 
 **Checkpoint**: All user stories should now be independently functional.
 
@@ -119,10 +119,10 @@ description: "Task list for feature implementation"
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T031 [P] Verify API stability and input validation for all endpoints (Hono + Zod)
-- [ ] T032 Test full end-to-end flow from `quickstart.md`
-- [ ] T033 Code cleanup and ensure DRY/KISS Hexagonal compliance
-- [ ] T034 [P] Ensure UI adheres strictly to TailwindCSS styling rules for Admin/Developer portal differentiation
+- [x] T031 [P] Verify API stability and input validation for all endpoints (Hono + Zod)
+- [x] T032 Test full end-to-end flow from `quickstart.md`
+- [x] T033 Code cleanup and ensure DRY/KISS Hexagonal compliance
+- [x] T034 [P] Ensure UI adheres strictly to TailwindCSS styling rules for Admin/Developer portal differentiation
 
 ---
 

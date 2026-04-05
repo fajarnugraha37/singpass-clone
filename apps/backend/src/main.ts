@@ -1,4 +1,4 @@
-import app, { certService, keyManager } from './index';
+import { getApp } from './index';
 import { HttpsServer } from './infra/http/https.server';
 import { HttpRedirectServer } from './infra/http/http.server';
 import { Cron } from 'croner';
@@ -8,6 +8,12 @@ import { cleanupExpiredRecords } from './infra/database/cleanup';
  * Production-ready entry point for Unified HTTPS Architecture.
  * Handles TLS lifecycle, key rotation, and background jobs.
  */
+
+const { app, certService, keyManager } = await getApp();
+
+if (!certService || !keyManager) {
+  throw new Error('Failed to initialize critical services');
+}
 
 // Ensure active keys exist on startup and handle rotation if needed
 const [tls, ] = await Promise.all([

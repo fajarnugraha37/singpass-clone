@@ -26,7 +26,13 @@ import { DrizzleClientRegistry } from './infra/adapters/client_registry';
 import { DrizzleJtiStore } from './infra/adapters/db/drizzle_jti_store';
 import { jwksCache } from './infra/adapters/jwks_cache';
 import { createAuthRouter } from './infra/http/authRouter';
+import { createMgmtRouter } from './infra/http/mgmtRouter';
 import { createSingpassQRRouter } from './infra/http/routes/singpass-qr-routes';
+import { IAMService } from './core/iam/service';
+import { ClientService as MgmtClientService } from './core/clients/service';
+import { AdminService } from './core/admin/service';
+import { SessionService } from './core/sessions/service';
+import { SandboxService } from './core/sandbox/service';
 import { SingpassNDIAdapter } from './infra/adapters/singpass-ndi.adapter';
 import { QRAuthService } from './core/services/qr_auth_service';
 import { ValidateUserInfoRequestUseCase } from './application/usecases/validate-userinfo-request';
@@ -39,7 +45,7 @@ import { openapiSpec } from './infra/http/openapi-spec';
 import { fapiHeaders } from './infra/middleware/fapi-headers';
 import { CertificateService } from './infra/http/certificate.service';
 import { DPoPValidator } from './core/utils/dpop_validator';
-import { getDb } from './infra/database/client';
+import { getDb, db } from './infra/database/client';
 
 export async function createApp() {
   // Ensure DB is initialized and migrated
@@ -114,6 +120,13 @@ export async function createApp() {
   const qrAuthService = new QRAuthService(singpassNDIAdapter, userInfoRepository, cryptoService, generateAuthCodeUseCase);
   const singpassQRRouter = createSingpassQRRouter(qrAuthService);
 
+  const iamService = new IAMService(db);
+  const mgmtClientService = new MgmtClientService(db);
+  const adminService = new AdminService(db);
+  const sessionService = new SessionService(db);
+  const sandboxService = new SandboxService(db);
+  const mgmtRouter = createMgmtRouter(iamService, mgmtClientService, adminService, sessionService, sandboxService);
+
   const api = new Hono()
     .use('*', fapiHeaders)
     .get('/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }))
@@ -123,6 +136,8 @@ export async function createApp() {
     .route('/userinfo', userinfoRouter)
     // API: Auth RPC Endpoints (mounted at /api/auth)
     .route('/auth', authRouter)
+    // API: Management Console RPC Endpoints (mounted at /api/mgmt)
+    .route('/mgmt', mgmtRouter)
     // Singpass Auth Endpoints
     .route('/auth/singpass', singpassQRRouter);
 
@@ -193,19 +208,21 @@ export async function createApp() {
   return { app, certService, keyManager, cryptoService };
 }
 
+export type AppType = Awaited<ReturnType<typeof createApp>>['app'];
+
 // Global instances for direct execution (e.g. bun run src/main.ts)
 let appInstance: Hono | undefined;
-let certServiceInstance: CertificateService | undefined;
-let keyManagerInstance: DrizzleServerKeyManager | undefined;
+export let certService: CertificateService | undefined;
+export let keyManager: DrizzleServerKeyManager | undefined;
 
 export const getApp = async () => {
   if (!appInstance) {
-    const { app, certService, keyManager } = await createApp();
+    const { app, certService: cs, keyManager: km } = await createApp();
     appInstance = app;
-    certServiceInstance = certService;
-    keyManagerInstance = keyManager;
+    certService = cs;
+    keyManager = km;
   }
-  return { app: appInstance, certService: certServiceInstance, keyManager: keyManagerInstance };
+  return { app: appInstance, certService, keyManager };
 };
 
 // Default export for Hono execution
