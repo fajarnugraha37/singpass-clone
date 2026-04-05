@@ -11,12 +11,20 @@ class MgmtAuthStore {
   loading = $state(false);
   error = $state<string | null>(null);
 
-  async checkMe(redirectPath?: string) {
+  async checkMe(redirectPath?: string, requiredRole?: 'developer' | 'admin') {
     this.loading = true;
     try {
       const res = await client.api.mgmt.me.$get();
       if (res.ok) {
         const data = await res.json();
+        
+        // Enforce role-based access on the client side
+        if (requiredRole === 'admin' && data.user.role !== 'admin') {
+          this.user = null;
+          if (redirectPath) window.location.href = redirectPath;
+          return;
+        }
+        
         this.user = data.user;
       } else {
         this.user = null;

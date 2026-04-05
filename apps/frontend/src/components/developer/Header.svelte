@@ -2,11 +2,15 @@
   import { mgmtAuth } from '../../lib/mgmt-auth.svelte'
   import { onMount } from 'svelte'
 
+  let isAdmin = $state(false);
+
   onMount(() => {
     const isDev = window.location.pathname.startsWith('/developer')
+    isAdmin = window.location.pathname.startsWith('/admin')
     const isLogin = window.location.pathname.endsWith('/login')
     if (!isLogin) {
-      mgmtAuth.checkMe(isDev ? '/developer/login' : '/admin/login')
+      const requiredRole = isAdmin ? 'admin' : 'developer'
+      mgmtAuth.checkMe(isAdmin ? '/admin/login' : '/developer/login', requiredRole)
     }
   })
 </script>
@@ -15,11 +19,11 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between h-16">
       <div class="flex items-center">
-        <a href="/developer" class="flex-shrink-0 flex items-center">
-          <span class="text-xl font-bold text-indigo-600">Singpass Developer Portal</span>
+        <a href={isAdmin ? "/admin" : "/developer"} class="flex-shrink-0 flex items-center">
+          <span class="text-xl font-bold text-indigo-600">{isAdmin ? 'Admin God Mode' : 'Singpass Developer Portal'}</span>
           <span
             class="ml-2 px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-600 rounded uppercase tracking-wider"
-            >Dev Portal</span
+            >{isAdmin ? 'Admin' : 'Dev Portal'}</span
           >
         </a>
       </div>

@@ -40,7 +40,8 @@
     status = 'Verifying...';
     const success = await mgmtAuth.login(email, code);
     if (success) {
-      window.location.href = '/developer';
+      const isAdmin = window.location.pathname.startsWith('/admin');
+      window.location.href = isAdmin ? '/admin' : '/developer';
     } else {
       status = mgmtAuth.error || 'Invalid OTP';
     }
@@ -49,7 +50,11 @@
 
 <div class="max-w-md mx-auto mt-20 p-6 bg-white rounded-lg shadow-md border border-gray-200">
   <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">
-    {mode === 'login' ? 'Developer Portal Login' : 'Developer Registration'}
+    {#if mode === 'register'}
+      Developer Registration
+    {:else}
+      {typeof window !== 'undefined' && window.location.pathname.startsWith('/admin') ? 'Admin God Mode Login' : 'Developer Portal Login'}
+    {/if}
   </h1>
 
   {#if step === 'email'}
