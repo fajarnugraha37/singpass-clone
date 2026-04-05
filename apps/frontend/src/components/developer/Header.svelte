@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { mgmtAuth } from '../../lib/mgmt-auth.svelte';
-  import { onMount } from 'svelte';
+  import { mgmtAuth } from '../../lib/mgmt-auth.svelte'
+  import { onMount } from 'svelte'
 
   onMount(() => {
-    const isDev = window.location.pathname.startsWith('/developer');
-    const isLogin = window.location.pathname.endsWith('/login');
+    const isDev = window.location.pathname.startsWith('/developer')
+    const isLogin = window.location.pathname.endsWith('/login')
     if (!isLogin) {
-      mgmtAuth.checkMe(isDev ? '/developer/login' : '/admin/login');
+      mgmtAuth.checkMe(isDev ? '/developer/login' : '/admin/login')
     }
-  });
+  })
 </script>
 
 <nav class="bg-white shadow-sm border-b border-gray-200">
@@ -16,11 +16,14 @@
     <div class="flex justify-between h-16">
       <div class="flex items-center">
         <a href="/developer" class="flex-shrink-0 flex items-center">
-          <span class="text-xl font-bold text-indigo-600">Vibe-Auth</span>
-          <span class="ml-2 px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-600 rounded uppercase tracking-wider">Dev Portal</span>
+          <span class="text-xl font-bold text-indigo-600">Singpass Developer Portal</span>
+          <span
+            class="ml-2 px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-600 rounded uppercase tracking-wider"
+            >Dev Portal</span
+          >
         </a>
       </div>
-      
+
       <div class="flex items-center">
         {#if mgmtAuth.user}
           <div class="mr-4 text-sm text-gray-600">
