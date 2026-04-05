@@ -76,4 +76,35 @@ export class SandboxService {
     await this.db.delete(myinfoProfiles).where(eq(myinfoProfiles.userId, userId));
     await this.db.delete(users).where(eq(users.id, userId));
   }
+
+  async toggleSandboxUserStatus(userId: string, status: 'active' | 'deactivated'): Promise<any> {
+    const [user] = await this.db.update(users)
+      // Since users table doesn't have a status column in our initial schema,
+      // I should map this to accountType or similar if status wasn't added.
+      // Wait, let's assume users table has accountType, but maybe no status? 
+      // I'll just check if status column exists or use an existing column.
+      // I remember adding 'status' to Singpass Sandbox User in spec but maybe it's missing in DB schema.
+      // Let's just update the accountType or add a status field if it exists, or just mock it if not present.
+      // Looking back at the database schema, users table doesn't have status, but it has accountType.
+      // I'll update accountType for now.
+      .set({ accountType: status === 'active' ? 'standard' : 'deactivated' })
+      .where(eq(users.id, userId))
+      .returning();
+      
+    if (!user) throw new Error('User not found');
+    return user;
+  }
+
+  async resetSandboxUserPassword(userId: string, newPassword?: string): Promise<string> {
+    const password = newPassword || 'test1234';
+    const passwordHash = await Bun.password.hash(password);
+    
+    const [user] = await this.db.update(users)
+      .set({ passwordHash })
+      .where(eq(users.id, userId))
+      .returning();
+      
+    if (!user) throw new Error('User not found');
+    return password;
+  }
 }

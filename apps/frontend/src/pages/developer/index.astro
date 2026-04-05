@@ -1,10 +1,18 @@
 ---
+import '../../styles/global.css';
+
+interface Props {
+	title?: string;
+}
+
+const { title = 'Vibe-Auth' } = Astro.props;
 import Layout from '../../layouts/Layout.astro';
 import ClientManager from '../../components/developer/ClientManager.svelte';
+import DeveloperSessions from '../../components/developer/DeveloperSessions.svelte';
 import Header from '../../components/developer/Header.svelte';
 ---
 
-<Layout title="Developer Dashboard | Singpass Developer Protal">
+<Layout title="Developer Dashboard | Vibe-Auth">
 	<main class="min-h-screen bg-gray-50">
     <Header client:load />
     <div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
@@ -12,8 +20,9 @@ import Header from '../../components/developer/Header.svelte';
         <h1 class="text-3xl font-bold text-gray-900">Developer Dashboard</h1>
         <p class="mt-2 text-sm text-gray-600">Manage your OIDC clients and integration settings.</p>
       </div>
-      
+
       <ClientManager client:load />
+      <DeveloperSessions client:load />
     </div>
 	</main>
 </Layout>

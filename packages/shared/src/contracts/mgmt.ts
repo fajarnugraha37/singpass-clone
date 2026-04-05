@@ -16,6 +16,10 @@ export const RequestOtpSchema = z.object({
   email: z.string().email(),
 });
 
+export const RegisterDeveloperSchema = z.object({
+  email: z.string().email(),
+});
+
 export const VerifyOtpSchema = z.object({
   email: z.string().email(),
   code: z.string().length(6),
@@ -52,6 +56,10 @@ export const CreateClientSchema = ClientSchema.omit({
 
 export const UpdateClientSchema = CreateClientSchema.partial();
 
+export const ToggleClientStatusSchema = z.object({
+  isActive: z.boolean(),
+});
+
 // Sandbox User Schemas
 export const SandboxUserSchema = z.object({
   nric: z.string(),
@@ -61,8 +69,16 @@ export const SandboxUserSchema = z.object({
 
 export const CreateSandboxUserSchema = z.object({
   nric: z.string(),
-  password: z.string().min(8),
+  password: z.string().min(8).optional(),
   generateMockData: z.boolean().default(true),
+});
+
+export const ToggleSandboxUserStatusSchema = z.object({
+  status: z.enum(["active", "deactivated"]),
+});
+
+export const ResetSandboxUserPasswordSchema = z.object({
+  newPassword: z.string().min(8).optional(),
 });
 
 // Session Schemas
@@ -78,15 +94,21 @@ export const SessionSchema = z.object({
 // Endpoints mapping (Logical definition for Hono RPC)
 export type ManagementAPI = {
   // Auth
+  "POST /api/mgmt/auth/register": { body: typeof RegisterDeveloperSchema, response: typeof DeveloperSchema };
   "POST /api/mgmt/auth/request-otp": { body: typeof RequestOtpSchema, response: { success: boolean } };
   "POST /api/mgmt/auth/verify-otp": { body: typeof VerifyOtpSchema, response: { token: string, user: typeof DeveloperSchema } };
+  "POST /api/mgmt/auth/logout": { response: { success: boolean } };
   
   // Developer (Self)
+  "GET /api/mgmt/me": { response: { user: typeof DeveloperSchema } };
   "GET /api/mgmt/me/clients": { response: z.infer<ReturnType<typeof PaginatedResponseSchema<typeof ClientSchema>>> };
   "POST /api/mgmt/me/clients": { body: typeof CreateClientSchema, response: typeof ClientSchema };
   "PUT /api/mgmt/me/clients/:clientId": { body: typeof UpdateClientSchema, response: typeof ClientSchema };
+  "PATCH /api/mgmt/me/clients/:clientId/status": { body: typeof ToggleClientStatusSchema, response: typeof ClientSchema };
   "DELETE /api/mgmt/me/clients/:clientId": { response: { success: boolean } }; // Soft delete
   "POST /api/mgmt/me/clients/:clientId/rotate-secret": { response: { newSecret: string } };
+  "GET /api/mgmt/me/sessions": { response: z.infer<ReturnType<typeof PaginatedResponseSchema<typeof SessionSchema>>> };
+  "DELETE /api/mgmt/me/sessions/:sessionId": { response: { success: boolean } };
 
   // Admin God Mode
   "GET /api/mgmt/admin/developers": { query: typeof CursorPaginationSchema, response: z.infer<ReturnType<typeof PaginatedResponseSchema<typeof DeveloperSchema>>> };
@@ -95,6 +117,9 @@ export type ManagementAPI = {
   "DELETE /api/mgmt/admin/sessions/:sessionId": { response: { success: boolean } };
   
   // Singpass Sandbox
-  "GET /api/mgmt/sandbox/users": { query: typeof CursorPaginationSchema, response: z.infer<ReturnType<typeof PaginatedResponseSchema<typeof SandboxUserSchema>>> };
-  "POST /api/mgmt/sandbox/users": { body: typeof CreateSandboxUserSchema, response: typeof SandboxUserSchema };
+  "GET /api/mgmt/admin/sandbox/users": { query: typeof CursorPaginationSchema, response: z.infer<ReturnType<typeof PaginatedResponseSchema<typeof SandboxUserSchema>>> };
+  "POST /api/mgmt/admin/sandbox/users": { body: typeof CreateSandboxUserSchema, response: typeof SandboxUserSchema };
+  "PATCH /api/mgmt/admin/sandbox/users/:userId/status": { body: typeof ToggleSandboxUserStatusSchema, response: typeof SandboxUserSchema };
+  "POST /api/mgmt/admin/sandbox/users/:userId/reset-password": { body: typeof ResetSandboxUserPasswordSchema, response: { success: boolean, password: string } };
+  "DELETE /api/mgmt/admin/sandbox/users/:userId": { response: { success: boolean } };
 };

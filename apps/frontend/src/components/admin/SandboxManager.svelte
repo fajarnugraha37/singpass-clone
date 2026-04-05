@@ -58,6 +58,34 @@
     }
   }
 
+  async function toggleStatus(u: any) {
+    const newStatus = u.accountType === 'deactivated' ? 'active' : 'deactivated';
+    const res = await client.api.mgmt.admin.sandbox.users[':userId'].status.$patch({
+      param: { userId: u.id },
+      json: { status: newStatus }
+    });
+    if (res.ok) {
+      await fetchUsers();
+    }
+  }
+
+  async function resetPassword(userId: string) {
+    const newPassword = prompt('Enter new password (leave blank for test1234):');
+    if (newPassword === null) return; // cancelled
+    
+    const res = await client.api.mgmt.admin.sandbox.users[':userId']['reset-password'].$post({
+      param: { userId },
+      json: { newPassword: newPassword || 'test1234' }
+    });
+    
+    if (res.ok) {
+      const data = await res.json() as any;
+      alert(`Password successfully reset to: ${data.password}`);
+    } else {
+      alert('Failed to reset password');
+    }
+  }
+
   onMount(fetchUsers);
 </script>
 
@@ -88,7 +116,7 @@
           <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NRIC</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
@@ -96,9 +124,21 @@
           {#each users as u}
             <tr>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-indigo-600">{u.nric}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{u.name}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{u.email}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {u.name}
+                <div class="text-xs text-gray-500">{u.email}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <button 
+                  onclick={() => toggleStatus(u)}
+                  class="px-2 py-1 text-xs font-semibold rounded-full hover:opacity-80 {u.accountType !== 'deactivated' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}"
+                  title="Click to toggle status"
+                >
+                  {u.accountType !== 'deactivated' ? 'Active' : 'Deactivated'}
+                </button>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
+                <button onclick={() => resetPassword(u.id)} class="text-indigo-600 hover:text-indigo-900">Reset PW</button>
                 <button onclick={() => deleteUser(u.id)} class="text-red-600 hover:text-red-900">Delete</button>
               </td>
             </tr>

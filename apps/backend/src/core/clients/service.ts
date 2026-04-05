@@ -1,6 +1,6 @@
-import { eq, and } from 'drizzle-orm';
+import { eq, and, isNull } from 'drizzle-orm';
 import { clients, sessions } from '../../infra/database/schema';
-import crypto from 'node:crypto';
+import * as crypto from 'node:crypto';
 
 export class ClientService {
   constructor(private db: any) {}
@@ -24,6 +24,40 @@ export class ClientService {
     }).returning();
 
     return { ...client, clientSecret }; // Return plain secret only once upon creation
+  }
+
+  async updateClient(developerId: string, clientId: string, data: any): Promise<any> {
+    const [client] = await this.db.update(clients)
+      .set({
+        name: data.name,
+        appType: data.appType,
+        uen: data.uen,
+        redirectUris: data.redirectUris,
+        allowedScopes: data.allowedScopes,
+        grantTypes: data.grantTypes,
+        updatedAt: new Date()
+      })
+      .where(and(eq(clients.id, clientId), eq(clients.developerId, developerId), isNull(clients.deletedAt)))
+      .returning();
+
+    if (!client) throw new Error('Client not found or unauthorized');
+    return client;
+  }
+
+  async toggleClientStatus(developerId: string, clientId: string, isActive: boolean): Promise<any> {
+    const [client] = await this.db.update(clients)
+      .set({ isActive, updatedAt: new Date() })
+      .where(and(eq(clients.id, clientId), eq(clients.developerId, developerId), isNull(clients.deletedAt)))
+      .returning();
+
+    if (!client) throw new Error('Client not found or unauthorized');
+
+    // Revoke all active sessions if deactivated
+    if (!isActive) {
+      await this.db.delete(sessions).where(eq(sessions.clientId, clientId));
+    }
+
+    return client;
   }
 
   async rotateSecret(developerId: string, clientId: string): Promise<string> {
@@ -55,7 +89,7 @@ export class ClientService {
 
   async getDeveloperClients(developerId: string): Promise<any[]> {
     return await this.db.query.clients.findMany({
-      where: and(eq(clients.developerId, developerId), eq(clients.isActive, true)),
+      where: and(eq(clients.developerId, developerId), isNull(clients.deletedAt)),
     });
   }
 }

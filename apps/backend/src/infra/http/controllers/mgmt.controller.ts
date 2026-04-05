@@ -14,6 +14,14 @@ export const requestOtp = (iamService: IAMService) => {
   };
 };
 
+export const registerDeveloper = (iamService: IAMService) => {
+  return async (c: Context) => {
+    const { email } = await c.req.json();
+    const dev = await iamService.registerDeveloper(email);
+    return c.json(dev, 201);
+  };
+};
+
 export const verifyOtp = (iamService: IAMService) => {
   return async (c: Context) => {
     const { email, code } = await c.req.json();
@@ -68,6 +76,26 @@ export const createClient = (clientService: ClientService) => {
   };
 };
 
+export const updateClient = (clientService: ClientService) => {
+  return async (c: Context) => {
+    const user = c.get('user');
+    const clientId = c.req.param('clientId')!;
+    const data = await c.req.json();
+    const client = await clientService.updateClient(user.sub, clientId, data);
+    return c.json(client);
+  };
+};
+
+export const toggleClientStatus = (clientService: ClientService) => {
+  return async (c: Context) => {
+    const user = c.get('user');
+    const clientId = c.req.param('clientId')!;
+    const { isActive } = await c.req.json();
+    const client = await clientService.toggleClientStatus(user.sub, clientId, isActive);
+    return c.json(client);
+  };
+};
+
 export const rotateClientSecret = (clientService: ClientService) => {
   return async (c: Context) => {
     const user = c.get('user');
@@ -82,6 +110,25 @@ export const deleteClient = (clientService: ClientService) => {
     const user = c.get('user');
     const clientId = c.req.param('clientId')!;
     await clientService.deleteClient(user.sub, clientId);
+    return c.json({ success: true });
+  };
+};
+
+export const getMySessions = (sessionService: SessionService) => {
+  return async (c: Context) => {
+    const user = c.get('user');
+    const cursor = c.req.query('cursor');
+    const limit = parseInt(c.req.query('limit') || '20');
+    const result = await sessionService.listDeveloperSessions(user.sub, { cursor, limit });
+    return c.json(result);
+  };
+};
+
+export const revokeMySession = (sessionService: SessionService) => {
+  return async (c: Context) => {
+    const user = c.get('user');
+    const sessionId = c.req.param('sessionId')!;
+    await sessionService.revokeSession(sessionId, user.sub);
     return c.json({ success: true });
   };
 };
@@ -145,6 +192,24 @@ export const deleteSandboxUser = (sandboxService: SandboxService) => {
     const userId = c.req.param('userId')!;
     await sandboxService.deleteUser(userId);
     return c.json({ success: true });
+  };
+};
+
+export const toggleSandboxUserStatus = (sandboxService: SandboxService) => {
+  return async (c: Context) => {
+    const userId = c.req.param('userId')!;
+    const { status } = await c.req.json();
+    const user = await sandboxService.toggleSandboxUserStatus(userId, status);
+    return c.json(user);
+  };
+};
+
+export const resetSandboxUserPassword = (sandboxService: SandboxService) => {
+  return async (c: Context) => {
+    const userId = c.req.param('userId')!;
+    const { newPassword } = await c.req.json();
+    const generatedPassword = await sandboxService.resetSandboxUserPassword(userId, newPassword);
+    return c.json({ success: true, password: generatedPassword });
   };
 };
 

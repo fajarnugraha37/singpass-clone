@@ -5,11 +5,23 @@
   let email = $state('');
   let code = $state('');
   let step = $state<'email' | 'otp'>('email');
+  let mode = $state<'login' | 'register'>('login');
   let status = $state('');
 
   async function requestOtp() {
     status = 'Sending...';
     try {
+      if (mode === 'register') {
+        const regRes = await client.api.mgmt.auth.register.$post({
+          json: { email }
+        });
+        if (!regRes.ok) {
+          const err = await regRes.json() as any;
+          status = `Registration failed: ${err.message || 'Unknown error'}`;
+          return;
+        }
+      }
+
       const res = await client.api.mgmt.auth['request-otp'].$post({
         json: { email }
       });
@@ -36,7 +48,9 @@
 </script>
 
 <div class="max-w-md mx-auto mt-20 p-6 bg-white rounded-lg shadow-md border border-gray-200">
-  <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">Developer Portal Login</h1>
+  <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">
+    {mode === 'login' ? 'Developer Portal Login' : 'Developer Registration'}
+  </h1>
 
   {#if step === 'email'}
     <div class="space-y-4">
@@ -54,8 +68,16 @@
         onclick={requestOtp}
         class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
       >
-        Request OTP
+        {mode === 'login' ? 'Request OTP' : 'Register & Request OTP'}
       </button>
+
+      <div class="text-sm text-center mt-4">
+        {#if mode === 'login'}
+          Don't have an account? <button onclick={() => mode = 'register'} class="text-indigo-600 hover:text-indigo-500 font-medium">Register here</button>
+        {:else}
+          Already have an account? <button onclick={() => mode = 'login'} class="text-indigo-600 hover:text-indigo-500 font-medium">Login here</button>
+        {/if}
+      </div>
     </div>
   {:else}
     <div class="space-y-4">
@@ -86,7 +108,7 @@
   {/if}
 
   {#if status}
-    <p class="mt-4 text-center text-sm font-medium {status.includes('Error') || status.includes('Failed') ? 'text-red-600' : 'text-indigo-600'}">
+    <p class="mt-4 text-center text-sm font-medium {status.includes('Error') || status.includes('Failed') || status.includes('failed') ? 'text-red-600' : 'text-indigo-600'}">
       {status}
     </p>
   {/if}

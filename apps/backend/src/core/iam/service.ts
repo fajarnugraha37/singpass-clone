@@ -6,6 +6,24 @@ import { emailAdapter } from '../../adapters/email/mock';
 export class IAMService {
   constructor(private db: any) {}
 
+  async registerDeveloper(email: string): Promise<any> {
+    const existing = await this.db.query.developers.findFirst({
+      where: eq(developers.email, email),
+    });
+
+    if (existing) {
+      throw new Error('Email already registered');
+    }
+
+    const [dev] = await this.db.insert(developers).values({
+      email,
+      role: 'developer',
+      status: 'active',
+    }).returning();
+
+    return dev;
+  }
+
   async requestOtp(email: string): Promise<void> {
     // 1. Verify developer exists
     const dev = await this.db.query.developers.findFirst({

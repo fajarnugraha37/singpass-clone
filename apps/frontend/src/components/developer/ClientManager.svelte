@@ -5,11 +5,16 @@
 
   let clients = $state<any[]>([]);
   let loading = $state(true);
+  
   let showCreateModal = $state(false);
-  let newClientName = $state('');
-  let newAppType = $state('Login');
-  let newUen = $state('');
-  let newRedirectUris = $state('');
+  let isEditing = $state(false);
+  let editingClientId = $state<string | null>(null);
+
+  let formName = $state('');
+  let formAppType = $state('Login');
+  let formUen = $state('');
+  let formRedirectUris = $state('');
+  
   let lastCreatedSecret = $state<string | null>(null);
 
   async function fetchClients() {
@@ -25,22 +30,65 @@
     }
   }
 
-  async function createClient() {
-    const res = await client.api.mgmt.me.clients.$post({
-      json: {
-        name: newClientName,
-        appType: newAppType,
-        uen: newUen,
-        redirectUris: newRedirectUris.split(',').map(u => u.trim()),
-        allowedScopes: ['openid', 'profile'],
-        grantTypes: ['authorization_code'],
-      }
-    });
+  function openCreateModal() {
+    isEditing = false;
+    editingClientId = null;
+    formName = '';
+    formAppType = 'Login';
+    formUen = '';
+    formRedirectUris = '';
+    showCreateModal = true;
+  }
 
+  function openEditModal(c: any) {
+    isEditing = true;
+    editingClientId = c.id;
+    formName = c.name;
+    formAppType = c.appType;
+    formUen = c.uen;
+    formRedirectUris = c.redirectUris.join(', ');
+    showCreateModal = true;
+  }
+
+  async function submitClientForm() {
+    const payload = {
+      name: formName,
+      appType: formAppType,
+      uen: formUen,
+      redirectUris: formRedirectUris.split(',').map(u => u.trim()),
+      allowedScopes: ['openid', 'profile'],
+      grantTypes: ['authorization_code'],
+    };
+
+    if (isEditing && editingClientId) {
+      const res = await client.api.mgmt.me.clients[':clientId'].$put({
+        param: { clientId: editingClientId },
+        json: payload
+      });
+      if (res.ok) {
+        showCreateModal = false;
+        await fetchClients();
+      }
+    } else {
+      const res = await client.api.mgmt.me.clients.$post({
+        json: payload
+      });
+
+      if (res.ok) {
+        const data = await res.json() as any;
+        lastCreatedSecret = data.clientSecret;
+        showCreateModal = false;
+        await fetchClients();
+      }
+    }
+  }
+
+  async function toggleStatus(c: any) {
+    const res = await client.api.mgmt.me.clients[':clientId'].status.$patch({
+      param: { clientId: c.id },
+      json: { isActive: !c.isActive }
+    });
     if (res.ok) {
-      const data = await res.json() as any;
-      lastCreatedSecret = data.clientSecret;
-      showCreateModal = false;
       await fetchClients();
     }
   }
@@ -76,7 +124,7 @@
     <div class="px-4 py-5 border-b border-gray-200 sm:px-6 flex justify-between items-center bg-gray-50">
       <h3 class="text-lg leading-6 font-medium text-gray-900">Your OIDC Clients</h3>
       <button
-        onclick={() => showCreateModal = true}
+        onclick={openCreateModal}
         class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
       >
         Create Client
@@ -97,12 +145,17 @@
                 <div class="text-sm text-gray-500">Client ID: <code class="bg-gray-100 px-1 rounded text-pink-600">{c.id}</code></div>
                 <div class="mt-1 flex space-x-2">
                   <span class="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">{c.appType}</span>
-                  <span class="px-2 py-0.5 text-xs font-medium {c.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} rounded">
+                  <button 
+                    onclick={() => toggleStatus(c)} 
+                    class="px-2 py-0.5 text-xs font-medium {c.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} rounded hover:opacity-80"
+                    title="Click to toggle status"
+                  >
                     {c.isActive ? 'Active' : 'Inactive'}
-                  </span>
+                  </button>
                 </div>
               </div>
               <div class="flex space-x-2">
+                <button onclick={() => openEditModal(c)} class="text-xs text-blue-600 hover:text-blue-900 font-medium">Edit</button>
                 <button onclick={() => rotateSecret(c.id)} class="text-xs text-indigo-600 hover:text-indigo-900 font-medium">Rotate Secret</button>
                 <button onclick={() => deleteClient(c.id)} class="text-xs text-red-600 hover:text-red-900 font-medium">Delete</button>
               </div>
@@ -132,30 +185,30 @@
           <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
         </div>
         <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Register New OIDC Client</h3>
+          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">{isEditing ? 'Edit OIDC Client' : 'Register New OIDC Client'}</h3>
           <div class="space-y-4">
             <div>
               <label class="block text-sm font-medium text-gray-700">App Name</label>
-              <input type="text" bind:value={newClientName} class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-indigo-500" placeholder="My Awesome App" />
+              <input type="text" bind:value={formName} class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-indigo-500" placeholder="My Awesome App" />
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">App Type</label>
-              <select bind:value={newAppType} class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-indigo-500">
+              <select bind:value={formAppType} class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-indigo-500">
                 <option>Login</option>
                 <option>Myinfo</option>
               </select>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">UEN</label>
-              <input type="text" bind:value={newUen} class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-indigo-500" placeholder="UEN12345678" />
+              <input type="text" bind:value={formUen} class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-indigo-500" placeholder="UEN12345678" />
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700">Redirect URIs (comma separated)</label>
-              <input type="text" bind:value={newRedirectUris} class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-indigo-500" placeholder="http://localhost:3000/callback" />
+              <input type="text" bind:value={formRedirectUris} class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-indigo-500" placeholder="http://localhost:3000/callback" />
             </div>
           </div>
           <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
-            <button onclick={createClient} class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 sm:col-start-2 sm:text-sm">Create</button>
+            <button onclick={submitClientForm} class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 sm:col-start-2 sm:text-sm">{isEditing ? 'Save' : 'Create'}</button>
             <button onclick={() => showCreateModal = false} class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:col-start-1 sm:text-sm">Cancel</button>
           </div>
         </div>
