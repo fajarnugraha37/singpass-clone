@@ -16,7 +16,9 @@ import {
   CreateSandboxUserSchema,
   ToggleSandboxUserStatusSchema,
   ResetSandboxUserPasswordSchema,
-  UpdateSandboxUserSchema
+  UpdateSandboxUserSchema,
+  RegisterDeveloperSchema,
+  ToggleClientStatusSchema
 } from '@vibe/shared/contracts/mgmt';
 
 export const createMgmtRouter = (
@@ -28,6 +30,7 @@ export const createMgmtRouter = (
 ) => {
   const mgmt = new Hono()
     // Public Auth Routes
+    .post('/auth/register', zValidator('json', RegisterDeveloperSchema), mgmtController.registerDeveloper(iamService))
     .post('/auth/request-otp', zValidator('json', RequestOtpSchema), mgmtController.requestOtp(iamService))
     .post('/auth/verify-otp', zValidator('json', VerifyOtpSchema), mgmtController.verifyOtp(iamService))
     .post('/auth/logout', mgmtController.logout())
@@ -37,8 +40,12 @@ export const createMgmtRouter = (
       .get('/me', mgmtController.getMe())
       .get('/me/clients', mgmtController.getMyClients(clientService))
       .post('/me/clients', zValidator('json', CreateClientSchema), mgmtController.createClient(clientService))
+      .put('/me/clients/:clientId', zValidator('json', UpdateClientSchema), mgmtController.updateClient(clientService))
+      .patch('/me/clients/:clientId/status', zValidator('json', ToggleClientStatusSchema), mgmtController.toggleClientStatus(clientService))
       .post('/me/clients/:clientId/rotate-secret', mgmtController.rotateClientSecret(clientService))
       .delete('/me/clients/:clientId', mgmtController.deleteClient(clientService))
+      .get('/me/sessions', mgmtController.getMySessions(sessionService))
+      .delete('/me/sessions/:sessionId', mgmtController.revokeMySession(sessionService))
     )
 
     // Admin Routes (Protected)
